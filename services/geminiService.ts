@@ -35,6 +35,7 @@ export const analyzeASO = async (appData: AppData): Promise<AnalysisResult> => {
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
+        systemInstruction: "You are a world-class App Store Optimization (ASO) expert. Your goal is to provide critical, data-driven, and actionable insights to app developers to help them increase organic downloads.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
