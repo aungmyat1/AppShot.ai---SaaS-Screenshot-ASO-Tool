@@ -7,15 +7,31 @@ function requiredEnv(name: string) {
   return v;
 }
 
+function pickEnv(...names: string[]) {
+  for (const n of names) {
+    const v = process.env[n];
+    if (v) return v;
+  }
+  return undefined;
+}
+
+function requiredOneOf(...names: string[]) {
+  const v = pickEnv(...names);
+  if (!v) throw new Error(`Missing env var (one of): ${names.join(", ")}`);
+  return v;
+}
+
 let client: S3Client | null = null;
 
 export function getStorageClient() {
   if (client) return client;
 
-  const region = process.env.STORAGE_REGION || "auto";
-  const endpoint = process.env.STORAGE_ENDPOINT;
-  const accessKeyId = process.env.STORAGE_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY;
+  const region = pickEnv("STORAGE_REGION") || "auto";
+  const r2AccountId = pickEnv("R2_ACCOUNT_ID");
+  const endpoint =
+    pickEnv("STORAGE_ENDPOINT", "R2_ENDPOINT") || (r2AccountId ? `https://${r2AccountId}.r2.cloudflarestorage.com` : undefined);
+  const accessKeyId = pickEnv("STORAGE_ACCESS_KEY_ID", "R2_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID");
+  const secretAccessKey = pickEnv("STORAGE_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY");
 
   client = new S3Client({
     region,
@@ -34,7 +50,7 @@ export async function uploadBuffer(params: {
   contentType: string;
   cacheControl?: string;
 }) {
-  const Bucket = requiredEnv("STORAGE_BUCKET");
+  const Bucket = requiredOneOf("STORAGE_BUCKET", "R2_BUCKET_NAME");
   const s3 = getStorageClient();
 
   await s3.send(
@@ -47,15 +63,15 @@ export async function uploadBuffer(params: {
     }),
   );
 
-  const publicBase = process.env.STORAGE_PUBLIC_URL;
+  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "R2_PUBLIC_URL");
   const url = publicBase ? `${publicBase.replace(/\/$/, "")}/${params.key}` : null;
 
   return { key: params.key, url };
 }
 
 export async function getDownloadUrl(params: { key: string; expiresInSeconds?: number }) {
-  const Bucket = requiredEnv("STORAGE_BUCKET");
-  const publicBase = process.env.STORAGE_PUBLIC_URL;
+  const Bucket = requiredOneOf("STORAGE_BUCKET", "R2_BUCKET_NAME");
+  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "R2_PUBLIC_URL");
   if (publicBase) return `${publicBase.replace(/\/$/, "")}/${params.key}`;
 
   const s3 = getStorageClient();

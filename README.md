@@ -24,9 +24,9 @@ cp .env.example .env.local
 ```
 
 Fill in `.env.local`:
-- **Clerk**: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`
-- **Postgres**: `DATABASE_URL`
-- **Storage** (S3 or R2): `STORAGE_BUCKET`, credentials, optional `STORAGE_ENDPOINT`
+- **Clerk**: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (and optionally `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`)
+- **Postgres**: `DATABASE_URL` (**must be the URL only**, not a `psql ...` command)
+- **Storage** (S3 or R2): either `STORAGE_*` or `R2_*` vars (see `.env.example`)
 - **Stripe**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, plus `NEXT_PUBLIC_STRIPE_PRICE_*`
 
 - **Create DB tables**
