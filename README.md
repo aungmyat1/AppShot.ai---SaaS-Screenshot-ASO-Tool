@@ -56,3 +56,11 @@ Listen for:
 - **Google Play scraping is best-effort**: it’s HTML parsing and can break or be blocked. In production you may want a dedicated scraping worker + proxying.
 - **ZIP generation happens in a Route Handler** (`/api/scrape`) and uploads the ZIP to S3/R2. Make sure your deployment limits allow the ZIP sizes you expect.
 
+### Enabling Google OAuth (Clerk)
+
+Google sign-in is enabled via the **Clerk Dashboard** (no extra code needed beyond using Clerk’s `<SignIn />` / `<SignUp />` components).
+
+- Enable **Google** under Clerk → **User & Authentication** → **Social Connections**
+- Ensure your app’s redirect URLs are set (commonly `/sign-in` and `/sign-up`)
+- Once enabled, the Google button will automatically appear on `/sign-in` and `/sign-up`
+
