@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+}
+
+enum StoreType {
+  APP_STORE
+  PLAY_STORE
+}
+
+enum ScrapeStatus {
+  QUEUED
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  clerkId              String   @unique
+  email                String
+  name                 String?
+  isAdmin              Boolean  @default(false)
+
+  plan                 Plan     @default(FREE)
+  creditsBalance       Int      @default(10)
+
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  stripePriceId        String?
+  stripeStatus         String?
+  currentPeriodEnd     DateTime?
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  scrapeJobs           ScrapeJob[]
+  creditLedger         CreditLedger[]
+}
+
+model ScrapeJob {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  store       StoreType
+  appUrl      String
+  appStoreId  String?
+  packageName String?
+  appName     String?
+  developer   String?
+  iconUrl     String?
+
+  status      ScrapeStatus @default(QUEUED)
+  error       String?
+
+  screenshotCount Int      @default(0)
+  zipObjectKey    String?
+  zipUrl          String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  screenshots ScrapedScreenshot[]
+  ledger      CreditLedger[]
+
+  @@index([userId, createdAt])
+}
+
+model ScrapedScreenshot {
+  id          String   @id @default(cuid())
+  scrapeJobId String
+  scrapeJob   ScrapeJob @relation(fields: [scrapeJobId], references: [id], onDelete: Cascade)
+
+  idx         Int
+  originalUrl String
+  storedKey   String?
+  storedUrl   String?
+  width       Int?
+  height      Int?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([scrapeJobId, idx])
+}
+
+model CreditLedger {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scrapeJobId String?
+  scrapeJob  ScrapeJob? @relation(fields: [scrapeJobId], references: [id], onDelete: SetNull)
+
+  delta      Int
+  reason     String
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
