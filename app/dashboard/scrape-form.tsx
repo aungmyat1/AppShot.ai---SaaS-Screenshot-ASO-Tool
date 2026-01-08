@@ -10,11 +10,13 @@ export function ScrapeForm() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [zipUrl, setZipUrl] = React.useState<string | null>(null);
+  const [status, setStatus] = React.useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setZipUrl(null);
+    setStatus(null);
     setLoading(true);
     try {
       const res = await fetch("/api/scrape", {
@@ -22,10 +24,34 @@ export function ScrapeForm() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      const data = (await res.json()) as { zipUrl?: string; error?: string };
+      const data = (await res.json()) as { zipUrl?: string; jobId?: string; status?: string; error?: string };
       if (!res.ok) throw new Error(data.error || "Failed to scrape");
-      if (!data.zipUrl) throw new Error("No ZIP URL returned");
-      setZipUrl(data.zipUrl);
+      if (data.zipUrl) {
+        setZipUrl(data.zipUrl);
+        setStatus("COMPLETE");
+        return;
+      }
+
+      if (!data.jobId) throw new Error("No job id returned");
+      setStatus(data.status || "QUEUED");
+
+      // Poll job status until complete/failed (queue mode)
+      const startedAt = Date.now();
+      const timeoutMs = 3 * 60_000;
+      while (Date.now() - startedAt < timeoutMs) {
+        await new Promise((r) => setTimeout(r, 2000));
+        const jr = await fetch(`/api/jobs/${data.jobId}`, { cache: "no-store" });
+        const jd = (await jr.json()) as { status?: string; zipUrl?: string; error?: string };
+        if (!jr.ok) throw new Error(jd.error || "Failed to fetch job status");
+        if (jd.status) setStatus(jd.status);
+        if (jd.status === "FAILED") throw new Error(jd.error || "Job failed");
+        if (jd.status === "COMPLETE") {
+          if (!jd.zipUrl) throw new Error("Job complete but missing ZIP URL");
+          setZipUrl(jd.zipUrl);
+          return;
+        }
+      }
+      throw new Error("Timed out waiting for ZIP. Please check history and try again.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
@@ -47,6 +73,7 @@ export function ScrapeForm() {
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {status ? <p className="text-sm text-muted-foreground">Status: {status}</p> : null}
       {zipUrl ? (
         <p className="text-sm">
           ZIP ready:{" "}

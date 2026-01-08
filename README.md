@@ -57,6 +57,22 @@ Listen for:
 - **ZIP generation happens in a Route Handler** (`/api/scrape`) and uploads the ZIP to S3/R2. Make sure your deployment limits allow the ZIP sizes you expect.
 - **Caching**: if `REDIS_URL` is set, screenshot URL results are cached in Redis; otherwise an in-memory cache is used per process.
 
+### Queue mode (optional)
+
+If you want “SaaS-style” background processing, enable queue mode:
+
+- Set `SCRAPE_QUEUE_MODE=queue`
+- Set `REDIS_URL=...`
+- Run the worker process:
+
+```bash
+npm run worker
+```
+
+In queue mode:
+- `POST /api/scrape` returns `{ jobId, status: "QUEUED" }`
+- Poll `GET /api/jobs/:jobId` until `status` becomes `COMPLETE` (then `zipUrl` is available)
+
 ### Enabling Google OAuth (Clerk)
 
 Google sign-in is enabled via the **Clerk Dashboard** (no extra code needed beyond using Clerk’s `<SignIn />` / `<SignUp />` components).
