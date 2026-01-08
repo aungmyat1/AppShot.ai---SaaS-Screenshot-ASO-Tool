@@ -55,6 +55,7 @@ Listen for:
 
 - **Google Play scraping is best-effort**: it’s HTML parsing and can break or be blocked. In production you may want a dedicated scraping worker + proxying.
 - **ZIP generation happens in a Route Handler** (`/api/scrape`) and uploads the ZIP to S3/R2. Make sure your deployment limits allow the ZIP sizes you expect.
+- **Caching**: if `REDIS_URL` is set, screenshot URL results are cached in Redis; otherwise an in-memory cache is used per process.
 
 ### Enabling Google OAuth (Clerk)
 

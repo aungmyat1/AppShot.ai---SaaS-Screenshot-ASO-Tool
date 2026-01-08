@@ -4,9 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 import { scrapeRequestSchema } from "@/lib/app-url";
 import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { scrapeScreenshots } from "@/lib/scrape";
 import { uploadBuffer, getDownloadUrl } from "@/lib/storage";
 import { createZipFromImageUrls } from "@/lib/zip";
+import { scrapeCore } from "@/lib/core/engine";
 
 export const runtime = "nodejs";
 
@@ -37,18 +37,17 @@ export async function POST(req: Request) {
   });
 
   try {
-    const scraped = await scrapeScreenshots(url);
-    const screenshotUrls = scraped.screenshotUrls.slice(0, 30);
+    const core = await scrapeCore(url, { forceRefresh: false });
+    const screenshotUrls = core.screenshots.map((s) => s.url).slice(0, 30);
 
     await prisma.scrapeJob.update({
       where: { id: job.id },
       data: {
-        store: scraped.store,
-        appStoreId: scraped.appStoreId ?? null,
-        packageName: scraped.packageName ?? null,
-        appName: scraped.appName ?? null,
-        developer: scraped.developer ?? null,
-        iconUrl: scraped.iconUrl ?? null,
+        store: core.metadata.store === "appstore" ? "APP_STORE" : "PLAY_STORE",
+        appStoreId: core.metadata.store === "appstore" ? core.metadata.appId : null,
+        packageName: core.metadata.store === "playstore" ? core.metadata.appId : null,
+        appName: core.metadata.title ?? null,
+        developer: core.metadata.developer ?? null,
         screenshotCount: screenshotUrls.length,
       },
     });

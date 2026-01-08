@@ -1,5 +1,6 @@
 import archiver from "archiver";
 import axios from "axios";
+import pLimit from "p-limit";
 import { PassThrough } from "stream";
 
 export async function createZipFromImageUrls(
@@ -30,10 +31,18 @@ export async function createZipFromImageUrls(
 
   archive.pipe(output);
 
-  for (const e of entries) {
-    const resp = await axios.get(e.url, { responseType: "arraybuffer", timeout: 30_000 });
-    const buf = Buffer.from(resp.data);
-    archive.append(buf, { name: e.name });
+  const limit = pLimit(Number(process.env.DOWNLOAD_CONCURRENCY || 5));
+  const downloaded = await Promise.all(
+    entries.map((e) =>
+      limit(async () => {
+        const resp = await axios.get(e.url, { responseType: "arraybuffer", timeout: 30_000 });
+        return { name: e.name, buf: Buffer.from(resp.data) };
+      }),
+    ),
+  );
+
+  for (const d of downloaded) {
+    archive.append(d.buf, { name: d.name });
   }
 
   await archive.finalize();
