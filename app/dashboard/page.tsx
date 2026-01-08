@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { ScrapeForm } from "@/app/dashboard/scrape-form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BillingActions } from "@/app/dashboard/billing-actions";
+import { getUsageSummary } from "@/lib/limits";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
   if (!userId) redirect("/sign-in");
 
   const user = await getOrCreateUser(userId);
+  const usage = await getUsageSummary({ userId: user.id, plan: user.plan });
   const jobs = await prisma.scrapeJob.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
@@ -38,8 +40,8 @@ export default async function DashboardPage() {
         <CardHeader>
           <CardTitle>Scrape screenshots</CardTitle>
           <CardDescription>
-            Credits: <span className="font-medium">{user.creditsBalance}</span> • Plan:{" "}
-            <span className="font-medium">{user.plan}</span>
+            Plan: <span className="font-medium">{user.plan}</span> •{" "}
+            <span className="font-medium">{usage.remaining}</span> / {usage.limit} apps remaining ({usage.window})
           </CardDescription>
         </CardHeader>
         <CardContent>

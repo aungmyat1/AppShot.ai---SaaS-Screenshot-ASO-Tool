@@ -25,20 +25,29 @@ export default function HomePage() {
       <Card id="pricing">
         <CardHeader>
           <CardTitle>Plans</CardTitle>
-          <CardDescription>Stripe subscriptions + credits/usage enforced server-side.</CardDescription>
+          <CardDescription>Simple limits designed for solo builders.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
+        <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border p-4">
-            <div className="font-medium">Free</div>
-            <div className="text-sm text-muted-foreground">Limited monthly credits</div>
+            <div className="font-medium">FREE — “Try &amp; Trust”</div>
+            <div className="mt-1 text-sm text-muted-foreground">$0</div>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>1 app per day</li>
+              <li>Max 5 screenshots</li>
+              <li>Play Store OR App Store (not both per day)</li>
+              <li>Cached results only</li>
+            </ul>
           </div>
           <div className="rounded-lg border p-4">
-            <div className="font-medium">Starter</div>
-            <div className="text-sm text-muted-foreground">More credits + faster processing</div>
-          </div>
-          <div className="rounded-lg border p-4">
-            <div className="font-medium">Pro</div>
-            <div className="text-sm text-muted-foreground">Highest credits + team-ready</div>
+            <div className="font-medium">STARTER — “Solo Builder”</div>
+            <div className="mt-1 text-sm text-muted-foreground">$9 / month</div>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>20 apps / month</li>
+              <li>Up to 30 screenshots per app</li>
+              <li>Play Store + App Store</li>
+              <li>ZIP download</li>
+              <li>Cache TTL: 24h</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

@@ -1,9 +1,10 @@
 import type { Plan } from "@prisma/client";
 
 export const PLAN_CREDITS: Record<Plan, number> = {
-  FREE: 10,
-  STARTER: 100,
-  PRO: 500,
+  // Kept for compatibility with existing DB field; primary enforcement is query-based limits.
+  FREE: 0,
+  STARTER: 20,
+  PRO: 999,
 };
 
 export function priceIdToPlan(priceId: string | null | undefined): Plan | null {

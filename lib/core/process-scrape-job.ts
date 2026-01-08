@@ -8,9 +8,9 @@ import { uploadBuffer, getDownloadUrl } from "@/lib/storage";
  * - marks PROCESSING
  * - scrapes screenshots (cached/rate-limited)
  * - builds ZIP, uploads to storage
- * - marks COMPLETE (or FAILED + refunds credit)
+ * - marks COMPLETE (or FAILED)
  */
-export async function processScrapeJob(scrapeJobId: string) {
+export async function processScrapeJob(scrapeJobId: string, opts?: { screenshotLimit?: number }) {
   const job = await prisma.scrapeJob.findUnique({
     where: { id: scrapeJobId },
     include: { user: true },
@@ -24,7 +24,8 @@ export async function processScrapeJob(scrapeJobId: string) {
 
   try {
     const core = await scrapeCore(job.appUrl, { forceRefresh: false });
-    const screenshotUrls = core.screenshots.map((s) => s.url).slice(0, 30);
+    const screenshotLimit = opts?.screenshotLimit ?? (job.user.plan === "FREE" ? 5 : 30);
+    const screenshotUrls = core.screenshots.map((s) => s.url).slice(0, screenshotLimit);
 
     await prisma.scrapeJob.update({
       where: { id: job.id },
@@ -62,12 +63,7 @@ export async function processScrapeJob(scrapeJobId: string) {
     return updated;
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    // Refund the reserved credit if job fails.
-    await prisma.$transaction([
-      prisma.scrapeJob.update({ where: { id: job.id }, data: { status: "FAILED", error: message } }),
-      prisma.user.update({ where: { id: job.userId }, data: { creditsBalance: { increment: 1 } } }),
-      prisma.creditLedger.create({ data: { userId: job.userId, scrapeJobId: job.id, delta: +1, reason: "REFUND_FAILED_SCRAPE" } }),
-    ]);
+    await prisma.scrapeJob.update({ where: { id: job.id }, data: { status: "FAILED", error: message } });
     throw e;
   }
 }
