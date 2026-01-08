@@ -31,6 +31,7 @@ type RedisClient = ReturnType<typeof createClient>;
 let redisClient: RedisClient | null = null;
 let redisConnecting: Promise<RedisClient> | null = null;
 const memory = new MemoryCache();
+let warnedRedisDown = false;
 
 function cacheKey(appId: string, store: Store) {
   return `screenshots:${store}:${appId}`;
@@ -45,7 +46,14 @@ async function getRedis(): Promise<RedisClient | null> {
 
   redisConnecting = (async () => {
     const c = createClient({ url });
-    c.on("error", () => undefined);
+    c.on("error", (err) => {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", err instanceof Error ? err.message : err);
+      }
+      redisClient = null;
+    });
     await c.connect();
     redisClient = c;
     return c;
@@ -66,15 +74,27 @@ export class CacheManager {
   async getCached(appId: string, store: Store): Promise<CacheValue | null> {
     const key = cacheKey(appId, store);
 
-    const r = await getRedis().catch(() => null);
+    const r = await getRedis().catch((e) => {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      return null;
+    });
     if (!r) return memory.get(key);
 
     try {
       const raw = await r.get(key);
       if (!raw) return null;
       return JSON.parse(raw) as CacheValue;
-    } catch {
-      return null;
+    } catch (e) {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      return memory.get(key);
     }
   }
 
@@ -83,20 +103,52 @@ export class CacheManager {
     const value: CacheValue = { screenshots, metadata, cachedAt: new Date().toISOString() };
     const payload = JSON.stringify(value);
 
-    const r = await getRedis().catch(() => null);
+    const r = await getRedis().catch((e) => {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      return null;
+    });
     if (!r) {
       memory.set(key, value, this.ttlSeconds);
       return;
     }
 
-    await r.setEx(key, this.ttlSeconds, payload);
+    try {
+      await r.setEx(key, this.ttlSeconds, payload);
+    } catch (e) {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      memory.set(key, value, this.ttlSeconds);
+    }
   }
 
   async invalidate(appId: string, store: Store): Promise<void> {
     const key = cacheKey(appId, store);
-    const r = await getRedis().catch(() => null);
+    const r = await getRedis().catch((e) => {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      return null;
+    });
     if (!r) return memory.del(key);
-    await r.del(key);
+    try {
+      await r.del(key);
+    } catch (e) {
+      if (!warnedRedisDown) {
+        warnedRedisDown = true;
+        // eslint-disable-next-line no-console
+        console.warn("Redis unavailable, bypassing cache:", e instanceof Error ? e.message : e);
+      }
+      memory.del(key);
+    }
   }
 }
 
