@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import type { ScrapedApp } from "@/lib/scrape/app-store";
+import { extractLdJsonScreenshotUrls } from "@/lib/scrape/play-store-utils";
 
 function uniq<T>(arr: T[]) {
   return Array.from(new Set(arr));
@@ -37,6 +38,7 @@ export async function scrapePlayStoreByPackageName(packageName: string): Promise
   // We combine two approaches:
   // 1) Find play-lh.googleusercontent.com URLs anywhere in HTML
   // 2) Prefer URLs that appear in AF_initDataCallback blobs (more screenshot-heavy)
+  // 3) Fallback to JSON-LD screenshot URLs when present (more stable)
   const allMatches =
     html.match(/https:\/\/play-lh\.googleusercontent\.com\/[A-Za-z0-9_-]+(?:=[^"\\\s<]*)?/g) ?? [];
 
@@ -45,7 +47,9 @@ export async function scrapePlayStoreByPackageName(packageName: string): Promise
     .join("\n")
     .match(/https:\/\/play-lh\.googleusercontent\.com\/[A-Za-z0-9_-]+(?:=[^"\\\s<]*)?/g);
 
-  const combined = uniq([...(afMatches ?? []), ...allMatches])
+  const ldJson = extractLdJsonScreenshotUrls(html);
+
+  const combined = uniq([...(afMatches ?? []), ...allMatches, ...ldJson])
     .map(unescapePlayUrl)
     .filter((m) => m.startsWith("https://play-lh.googleusercontent.com/"))
     .filter((m) => (ogIcon ? m !== ogIcon : true))

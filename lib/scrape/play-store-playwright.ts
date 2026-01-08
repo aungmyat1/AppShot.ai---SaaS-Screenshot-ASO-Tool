@@ -1,17 +1,7 @@
 import { chromium, type Browser, type BrowserContext } from "playwright";
 
 import type { ScrapedApp } from "@/lib/scrape/app-store";
-
-function uniq<T>(arr: T[]) {
-  return Array.from(new Set(arr));
-}
-
-function unescapePlayUrl(s: string) {
-  return s
-    .replace(/\\u003d/g, "=")
-    .replace(/\\u0026/g, "&")
-    .replace(/&amp;/g, "&");
-}
+import { extractLdJsonScreenshotUrls, uniq, unescapePlayUrl } from "@/lib/scrape/play-store-utils";
 
 /**
  * IMPORTANT: Proper Playwright lifecycle
@@ -91,7 +81,9 @@ export async function scrapePlayStoreByPackageNamePlaywright(packageName: string
       const matches =
         html.match(/https:\/\/play-lh\.googleusercontent\.com\/[A-Za-z0-9_-]+(?:=[^"\\\s<]*)?/g) ?? [];
 
-      const screenshotUrls = uniq(matches)
+      const ldJson = extractLdJsonScreenshotUrls(html);
+
+      const screenshotUrls = uniq([...matches, ...ldJson])
         .map(unescapePlayUrl)
         .filter((m) => m.startsWith("https://play-lh.googleusercontent.com/"))
         .filter((m) => (ogIcon ? m !== ogIcon : true))
