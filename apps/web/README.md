@@ -28,6 +28,7 @@ Fill in `.env.local`:
 - **Postgres**: `DATABASE_URL` (**must be the URL only**, not a `psql ...` command)
 - **Storage** (S3 or R2): either `STORAGE_*` or `R2_*` vars (see `.env.example`)
 - **Stripe**: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, plus `NEXT_PUBLIC_STRIPE_PRICE_*`
+  - Pro subscription (PaymentIntents flow): set `STRIPE_PRICE_PRO` / `NEXT_PUBLIC_STRIPE_PRICE_PRO`
 
 - **Create DB tables**
 
@@ -50,6 +51,10 @@ Listen for:
 - `customer.subscription.created`
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
+- `invoice.created`
+- `invoice.finalized`
+- `invoice.paid`
+- `invoice.payment_failed`
 
 ### Notes / limitations
 

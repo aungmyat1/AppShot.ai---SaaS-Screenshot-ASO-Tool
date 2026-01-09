@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { scrapeCore } from "@/lib/core/engine";
 import { createZipFromImageUrls } from "@/lib/zip";
 import { uploadBuffer, getDownloadUrl } from "@/lib/storage";
+import { recordStripeUsage } from "@/lib/billing/usage-record";
 
 /**
  * Processes a queued scrape job:
@@ -59,6 +60,17 @@ export async function processScrapeJob(scrapeJobId: string, opts?: { screenshotL
       where: { id: job.id },
       data: { status: "COMPLETE", zipObjectKey: key, zipUrl: downloadUrl, error: null },
     });
+
+    // Usage-based pricing (optional): report screenshot usage to Stripe metered billing item.
+    if (
+      (process.env.STRIPE_USAGE_ENABLED === "1" || process.env.STRIPE_USAGE_ENABLED === "true") &&
+      job.user.plan === "PRO" &&
+      job.user.stripeSubscriptionItemId
+    ) {
+      await recordStripeUsage({ subscriptionItemId: job.user.stripeSubscriptionItemId, quantity: screenshotUrls.length }).catch(
+        () => undefined,
+      );
+    }
 
     return updated;
   } catch (e) {

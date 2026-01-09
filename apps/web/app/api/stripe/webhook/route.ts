@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { prisma } from "@/lib/prisma";
-import { PLAN_CREDITS, priceIdToPlan } from "@/lib/plans";
+import { priceIdToPlan } from "@/lib/plans";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -35,16 +35,17 @@ export async function POST(req: Request) {
         const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
         const priceId = sub.items.data[0]?.price?.id ?? null;
         const plan = priceIdToPlan(priceId) ?? "FREE";
+        const subscriptionItemId = sub.items.data[0]?.id ?? null;
 
         await prisma.user.updateMany({
           where: { stripeCustomerId: customerId },
           data: {
             plan,
-            creditsBalance: PLAN_CREDITS[plan],
             stripeSubscriptionId: sub.id,
             stripePriceId: priceId,
             stripeStatus: sub.status,
             currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+            stripeSubscriptionItemId: subscriptionItemId,
           },
         });
         break;
@@ -57,11 +58,41 @@ export async function POST(req: Request) {
           where: { stripeCustomerId: customerId },
           data: {
             plan: "FREE",
-            creditsBalance: PLAN_CREDITS.FREE,
             stripeSubscriptionId: null,
             stripePriceId: null,
             stripeStatus: sub.status,
             currentPeriodEnd: null,
+            stripeSubscriptionItemId: null,
+          },
+        });
+        break;
+      }
+      case "invoice.created":
+      case "invoice.finalized":
+      case "invoice.paid":
+      case "invoice.payment_failed": {
+        const inv = event.data.object as Stripe.Invoice;
+        const customerId = typeof inv.customer === "string" ? inv.customer : inv.customer?.id;
+        if (!customerId) break;
+        const user = await prisma.user.findFirst({ where: { stripeCustomerId: customerId } });
+        if (!user) break;
+        await prisma.invoice.upsert({
+          where: { stripeInvoiceId: inv.id },
+          create: {
+            userId: user.id,
+            stripeInvoiceId: inv.id,
+            status: inv.status ?? null,
+            currency: inv.currency ?? null,
+            amountDue: inv.amount_due ?? null,
+            hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
+            invoicePdf: inv.invoice_pdf ?? null,
+          },
+          update: {
+            status: inv.status ?? null,
+            currency: inv.currency ?? null,
+            amountDue: inv.amount_due ?? null,
+            hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
+            invoicePdf: inv.invoice_pdf ?? null,
           },
         });
         break;

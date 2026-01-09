@@ -6,7 +6,6 @@ import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isQueueEnabled, getScrapeQueue } from "@/lib/queue";
 import { processScrapeJob } from "@/lib/core/process-scrape-job";
-import { detectStore } from "@/lib/app-url";
 import { enforcePlanLimits } from "@/lib/limits";
 
 export const runtime = "nodejs";
@@ -24,11 +23,9 @@ export async function POST(req: Request) {
   const url = parsed.data.url;
 
   const dbUser = await getOrCreateUser(userId);
-  const requestedStore = detectStore(url) === "APP_STORE" ? "APP_STORE" : "PLAY_STORE";
-
   let screenshotLimit = 30;
   try {
-    const decision = await enforcePlanLimits({ userId: dbUser.id, plan: dbUser.plan, requestedStore });
+    const decision = await enforcePlanLimits({ userId: dbUser.id, plan: dbUser.plan });
     screenshotLimit = decision.screenshotLimit;
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Limit reached" }, { status: 402 });
@@ -37,7 +34,7 @@ export async function POST(req: Request) {
   const job = await prisma.scrapeJob.create({
     data: {
       userId: dbUser.id,
-      store: requestedStore,
+      store: "APP_STORE",
       appUrl: url,
       status: isQueueEnabled() ? "QUEUED" : "PROCESSING",
     },

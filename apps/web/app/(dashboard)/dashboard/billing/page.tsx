@@ -1,19 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BillingActions } from "@/app/dashboard/billing-actions";
-
 export const metadata = { title: "Dashboard • Billing" };
 
+import { BillingClient } from "./billing-client";
+
 export default function BillingPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Billing</CardTitle>
-        <CardDescription>Manage your subscription.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <BillingActions />
-      </CardContent>
-    </Card>
-  );
+  return <BillingClient />;
 }
 

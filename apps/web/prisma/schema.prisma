@@ -40,12 +40,15 @@ model User {
   stripePriceId        String?
   stripeStatus         String?
   currentPeriodEnd     DateTime?
+  stripeSubscriptionItemId String?
+  stripeDefaultPaymentMethodId String?
 
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   scrapeJobs           ScrapeJob[]
   creditLedger         CreditLedger[]
+  invoices             Invoice[]
 }
 
 model ScrapeJob {
@@ -104,6 +107,24 @@ model CreditLedger {
   delta      Int
   reason     String
   createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Invoice {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeInvoiceId  String   @unique
+  status           String?
+  currency         String?
+  amountDue        Int?
+  hostedInvoiceUrl String?
+  invoicePdf       String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([userId, createdAt])
 }

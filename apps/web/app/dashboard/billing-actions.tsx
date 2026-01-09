@@ -5,7 +5,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 
 export function BillingActions() {
-  const starter = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER;
+  const pro = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO;
 
   const [loading, setLoading] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -49,14 +49,14 @@ export function BillingActions() {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        {starter ? (
+        {pro ? (
           <Button
             variant="secondary"
-            onClick={() => goCheckout(starter)}
+            onClick={() => goCheckout(pro)}
             disabled={!!loading}
-            aria-busy={loading === starter}
+            aria-busy={loading === pro}
           >
-            {loading === starter ? "Redirecting…" : "Upgrade: Starter"}
+            {loading === pro ? "Redirecting…" : "Upgrade: Pro"}
           </Button>
         ) : null}
         <Button variant="outline" onClick={openPortal} disabled={!!loading} aria-busy={loading === "portal"}>
@@ -64,9 +64,9 @@ export function BillingActions() {
         </Button>
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      {!starter ? (
+      {!pro ? (
         <p className="text-sm text-muted-foreground">
-          Set <code className="rounded bg-muted px-1 py-0.5">NEXT_PUBLIC_STRIPE_PRICE_STARTER</code> to enable upgrades.
+          Set <code className="rounded bg-muted px-1 py-0.5">NEXT_PUBLIC_STRIPE_PRICE_PRO</code> to enable upgrades.
         </p>
       ) : null}
     </div>

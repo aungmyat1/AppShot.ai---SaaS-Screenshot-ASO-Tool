@@ -25,28 +25,23 @@ export default function HomePage() {
       <Card id="pricing">
         <CardHeader>
           <CardTitle>Plans</CardTitle>
-          <CardDescription>Simple limits designed for solo builders.</CardDescription>
+          <CardDescription>Straightforward screenshot limits.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border p-4">
-            <div className="font-medium">FREE — “Try &amp; Trust”</div>
+            <div className="font-medium">Free</div>
             <div className="mt-1 text-sm text-muted-foreground">$0</div>
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              <li>1 app per day</li>
-              <li>Max 5 screenshots</li>
-              <li>Play Store OR App Store (not both per day)</li>
-              <li>Cached results only</li>
+              <li>10 screenshots / month</li>
+              <li>Basic features</li>
             </ul>
           </div>
           <div className="rounded-lg border p-4">
-            <div className="font-medium">STARTER — “Solo Builder”</div>
-            <div className="mt-1 text-sm text-muted-foreground">$9 / month</div>
+            <div className="font-medium">Pro</div>
+            <div className="mt-1 text-sm text-muted-foreground">$29 / month</div>
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              <li>20 apps / month</li>
-              <li>Up to 30 screenshots per app</li>
-              <li>Play Store + App Store</li>
-              <li>ZIP download</li>
-              <li>Cache TTL: 24h</li>
+              <li>500 screenshots / month</li>
+              <li>Priority support</li>
             </ul>
           </div>
         </CardContent>
