@@ -1,0 +1,97 @@
+## Essential context for AI assistance (GetAppShots)
+
+This repository is **GetAppShots**, a production-oriented **Next.js 14 (App Router)** SaaS that scrapes app store screenshots and provides downloadable ZIPs.
+
+### 1) Project architecture
+
+- **Framework**: Next.js 14 (App Router) + TypeScript
+- **UI**: Tailwind + shadcn-style components (`components/ui/*`)
+- **Auth**: Clerk (`middleware.ts`, `app/sign-in`, `app/sign-up`)
+- **DB**: PostgreSQL + Prisma (`prisma/schema.prisma`, `lib/prisma.ts`)
+- **Payments**: Stripe (`app/api/stripe/*`)
+- **Storage**: S3-compatible (AWS S3 or Cloudflare R2) (`lib/storage.ts`)
+- **Scraping engine**:
+  - iOS App Store: iTunes lookup API (`lib/scrape/app-store.ts`)
+  - Google Play: HTML scrape + JSON-LD fallback (`lib/scrape/play-store.ts`, `lib/scrape/play-store-utils.ts`)
+  - Optional Playwright mode with safe lifecycle (`lib/scrape/play-store-playwright.ts`)
+- **Queue (optional)**: BullMQ + Redis (`lib/queue.ts`, `server/worker.ts`, `/api/jobs/:jobId`)
+
+### 2) Where the “core” logic lives
+
+- **Request validation + store detection**: `lib/app-url.ts`
+- **Core engine (rate limit + cache + scrape)**: `lib/core/engine.ts`
+- **Redis cache (safe fallback)**: `lib/core/cache.ts`
+- **Rate limiting / backoff**: `lib/core/rateLimiter.ts`
+- **ZIP creation + efficient downloads**: `lib/zip.ts`
+- **Storage upload + signed/public URLs**: `lib/storage.ts`
+- **Plan limits enforcement (Free/Starter)**: `lib/limits.ts`
+- **Job processing (sync + worker)**: `lib/core/process-scrape-job.ts`
+
+### 3) Key endpoints & flows
+
+- **Validate URL**: `POST /api/validate-url` → `{ store, identifier }`
+- **Scrape + ZIP**: `POST /api/scrape`
+  - **Sync mode** (`SCRAPE_QUEUE_MODE=sync`): returns `zipUrl` when done
+  - **Queue mode** (`SCRAPE_QUEUE_MODE=queue` + `REDIS_URL`): returns `{ jobId, status: "QUEUED" }`
+- **Poll job**: `GET /api/jobs/:jobId` → `{ status, zipUrl? }`
+- **Stripe**:
+  - `POST /api/stripe/checkout`
+  - `POST /api/stripe/portal`
+  - `POST /api/stripe/webhook` (public)
+
+### 4) Debugging checklist (rendering / blank UI / API failures)
+
+- **Build + typecheck**:
+
+```bash
+npm run build
+```
+
+- **Run locally**:
+
+```bash
+npm run dev
+```
+
+- **If UI is blank**:
+  - Check browser console for runtime errors
+  - Verify `.env.local` is present and keys are set (Clerk keys are required for auth flows)
+  - Confirm middleware isn’t redirecting unexpectedly
+
+- **If scraping fails**:
+  - Try an iOS URL first (more reliable)
+  - For Google Play, enable Playwright fallback:
+    - `PLAY_SCRAPE_FALLBACK_PLAYWRIGHT=true` or `PLAY_SCRAPE_MODE=playwright`
+
+### 5) Queue testing (production-style)
+
+Requires `REDIS_URL` and `SCRAPE_QUEUE_MODE=queue`.
+
+Run app + worker in two terminals:
+
+```bash
+npm run dev
+```
+
+```bash
+npm run worker
+```
+
+### 6) Deployment guidance (Vercel)
+
+- Deploy as a standard Next.js app
+- Configure environment variables in Vercel project settings (never commit secrets)
+- Ensure Stripe webhook is configured to `POST /api/stripe/webhook`
+- If using queue mode, you need a worker runtime (Vercel doesn’t run long-lived workers by default). Consider:
+  - a separate worker deployment (Railway/Fly/Render)
+  - or keep `SCRAPE_QUEUE_MODE=sync` and enforce smaller workloads
+
+### 7) End-to-end “real data” test plan
+
+1. Sign up / sign in (`/sign-in`, `/sign-up`)
+2. Go to `/dashboard`
+3. Paste a real store URL (iOS + Play)
+4. Confirm ZIP link is returned and downloads successfully
+5. Confirm job appears in history
+6. Confirm Free/Starter limits are enforced
+
