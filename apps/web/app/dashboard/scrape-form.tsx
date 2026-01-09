@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useUiStore } from "@/lib/store/ui";
 
 export function ScrapeForm() {
   const [url, setUrl] = React.useState("");
@@ -11,12 +12,14 @@ export function ScrapeForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [zipUrl, setZipUrl] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<string | null>(null);
+  const setLastJobId = useUiStore((s) => s.setLastJobId);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setZipUrl(null);
     setStatus(null);
+    setLastJobId(null);
     setLoading(true);
     try {
       const res = await fetch("/api/scrape", {
@@ -33,6 +36,7 @@ export function ScrapeForm() {
       }
 
       if (!data.jobId) throw new Error("No job id returned");
+      setLastJobId(data.jobId);
       setStatus(data.status || "QUEUED");
 
       // Poll job status until complete/failed (queue mode)

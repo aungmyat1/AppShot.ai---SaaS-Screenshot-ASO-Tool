@@ -4,6 +4,8 @@ import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from "@c
 
 import "./globals.css";
 import { Button } from "@/components/ui/button";
+import { Providers } from "@/app/providers";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "GetAppShots",
@@ -24,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
               Dashboard
             </Link>
+            <ThemeToggle />
             {publishableKey ? (
               <>
                 <SignedOut>
@@ -50,7 +53,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-dvh bg-background text-foreground">
-        {publishableKey ? <ClerkProvider publishableKey={publishableKey}>{appShell}</ClerkProvider> : appShell}
+        <Providers>
+          {publishableKey ? <ClerkProvider publishableKey={publishableKey}>{appShell}</ClerkProvider> : appShell}
+        </Providers>
       </body>
     </html>
   );

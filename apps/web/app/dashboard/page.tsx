@@ -13,92 +13,10 @@ import { getUsageSummary } from "@/lib/limits";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  // Legacy dashboard route: keep compatibility but send users to new dashboard overview.
   const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  if (!userId) redirect("/login");
 
-  const user = await getOrCreateUser(userId);
-  const usage = await getUsageSummary({ userId: user.id, plan: user.plan });
-  const jobs = await prisma.scrapeJob.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Paste an App Store URL, then download the ZIP.</p>
-        </div>
-        <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground">
-          Admin
-        </Link>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Scrape screenshots</CardTitle>
-          <CardDescription>
-            Plan: <span className="font-medium">{user.plan}</span> •{" "}
-            <span className="font-medium">{usage.remaining}</span> / {usage.limit} apps remaining ({usage.window})
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-5">
-            <ScrapeForm />
-            <BillingActions />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>History</CardTitle>
-          <CardDescription>Your most recent scrape jobs.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Created</TableHead>
-                <TableHead>Store</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Screenshots</TableHead>
-                <TableHead>Download</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {jobs.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
-                    No scrapes yet.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                jobs.map((j) => (
-                  <TableRow key={j.id}>
-                    <TableCell>{j.createdAt.toISOString().slice(0, 19).replace("T", " ")}</TableCell>
-                    <TableCell>{j.store}</TableCell>
-                    <TableCell>{j.status}</TableCell>
-                    <TableCell>{j.screenshotCount}</TableCell>
-                    <TableCell>
-                      {j.zipUrl ? (
-                        <a className="underline" href={j.zipUrl} target="_blank" rel="noreferrer">
-                          ZIP
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  redirect("/dashboard/overview");
 }
 

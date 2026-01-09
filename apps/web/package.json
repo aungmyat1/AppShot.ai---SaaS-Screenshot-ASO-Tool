@@ -40,7 +40,13 @@
     "stripe": "^16.12.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@tanstack/react-query": "^5.66.9",
+    "@tanstack/react-query-devtools": "^5.66.9",
+    "zustand": "^5.0.3",
+    "react-hook-form": "^7.54.2",
+    "@hookform/resolvers": "^3.10.0",
+    "next-themes": "^0.4.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
