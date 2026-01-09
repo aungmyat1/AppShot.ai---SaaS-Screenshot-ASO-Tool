@@ -1,60 +1,23 @@
 {
-  "name": "getappshots",
+  "name": "getappshots-monorepo",
   "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
-    ,
-    "worker": "node --loader tsx server/worker.ts"
-  },
-  "dependencies": {
-    "@google/genai": "^1.30.0",
-    "@aws-sdk/client-s3": "^3.940.0",
-    "@aws-sdk/s3-request-presigner": "^3.940.0",
-    "@clerk/nextjs": "^6.18.0",
-    "@prisma/client": "^6.3.1",
-    "@radix-ui/react-slot": "^1.1.2",
-    "archiver": "^7.0.1",
-    "axios": "^1.13.2",
-    "buffer": "^6.0.3",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.469.0",
-    "next": "^14.2.25",
-    "playwright": "^1.51.1",
-    "bullmq": "^5.40.2",
-    "ioredis": "^5.6.0",
-    "p-limit": "^6.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "redis": "^4.7.1",
-    "recharts": "^3.5.1",
-    "sharp": "^0.34.5",
-    "stripe": "^16.12.0",
-    "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "web:dev": "npm --workspace apps/web run dev",
+    "web:build": "npm --workspace apps/web run build",
+    "web:start": "npm --workspace apps/web run start",
+    "web:lint": "npm --workspace apps/web run lint",
+    "web:worker": "npm --workspace apps/web run worker",
+    "api:dev": "cd apps/api && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@types/archiver": "^6.0.3",
-    "@types/react": "^18.2.79",
-    "@types/react-dom": "^18.2.25",
-    "@types/p-limit": "^2.0.2",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "^14.2.25",
-    "postcss": "^8.4.49",
-    "prisma": "^6.3.1",
-    "tailwindcss": "^3.4.17",
-    "tsx": "^4.19.2",
-    "typescript": "~5.8.2"
+    "turbo": "^2.3.3"
   }
 }
+

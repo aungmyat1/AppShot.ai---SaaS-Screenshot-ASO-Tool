@@ -5,27 +5,27 @@ This repository is **GetAppShots**, a production-oriented **Next.js 14 (App Rout
 ### 1) Project architecture
 
 - **Framework**: Next.js 14 (App Router) + TypeScript
-- **UI**: Tailwind + shadcn-style components (`components/ui/*`)
-- **Auth**: Clerk (`middleware.ts`, `app/sign-in`, `app/sign-up`)
-- **DB**: PostgreSQL + Prisma (`prisma/schema.prisma`, `lib/prisma.ts`)
-- **Payments**: Stripe (`app/api/stripe/*`)
-- **Storage**: S3-compatible (AWS S3 or Cloudflare R2) (`lib/storage.ts`)
+- **UI**: Tailwind + shadcn-style components (`apps/web/components/ui/*`)
+- **Auth**: Clerk (`apps/web/middleware.ts`, `apps/web/app/sign-in`, `apps/web/app/sign-up`)
+- **DB**: PostgreSQL + Prisma (`apps/web/prisma/schema.prisma`, `apps/web/lib/prisma.ts`)
+- **Payments**: Stripe (`apps/web/app/api/stripe/*`)
+- **Storage**: S3-compatible (AWS S3 or Cloudflare R2) (`apps/web/lib/storage.ts`)
 - **Scraping engine**:
-  - iOS App Store: iTunes lookup API (`lib/scrape/app-store.ts`)
-  - Google Play: HTML scrape + JSON-LD fallback (`lib/scrape/play-store.ts`, `lib/scrape/play-store-utils.ts`)
-  - Optional Playwright mode with safe lifecycle (`lib/scrape/play-store-playwright.ts`)
-- **Queue (optional)**: BullMQ + Redis (`lib/queue.ts`, `server/worker.ts`, `/api/jobs/:jobId`)
+  - iOS App Store: iTunes lookup API (`apps/web/lib/scrape/app-store.ts`)
+  - Google Play: HTML scrape + JSON-LD fallback (`apps/web/lib/scrape/play-store.ts`, `apps/web/lib/scrape/play-store-utils.ts`)
+  - Optional Playwright mode with safe lifecycle (`apps/web/lib/scrape/play-store-playwright.ts`)
+- **Queue (optional)**: BullMQ + Redis (`apps/web/lib/queue.ts`, `apps/web/server/worker.ts`, `/api/jobs/:jobId`)
 
 ### 2) Where the “core” logic lives
 
-- **Request validation + store detection**: `lib/app-url.ts`
-- **Core engine (rate limit + cache + scrape)**: `lib/core/engine.ts`
-- **Redis cache (safe fallback)**: `lib/core/cache.ts`
-- **Rate limiting / backoff**: `lib/core/rateLimiter.ts`
-- **ZIP creation + efficient downloads**: `lib/zip.ts`
-- **Storage upload + signed/public URLs**: `lib/storage.ts`
-- **Plan limits enforcement (Free/Starter)**: `lib/limits.ts`
-- **Job processing (sync + worker)**: `lib/core/process-scrape-job.ts`
+- **Request validation + store detection**: `apps/web/lib/app-url.ts`
+- **Core engine (rate limit + cache + scrape)**: `apps/web/lib/core/engine.ts`
+- **Redis cache (safe fallback)**: `apps/web/lib/core/cache.ts`
+- **Rate limiting / backoff**: `apps/web/lib/core/rateLimiter.ts`
+- **ZIP creation + efficient downloads**: `apps/web/lib/zip.ts`
+- **Storage upload + signed/public URLs**: `apps/web/lib/storage.ts`
+- **Plan limits enforcement (Free/Starter)**: `apps/web/lib/limits.ts`
+- **Job processing (sync + worker)**: `apps/web/lib/core/process-scrape-job.ts`
 
 ### 3) Key endpoints & flows
 
