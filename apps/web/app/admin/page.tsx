@@ -24,6 +24,11 @@ export default async function AdminPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
         <p className="text-muted-foreground">User management (basic v1).</p>
+        <p className="mt-2">
+          <a className="text-sm underline" href="/admin/analytics">
+            View analytics
+          </a>
+        </p>
       </div>
 
       <Card>
