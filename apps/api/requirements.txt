@@ -1,3 +1,22 @@
 fastapi==0.115.6
 uvicorn[standard]==0.30.6
 
+# Settings / validation
+pydantic-settings==2.7.1
+
+# Database
+SQLAlchemy[asyncio]==2.0.36
+asyncpg==0.29.0
+alembic==1.14.0
+
+# Auth / security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Redis cache + rate limiting store (optional)
+redis==5.2.1
+
+# Async tasks
+celery==5.4.0
+
+
