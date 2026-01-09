@@ -8,8 +8,11 @@ from app.api.v1.router import api_router as api_v1
 from app.api.v2.router import api_router as api_v2
 from app.core.config import settings
 from app.core.exceptions import AppError
+from app.middleware.api_key_auth import APIKeyAuthMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
+from app.middleware.usage_logging import UsageLoggingMiddleware
+from app.monitoring.metrics import metrics
 from app.websockets.manager import manager
 
 
@@ -19,6 +22,8 @@ def create_app() -> FastAPI:
     # Middleware
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(APIKeyAuthMiddleware)
+    app.add_middleware(UsageLoggingMiddleware)
 
     # Versioned APIs
     app.include_router(api_v1, prefix=settings.API_V1_PREFIX)
@@ -50,8 +55,8 @@ def create_app() -> FastAPI:
     async def timing_middleware(request: Request, call_next):
         start = perf_counter()
         resp = await call_next(request)
-        _ = perf_counter() - start
-        # TODO: persist UsageLog with AsyncSession in background task
+        elapsed = (perf_counter() - start) * 1000.0
+        metrics.observe(f"{request.method} {request.url.path}", elapsed, is_error=resp.status_code >= 500)
         return resp
 
     return app

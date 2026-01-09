@@ -17,7 +17,7 @@ class ScreenshotsRepository:
         return res.scalar_one_or_none()
 
     async def create(self, *, user_id, app_id: str, platform: str, url: str, metadata: dict) -> Screenshot:
-        s = Screenshot(user_id=user_id, app_id=app_id, platform=platform, url=url, metadata=metadata, status="QUEUED")
+        s = Screenshot(user_id=user_id, app_id=app_id, platform=platform, url=url, meta=metadata, status="QUEUED")
         self.db.add(s)
         await self.db.commit()
         await self.db.refresh(s)

@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +28,20 @@ async def get_current_user(db: AsyncSession = Depends(get_db), token: str = Depe
     return user
 
 
+async def get_principal(request: Request, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """
+    Returns a user principal from either:
+    - API key middleware (request.state.user)
+    - Bearer JWT token
+    """
+    state_user = getattr(request.state, "user", None)
+    if state_user is not None:
+        return state_user
+    return await get_current_user(db=db, token=token)
+
+
 def require_roles(*roles: str):
-    async def _dep(user=Depends(get_current_user)):
+    async def _dep(user=Depends(get_principal)):
         if user.role not in roles:
             raise http_error(403, "Forbidden")
         return user

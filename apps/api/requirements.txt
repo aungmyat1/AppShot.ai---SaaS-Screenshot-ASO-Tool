@@ -26,4 +26,7 @@ httpx==0.27.2
 # MFA (TOTP)
 pyotp==2.9.0
 
+# EmailStr support
+email-validator==2.2.0
+
 

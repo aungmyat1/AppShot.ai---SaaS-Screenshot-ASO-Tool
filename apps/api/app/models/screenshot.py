@@ -18,7 +18,8 @@ class Screenshot(Base):
     platform: Mapped[str] = mapped_column(String(32), nullable=False)  # appstore|playstore
 
     url: Mapped[str] = mapped_column(String(2048), nullable=False)
-    metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    # NOTE: "metadata" is reserved by SQLAlchemy's Declarative API.
+    meta: Mapped[dict] = mapped_column("metadata", JSON, default=dict, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="QUEUED", nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
