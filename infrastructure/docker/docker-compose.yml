@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: getappshots
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -17,6 +19,13 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   web:
     build:
@@ -25,14 +34,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       # Set these in an .env file or in your shell:
       # DATABASE_URL, Clerk keys, storage keys, stripe keys, etc.
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
   api:
     build:
@@ -42,5 +51,9 @@ services:
       - "8000:8000"
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
 

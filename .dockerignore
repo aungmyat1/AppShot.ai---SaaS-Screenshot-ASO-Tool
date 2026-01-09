@@ -1,3 +1,33 @@
+**/.git
+**/.DS_Store
+**/.next
+**/dist
+**/build
+**/coverage
+**/.turbo
+**/.cache
+
+**/node_modules
+**/*.log
+
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.venv
+**/venv
+
+# local envs / secrets
+.env
+.env.*
+
+# cursor/ide artifacts
+.cursor
+terminals
+agent-transcripts
 node_modules
 .next
 .turbo

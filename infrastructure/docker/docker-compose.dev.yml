@@ -1,0 +1,135 @@
+name: getappshots-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: getappshots
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [appnet]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d getappshots"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks: [appnet]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+      target: dev
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/getappshots
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      JWT_SECRET_KEY: change-me
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../..:/repo
+    working_dir: /repo/apps/api
+    command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    networks: [appnet]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  celery-worker:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+      target: runtime
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/getappshots
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    networks: [appnet]
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["celery", "-A", "app.tasks.celery_app.celery_app", "worker", "-l", "info", "-Q", "urgent,normal,low,dead"]
+
+  celery-beat:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+      target: runtime
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    networks: [appnet]
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["celery", "-A", "app.tasks.celery_app.celery_app", "beat", "-l", "info"]
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/web.Dockerfile
+      target: dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/getappshots?schema=public
+      REDIS_URL: redis://redis:6379/0
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../..:/repo
+      - web_node_modules:/repo/node_modules
+      - web_next:/repo/apps/web/.next
+    working_dir: /repo/apps/web
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
+    networks: [appnet]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres_data:
+  redis_data:
+  web_node_modules:
+  web_next:
+
+networks:
+  appnet:
+    driver: bridge
+

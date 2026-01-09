@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
+import path from "path";
+
 const nextConfig = {
   reactStrictMode: true,
+  output: "standalone",
+  experimental: {
+    outputFileTracingRoot: path.join(path.dirname(new URL(import.meta.url).pathname), "../.."),
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "is1-ssl.mzstatic.com" },

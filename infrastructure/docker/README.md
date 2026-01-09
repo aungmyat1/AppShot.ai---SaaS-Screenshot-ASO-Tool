@@ -1,18 +1,35 @@
-## Docker (local dev)
+## Docker
 
-This folder provides Docker files and a compose setup for local development.
+This folder provides **production-ready multi-stage Dockerfiles** and **compose setups** for dev and staging.
 
-### Start services
+### Development (hot reload)
 
 From repo root:
 
 ```bash
-docker compose -f infrastructure/docker/docker-compose.yml up --build
+docker compose -f infrastructure/docker/docker-compose.dev.yml up --build
 ```
 
 Services:
-- `web`: Next.js app (`apps/web`) on port `3000`
-- `api`: FastAPI (`apps/api`) on port `8000`
-- `postgres`: Postgres on `5432`
-- `redis`: Redis on `6379`
+- `web` (Next.js) on `3000`
+- `api` (FastAPI) on `8000`
+- `celery-worker`, `celery-beat`
+- `postgres` on `5432`
+- `redis` on `6379`
+
+### Staging (production-like)
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.staging.yml up --build
+```
+
+### Trivy scan (optional)
+
+If you have Trivy installed:
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.staging.yml build
+chmod +x infrastructure/docker/trivy.sh
+./infrastructure/docker/trivy.sh
+```
 
