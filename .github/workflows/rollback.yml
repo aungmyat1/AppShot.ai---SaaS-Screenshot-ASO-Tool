@@ -1,0 +1,36 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      image_tag:
+        description: "Image tag to roll back to (e.g. a previous sha)"
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_WEB: ghcr.io/${{ github.repository }}-web
+  IMAGE_API: ghcr.io/${{ github.repository }}-api
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rollback deployment (placeholder)
+        run: |
+          echo "Rolling back ${{ github.event.inputs.environment }} to tag ${{ github.event.inputs.image_tag }}"
+          echo "WEB=${IMAGE_WEB}:${{ github.event.inputs.image_tag }}"
+          echo "API=${IMAGE_API}:${{ github.event.inputs.image_tag }}"
+          echo "TODO: call your deploy system to redeploy these tags"
+

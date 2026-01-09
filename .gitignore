@@ -16,6 +16,11 @@ out
 *.local
 .turbo
 
+# Test output
+coverage
+**/coverage
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,175 @@
+name: CD
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Target environment"
+        required: true
+        options:
+          - staging
+          - production
+      image_tag:
+        description: "Override image tag (defaults to sha)"
+        required: false
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_WEB: ghcr.io/${{ github.repository }}-web
+  IMAGE_API: ghcr.io/${{ github.repository }}-api
+
+jobs:
+  build_and_push:
+    name: Build & push images (GHCR)
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tag
+        id: meta
+        run: |
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            echo "version=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/web.Dockerfile
+          target: runner
+          push: true
+          tags: |
+            ${{ env.IMAGE_WEB }}:${{ steps.meta.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push api (shared for celery)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/api.Dockerfile
+          target: runtime
+          push: true
+          tags: |
+            ${{ env.IMAGE_API }}:${{ steps.meta.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy_staging:
+    name: Deploy • staging
+    needs: [build_and_push]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.environment == 'staging' }}
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run database migrations (staging)
+        if: ${{ secrets.STAGING_DATABASE_URL != '' }}
+        run: |
+          echo "Running DB migrations for staging..."
+          npm ci
+          npm --workspace apps/web run prisma:generate
+          npx --yes prisma migrate deploy --schema apps/web/prisma/schema.prisma
+          if [ -d "apps/api/alembic/versions" ]; then
+            python -m pip install -r apps/api/requirements.txt
+            alembic -c apps/api/alembic.ini upgrade head
+          else
+            echo "No Alembic versions found; skipping."
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: Deploy (staging)
+        if: ${{ secrets.STAGING_DEPLOY_COMMAND != '' }}
+        run: ${{ secrets.STAGING_DEPLOY_COMMAND }}
+        env:
+          IMAGE_WEB: ${{ env.IMAGE_WEB }}:${{ needs.build_and_push.outputs.tag }}
+          IMAGE_API: ${{ env.IMAGE_API }}:${{ needs.build_and_push.outputs.tag }}
+
+      - name: Post-deploy health check
+        if: ${{ secrets.STAGING_HEALTHCHECK_URL != '' }}
+        run: |
+          curl -fsS "${{ secrets.STAGING_HEALTHCHECK_URL }}" >/dev/null
+
+  deploy_production:
+    name: Deploy • production (approval required)
+    needs: [build_and_push]
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.environment == 'production' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run database migrations (production)
+        if: ${{ secrets.PROD_DATABASE_URL != '' }}
+        run: |
+          echo "Running DB migrations for production..."
+          npm ci
+          npm --workspace apps/web run prisma:generate
+          npx --yes prisma migrate deploy --schema apps/web/prisma/schema.prisma
+          if [ -d "apps/api/alembic/versions" ]; then
+            python -m pip install -r apps/api/requirements.txt
+            alembic -c apps/api/alembic.ini upgrade head
+          else
+            echo "No Alembic versions found; skipping."
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+
+      - name: Deploy (production)
+        if: ${{ secrets.PROD_DEPLOY_COMMAND != '' }}
+        run: ${{ secrets.PROD_DEPLOY_COMMAND }}
+        env:
+          IMAGE_WEB: ${{ env.IMAGE_WEB }}:${{ needs.build_and_push.outputs.tag }}
+          IMAGE_API: ${{ env.IMAGE_API }}:${{ needs.build_and_push.outputs.tag }}
+
+      - name: Post-deploy health check
+        if: ${{ secrets.PROD_HEALTHCHECK_URL != '' }}
+        run: |
+          curl -fsS "${{ secrets.PROD_HEALTHCHECK_URL }}" >/dev/null
+
