@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getOrCreateUser } from "@/lib/auth";
 import { getUserAnalytics } from "@/lib/analytics/queries";
+import { requireAdmin } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -20,9 +21,16 @@ export async function GET(req: Request) {
 
   const u = new URL(req.url);
   const days = Number(u.searchParams.get("days") || "30");
+  const asUserId = u.searchParams.get("asUserId") || undefined;
 
-  const user = await getOrCreateUser(userId);
-  const data = await getUserAnalytics({ userId: user.id, rangeDays: days });
+  const actor = await getOrCreateUser(userId);
+  let targetUserId = actor.id;
+  if (asUserId && asUserId !== actor.id) {
+    await requireAdmin(userId);
+    targetUserId = asUserId;
+  }
+
+  const data = await getUserAnalytics({ userId: targetUserId, rangeDays: days });
 
   const csv = toCsv(data.screenshotsPerDay.map((p) => ({ date: p.t, screenshots: p.v })));
 

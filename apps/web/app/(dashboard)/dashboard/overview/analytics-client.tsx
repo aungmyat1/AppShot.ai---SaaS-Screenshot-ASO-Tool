@@ -26,11 +26,13 @@ type Analytics = {
   errorTop: Array<{ error: string; count: number }>;
 };
 
-export function AnalyticsClient() {
+export function AnalyticsClient(props: { asUserId?: string }) {
+  const asUserId = props.asUserId;
   const q = useQuery({
-    queryKey: ["analytics", "user", 30],
+    queryKey: ["analytics", "user", 30, asUserId || "self"],
     queryFn: async (): Promise<Analytics> => {
-      const res = await fetch("/api/analytics/user?days=30", { cache: "no-store" });
+      const qs = new URLSearchParams({ days: "30", ...(asUserId ? { asUserId } : {}) });
+      const res = await fetch(`/api/analytics/user?${qs.toString()}`, { cache: "no-store" });
       const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error || "Failed to load analytics");
       return data as Analytics;
@@ -43,10 +45,14 @@ export function AnalyticsClient() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Analytics</h2>
-          <p className="text-sm text-muted-foreground">Last 30 days.</p>
+          <p className="text-sm text-muted-foreground">
+            Last 30 days{asUserId ? " (support view)" : ""}.
+          </p>
         </div>
         <Button variant="outline" asChild>
-          <a href="/api/analytics/user/export?days=30">Export CSV</a>
+          <a href={asUserId ? `/api/analytics/user/export?days=30&asUserId=${encodeURIComponent(asUserId)}` : "/api/analytics/user/export?days=30"}>
+            Export CSV
+          </a>
         </Button>
       </div>
 

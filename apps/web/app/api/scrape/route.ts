@@ -23,6 +23,9 @@ export async function POST(req: Request) {
   const url = parsed.data.url;
 
   const dbUser = await getOrCreateUser(userId);
+  if (dbUser.suspendedAt && !dbUser.isAdmin) {
+    return NextResponse.json({ error: "Account suspended." }, { status: 403 });
+  }
   let screenshotLimit = 30;
   try {
     const decision = await enforcePlanLimits({ userId: dbUser.id, plan: dbUser.plan });
