@@ -14,6 +14,7 @@ from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.usage_logging import UsageLoggingMiddleware
 from app.monitoring.metrics import metrics
 from app.websockets.manager import manager
+from app.websockets.progress import stream_progress
 
 
 def create_app() -> FastAPI:
@@ -49,6 +50,10 @@ def create_app() -> FastAPI:
                 await asyncio.sleep(5)
         finally:
             manager.disconnect(topic, ws)
+
+    @app.websocket("/api/v1/ws/progress/{batch_id}")
+    async def ws_progress(ws: WebSocket, batch_id: str):
+        await stream_progress(ws, f"progress:{batch_id}")
 
     # Usage log placeholder (demonstrates pattern)
     @app.middleware("http")

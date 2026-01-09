@@ -32,6 +32,17 @@ class Settings(BaseSettings):
     # Redis (optional)
     REDIS_URL: str | None = None
 
+    # Screenshot pipeline
+    STORAGE_ENDPOINT_URL: str | None = None
+    STORAGE_REGION: str = "auto"
+    STORAGE_BUCKET: str | None = None
+    STORAGE_ACCESS_KEY_ID: str | None = None
+    STORAGE_SECRET_ACCESS_KEY: str | None = None
+    STORAGE_PUBLIC_BASE_URL: str | None = None
+    PRESIGN_EXPIRES_SECONDS: int = 3600
+
+    PIPELINE_MAX_SCREENSHOTS: int = 30
+
     # Rate limiting
     DEFAULT_RATE_LIMIT_PER_MINUTE: int = 60
 
