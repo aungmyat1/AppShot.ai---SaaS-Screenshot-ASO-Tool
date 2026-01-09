@@ -47,10 +47,17 @@ This repository is **GetAppShots**, a production-oriented **Next.js 14 (App Rout
 npm run build
 ```
 
-- **Run locally**:
+- **Run locally (dev)**:
 
 ```bash
 npm run dev
+```
+
+- **Run locally (production preview)**:
+
+```bash
+npm run build
+npm run start
 ```
 
 - **If UI is blank**:
@@ -66,6 +73,12 @@ npm run dev
 ### 5) Queue testing (production-style)
 
 Requires `REDIS_URL` and `SCRAPE_QUEUE_MODE=queue`.
+
+If you don’t have Redis locally, run it quickly:
+
+```bash
+docker run --rm -p 6379:6379 redis:7-alpine
+```
 
 Run app + worker in two terminals:
 
