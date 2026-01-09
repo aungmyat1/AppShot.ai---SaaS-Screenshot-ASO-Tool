@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -79,7 +80,7 @@ export function BillingClient() {
   async function startCheckout() {
     setCreating(true);
     try {
-      const res = await fetch("/api/billing/subscription/create", { method: "POST" });
+      const res = await fetch("/api/billing/subscription/create", { method: "POST", headers: withCsrfHeaders() });
       const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error || "Failed to start subscription");
       setClientSecret(data.clientSecret);
@@ -89,12 +90,12 @@ export function BillingClient() {
   }
 
   async function cancel() {
-    await fetch("/api/billing/subscription/cancel", { method: "POST" });
+    await fetch("/api/billing/subscription/cancel", { method: "POST", headers: withCsrfHeaders() });
     window.location.reload();
   }
 
   async function openPortal() {
-    const res = await fetch("/api/stripe/portal", { method: "POST" });
+    const res = await fetch("/api/stripe/portal", { method: "POST", headers: withCsrfHeaders() });
     const data = (await res.json()) as { url?: string; error?: string };
     if (!res.ok) throw new Error(data.error || "Failed to open portal");
     if (data.url) window.location.href = data.url;

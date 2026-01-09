@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 export function UserAdminDetailClient({ id }: { id: string }) {
   const qc = useQueryClient();
@@ -26,7 +27,7 @@ export function UserAdminDetailClient({ id }: { id: string }) {
     mutationFn: async (patch: any) => {
       const res = await fetch(`/api/admin/users/${id}`, {
         method: "PATCH",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify(patch),
       });
       const data = (await res.json()) as any;

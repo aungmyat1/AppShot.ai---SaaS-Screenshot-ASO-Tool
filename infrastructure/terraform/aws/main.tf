@@ -31,6 +31,7 @@ module "rds" {
   name               = local.name
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
+  vpc_cidr           = var.vpc_cidr
   db_name            = var.db_name
   username           = var.db_username
   password           = var.db_password
@@ -44,6 +45,7 @@ module "redis" {
   name               = local.name
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
+  vpc_cidr           = var.vpc_cidr
   node_type          = var.redis_node_type
   tags               = local.tags
 }
@@ -62,6 +64,22 @@ module "dns" {
   zone_name  = var.domain_name
   # This expects you to point the record at whatever ingress/LB you use (set later).
   tags       = local.tags
+}
+
+# WAF (attach to your ingress ALB/NLB via ARN)
+module "waf" {
+  source       = "./modules/waf"
+  name         = local.name
+  resource_arn = var.waf_resource_arn
+  tags         = local.tags
+}
+
+module "secrets" {
+  source       = "./modules/secrets"
+  name         = local.name
+  database_url = "" # store via CI/CD or set here for testing
+  redis_url    = "" # store via CI/CD or set here for testing
+  tags         = local.tags
 }
 
 # Kubernetes/Helm providers (wires Terraform to the new EKS cluster)

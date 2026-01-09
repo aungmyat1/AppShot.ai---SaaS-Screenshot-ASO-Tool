@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     # Redis (optional)
     REDIS_URL: str | None = None
 
+    # CORS
+    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ALLOW_CREDENTIALS: bool = True
+
     # Screenshot pipeline
     STORAGE_ENDPOINT_URL: str | None = None
     STORAGE_REGION: str = "auto"

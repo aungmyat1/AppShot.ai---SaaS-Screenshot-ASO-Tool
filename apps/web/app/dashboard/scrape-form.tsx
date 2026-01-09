@@ -5,6 +5,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUiStore } from "@/lib/store/ui";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 export function ScrapeForm() {
   const [url, setUrl] = React.useState("");
@@ -24,7 +25,7 @@ export function ScrapeForm() {
     try {
       const res = await fetch("/api/scrape", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ url }),
       });
       const data = (await res.json()) as { zipUrl?: string; jobId?: string; status?: string; error?: string };

@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 export function BillingActions() {
   const pro = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO;
@@ -16,7 +17,7 @@ export function BillingActions() {
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ priceId }),
       });
       const data = (await res.json()) as { url?: string; error?: string };
@@ -34,7 +35,7 @@ export function BillingActions() {
     setError(null);
     setLoading("portal");
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const res = await fetch("/api/stripe/portal", { method: "POST", headers: withCsrfHeaders() });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) throw new Error(data.error || "Failed to open billing portal");
       if (!data.url) throw new Error("Missing portal url");

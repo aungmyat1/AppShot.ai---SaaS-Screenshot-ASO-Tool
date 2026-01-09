@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 type ApiKey = {
   id: string;
@@ -36,7 +37,7 @@ export function ApiKeysClient() {
     mutationFn: async () => {
       const res = await fetch("/api/dev/api-keys", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ name: newName || null }),
       });
       const data = (await res.json()) as any;
@@ -52,7 +53,7 @@ export function ApiKeysClient() {
 
   const revoke = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/dev/api-keys/${id}/revoke`, { method: "POST" });
+      const res = await fetch(`/api/dev/api-keys/${id}/revoke`, { method: "POST", headers: withCsrfHeaders() });
       const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error || "Failed to revoke");
       return data;
@@ -64,7 +65,7 @@ export function ApiKeysClient() {
 
   const rotate = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/dev/api-keys/${id}/rotate`, { method: "POST" });
+      const res = await fetch(`/api/dev/api-keys/${id}/rotate`, { method: "POST", headers: withCsrfHeaders() });
       const data = (await res.json()) as any;
       if (!res.ok) throw new Error(data.error || "Failed to rotate");
       return data as { secret: string };

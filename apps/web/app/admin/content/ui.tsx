@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 export function AdminContentClient() {
   const qc = useQueryClient();
@@ -25,7 +26,7 @@ export function AdminContentClient() {
     mutationFn: async () => {
       const res = await fetch("/api/admin/content/feature-flags", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ key: flagKey, enabled: flagEnabled }),
       });
       const data = await res.json();
@@ -55,7 +56,7 @@ export function AdminContentClient() {
     mutationFn: async () => {
       const res = await fetch("/api/admin/content/announcements", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ title: aTitle, body: aBody, active: true }),
       });
       const data = await res.json();
@@ -87,7 +88,7 @@ export function AdminContentClient() {
     mutationFn: async () => {
       const res = await fetch("/api/admin/content/pricing-plans", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({
           id: planId,
           name: planName || planId,
@@ -126,7 +127,7 @@ export function AdminContentClient() {
     mutationFn: async () => {
       const res = await fetch("/api/admin/content/email-templates", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ slug: tplSlug, subject: tplSubject, bodyText: tplBody }),
       });
       const data = await res.json();

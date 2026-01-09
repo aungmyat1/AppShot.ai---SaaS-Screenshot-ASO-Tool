@@ -6,6 +6,7 @@ import "./globals.css";
 import { Button } from "@/components/ui/button";
 import { Providers } from "@/app/providers";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CookieConsent } from "@/components/CookieConsent";
 
 export const metadata: Metadata = {
   title: "GetAppShots",
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
       </header>
       <main className="container py-10">{children}</main>
+      <CookieConsent />
     </>
   );
 

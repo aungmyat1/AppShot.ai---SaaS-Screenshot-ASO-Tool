@@ -5,6 +5,24 @@ resource "aws_security_group" "redis" {
   tags        = merge(var.tags, { Name = "${var.name}-redis-sg" })
 }
 
+resource "aws_security_group_rule" "ingress_redis_vpc" {
+  type              = "ingress"
+  security_group_id = aws_security_group.redis.id
+  from_port         = 6379
+  to_port           = 6379
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr]
+}
+
+resource "aws_security_group_rule" "egress_all" {
+  type              = "egress"
+  security_group_id = aws_security_group.redis.id
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
 resource "aws_elasticache_subnet_group" "this" {
   name       = "${var.name}-redis-subnets"
   subnet_ids = var.private_subnet_ids

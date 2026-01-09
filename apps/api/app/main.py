@@ -3,6 +3,7 @@ from time import perf_counter
 
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router as api_v1
 from app.api.v2.router import api_router as api_v2
@@ -19,6 +20,17 @@ from app.websockets.progress import stream_progress
 
 def create_app() -> FastAPI:
     app = FastAPI(title=settings.APP_NAME, version="0.1.0")
+
+    # CORS (configure via env; supports comma-separated origins)
+    origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+    if origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     # Middleware
     app.add_middleware(RateLimitMiddleware)

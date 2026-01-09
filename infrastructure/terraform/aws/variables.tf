@@ -76,3 +76,9 @@ variable "create_s3_cdn" {
   default     = false
 }
 
+variable "waf_resource_arn" {
+  type        = string
+  description = "Optional ARN to attach WAF to (typically an ALB ARN)."
+  default     = ""
+}
+

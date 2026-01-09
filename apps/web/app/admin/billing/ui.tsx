@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { withCsrfHeaders } from "@/lib/security/csrf";
 
 export function AdminBillingClient() {
   const [status, setStatus] = React.useState("");
@@ -24,7 +25,7 @@ export function AdminBillingClient() {
     mutationFn: async () => {
       const res = await fetch("/api/admin/billing/refund", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: withCsrfHeaders({ "content-type": "application/json" }),
         body: JSON.stringify({ paymentIntentId: pi }),
       });
       const data = await res.json();
