@@ -9,6 +9,7 @@ from app.api.v2.router import api_router as api_v2
 from app.core.config import settings
 from app.core.exceptions import AppError
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.websockets.manager import manager
 
 
@@ -17,6 +18,7 @@ def create_app() -> FastAPI:
 
     # Middleware
     app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
 
     # Versioned APIs
     app.include_router(api_v1, prefix=settings.API_V1_PREFIX)

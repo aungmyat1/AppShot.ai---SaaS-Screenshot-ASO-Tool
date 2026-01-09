@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, func
+from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -17,6 +17,15 @@ class User(Base):
 
     role: Mapped[str] = mapped_column(String(32), default="user", nullable=False)  # user|admin
     subscription_tier: Mapped[str] = mapped_column(String(32), default="free", nullable=False)
+
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    totp_secret: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

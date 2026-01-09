@@ -11,7 +11,20 @@ class Settings(BaseSettings):
     # Security
     JWT_SECRET_KEY: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
+    # OAuth (optional)
+    OAUTH_GOOGLE_CLIENT_ID: str | None = None
+    OAUTH_GOOGLE_CLIENT_SECRET: str | None = None
+    OAUTH_GITHUB_CLIENT_ID: str | None = None
+    OAUTH_GITHUB_CLIENT_SECRET: str | None = None
+    OAUTH_REDIRECT_BASE_URL: str = "http://localhost:8000"
+
+    # Security controls
+    REQUIRE_EMAIL_VERIFICATION: bool = True
+    LOGIN_MAX_ATTEMPTS: int = 8
+    LOGIN_LOCK_MINUTES: int = 15
 
     # DB
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/getappshots"

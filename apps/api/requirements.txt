@@ -19,4 +19,11 @@ redis==5.2.1
 # Async tasks
 celery==5.4.0
 
+# OAuth + HTTP
+authlib==1.3.2
+httpx==0.27.2
+
+# MFA (TOTP)
+pyotp==2.9.0
+
 
