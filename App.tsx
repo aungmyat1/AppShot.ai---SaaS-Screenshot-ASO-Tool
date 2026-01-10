@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Landing from './views/Landing';
-import Dashboard from './views/Dashboard';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     // Check local storage or system preference
     if (typeof window !== 'undefined') {
@@ -27,19 +25,10 @@ const App: React.FC = () => {
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);
 
-  // Simple state-based routing for this demo
-  if (view === 'dashboard') {
-    return (
-      <Dashboard 
-        isDarkMode={isDarkMode} 
-        toggleTheme={toggleTheme} 
-      />
-    );
-  }
-
+  // The entire app is now contained in the "Landing" view which handles the SPA logic
   return (
     <Landing 
-      onGetStarted={() => setView('dashboard')} 
+      onGetStarted={() => {}} 
       isDarkMode={isDarkMode} 
       toggleTheme={toggleTheme} 
     />

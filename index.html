@@ -4,48 +4,72 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AppShot.ai | Modern ASO Tool</title>
-    <!-- Polyfill for crypto.randomUUID -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      (function() {
-        if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
-          crypto.randomUUID = function randomUUID() {
-            if (crypto.getRandomValues) {
-              const bytes = new Uint8Array(16);
-              crypto.getRandomValues(bytes);
-              bytes[6] = (bytes[6] & 0x0f) | 0x40;
-              bytes[8] = (bytes[8] & 0x3f) | 0x80;
-              const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-              return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20, 32)].join('-');
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                900: '#1e3a8a',
+              }
             }
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-              const r = Math.random() * 16 | 0;
-              const v = c === 'x' ? r : (r & 0x3 | 0x8);
-              return v.toString(16);
-            });
-          };
-        }
-      })();
-    </script>
-    <script type="importmap">
-      {
-        "imports": {
-          "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
-          "react/": "https://aistudiocdn.com/react@^19.2.0/",
-          "react": "https://aistudiocdn.com/react@^19.2.0",
-          "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-          "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
-          "@aws-sdk/client-s3": "https://aistudiocdn.com/@aws-sdk/client-s3@^3.940.0",
-          "@aws-sdk/s3-request-presigner": "https://aistudiocdn.com/@aws-sdk/s3-request-presigner@^3.940.0",
-          "buffer": "https://aistudiocdn.com/buffer@^6.0.3",
-          "sharp": "https://aistudiocdn.com/sharp@^0.34.5",
-          "axios": "https://aistudiocdn.com/axios@^1.13.2"
+          }
         }
       }
     </script>
-  </head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9; 
+      }
+      .dark ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #334155;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
+    "@aws-sdk/client-s3": "https://aistudiocdn.com/@aws-sdk/client-s3@^3.940.0",
+    "@aws-sdk/s3-request-presigner": "https://aistudiocdn.com/@aws-sdk/s3-request-presigner@^3.940.0",
+    "buffer": "https://aistudiocdn.com/buffer@^6.0.3",
+    "sharp": "https://aistudiocdn.com/sharp@^0.34.5",
+    "axios": "https://aistudiocdn.com/axios@^1.13.2"
+  }
+}
+</script>
+</head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 antialiased transition-colors duration-200">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
