@@ -1,8 +1,10 @@
+
 import React, { useState, useCallback } from 'react';
 import JSZip from 'jszip';
 import { 
   CheckIcon, DownloadIcon, ChartIcon, BrainIcon, MoonIcon, SunIcon, 
-  LayersIcon, GlobeIcon, SparklesIcon, CubeIcon, LightningIcon, SearchIcon, UserIcon, MenuIcon 
+  LayersIcon, GlobeIcon, SparklesIcon, LightningIcon, SearchIcon, UserIcon, MenuIcon,
+  AppleIcon, GooglePlayIcon, AppIcon
 } from '../components/Icons';
 import { ResultsView, HistoryModal, SettingsModal, TrendingApps } from './Dashboard';
 import PricingModal from '../components/PricingModal';
@@ -12,7 +14,7 @@ import { scrapeApp, validateUrl } from '../services/mockScraperService';
 import { analyzeASO } from '../services/geminiService';
 
 interface Props {
-  onGetStarted: () => void; // Deprecated but kept for type compat if needed, unused now
+  onGetStarted: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }
@@ -27,6 +29,7 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState<'screenshots' | 'analysis'>('screenshots');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [selectedStore, setSelectedStore] = useState<StoreType>(StoreType.APP_STORE);
   
   // Modals
   const [showPricing, setShowPricing] = useState(false);
@@ -67,7 +70,7 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
     setAnalysis(null);
     
     const storeType = validateUrl(targetUrl);
-    if (storeType === StoreType.UNKNOWN) {
+    if (storeType === StoreType.UNKNOWN && !targetUrl.includes('id') && targetUrl.length < 5) {
       addToast('Please enter a valid Google Play or Apple App Store URL', 'error');
       return;
     }
@@ -79,7 +82,6 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
       setHistory(prev => [data, ...prev]);
       setUser(prev => ({ ...prev, credits: { ...prev.credits, used: prev.credits.used + 1 } }));
       addToast('App data loaded successfully', 'success');
-      // Scroll to results usually handled by layout shift, or we can force scroll
       setTimeout(() => {
           document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
@@ -172,55 +174,42 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
       addToast(`Upgraded to ${tier.toUpperCase()} plan!`, 'success');
   };
 
-  // --- RENDER ---
   return (
-    <div className="bg-white dark:bg-slate-950 transition-colors duration-200 flex flex-col min-h-screen">
+    <div className="bg-slate-950 text-white transition-colors duration-200 flex flex-col min-h-screen selection:bg-brand-500/30">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       
       {/* HEADER */}
-      <nav className="fixed w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setAppData(null); window.scrollTo(0,0); }}>
-            <LayersIcon className="text-brand-600 h-8 w-8" />
-            <span className="font-bold text-xl text-slate-900 dark:text-white">AppShot.ai</span>
+      <nav className="fixed w-full z-40 bg-slate-950/50 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex justify-between items-center">
+          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setAppData(null); window.scrollTo(0,0); }}>
+            <AppIcon className="text-brand-500 h-7 w-7 transition-transform group-hover:scale-110" />
+            <span className="font-bold text-xl tracking-tight text-white">getappshots</span>
           </div>
           
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
-            <button onClick={() => setShowHistory(true)} className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">History</button>
-            <a href="#features" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Features</a>
-            <a href="#pricing" onClick={(e) => { e.preventDefault(); setShowPricing(true); }} className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Pricing</a>
+          <div className="hidden md:flex items-center gap-10">
+            <div className="flex items-center gap-8 text-sm font-medium text-slate-400">
+                <button onClick={() => setShowPricing(true)} className="hover:text-white transition-colors">Pricing</button>
+                <a href="#" className="hover:text-white transition-colors">API Docs</a>
+                <a href="#" className="hover:text-white transition-colors">Contact</a>
+            </div>
             
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
-            
-            <button 
-             onClick={toggleTheme} 
-             className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-800 transition-colors"
-           >
-             {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-           </button>
-
-           <div className="flex items-center gap-3">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-                  {user.credits.total - user.credits.used} credits
-              </span>
-              <button onClick={() => setShowSettings(true)} className="flex items-center gap-2 p-1 pr-3 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
-                      <UserIcon className="w-5 h-5" />
-                  </div>
-              </button>
-           </div>
+            <div className="flex items-center gap-4">
+                <button 
+                onClick={toggleTheme} 
+                className="p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                >
+                {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+                </button>
+                <button className="bg-brand-600 hover:bg-brand-500 px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-lg shadow-brand-500/20 active:scale-95">
+                    Sign Up
+                </button>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-4">
-             <button 
-             onClick={toggleTheme} 
-             className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-800 transition-colors"
-           >
-             {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-           </button>
-             <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="text-slate-500 dark:text-slate-400">
+             <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="p-2 text-slate-400">
                 <MenuIcon className="w-6 h-6" />
              </button>
           </div>
@@ -228,83 +217,120 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
 
         {/* Mobile Nav Menu */}
         {showMobileMenu && (
-            <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 space-y-4 shadow-lg absolute w-full">
-                <button onClick={() => {setShowHistory(true); setShowMobileMenu(false);}} className="block w-full text-left text-sm font-medium text-slate-900 dark:text-white py-2">History</button>
-                <button onClick={() => {setShowPricing(true); setShowMobileMenu(false);}} className="block w-full text-left text-sm font-medium text-slate-900 dark:text-white py-2">Pricing</button>
-                <button onClick={() => {setShowSettings(true); setShowMobileMenu(false);}} className="block w-full text-left text-sm font-medium text-slate-900 dark:text-white py-2">Account Settings</button>
+            <div className="md:hidden border-t border-white/5 bg-slate-950 p-6 space-y-6 shadow-2xl absolute w-full animate-fade-in">
+                <button onClick={() => {setShowPricing(true); setShowMobileMenu(false);}} className="block w-full text-left text-base font-medium text-white">Pricing</button>
+                <a href="#" className="block w-full text-left text-base font-medium text-white">API Docs</a>
+                <a href="#" className="block w-full text-left text-base font-medium text-white">Contact</a>
+                <button className="w-full bg-brand-600 px-6 py-3 rounded-full text-sm font-semibold text-white">Sign Up</button>
             </div>
         )}
       </nav>
 
-      {/* HERO SECTION - Always visible, acts as the Search Entry */}
-      <div className={`relative isolate pt-32 pb-14 lg:px-8 transition-all duration-500 ${appData ? 'min-h-[400px]' : 'min-h-[80vh] flex flex-col justify-center'}`}>
-        {/* Background Gradients */}
-        {!appData && (
-            <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
-            <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 dark:opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style={{clipPath: "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"}}></div>
-            </div>
-        )}
+      {/* HERO SECTION */}
+      <div className={`relative isolate pt-40 pb-20 lg:px-8 transition-all duration-700 ${appData ? 'min-h-[500px]' : 'min-h-[90vh] flex flex-col justify-center'}`}>
+        {/* Background Mesh Gradients */}
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-600/10 rounded-full blur-[120px]"></div>
+            <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px]"></div>
+        </div>
         
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          {!appData && (
-            <div className="hidden sm:mb-8 sm:flex sm:justify-center animate-fade-in-down">
-                <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-slate-600 dark:text-slate-300 ring-1 ring-slate-900/10 dark:ring-slate-100/10 hover:ring-slate-900/20 dark:hover:ring-slate-100/20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all hover:shadow-sm cursor-pointer group">
-                <span className="font-semibold text-brand-600 dark:text-brand-400">New feature</span>
-                <span className="mx-2 text-slate-300 dark:text-slate-600">|</span>
-                Gemini 2.5 Integration is live 
-                <span className="ml-1 inline-block transition-transform group-hover:translate-x-1 text-brand-600 dark:text-brand-400">&rarr;</span>
-                </div>
-            </div>
-          )}
-          
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl animate-fade-in">
-             {appData ? 'Result Ready' : 'Analyze App Assets with'} <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-400 dark:to-indigo-400">{appData ? '' : 'AI Precision'}</span>
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-7xl mb-8 leading-[1.1]">
+             {appData ? 'Analysis Ready' : (
+               <>
+                 App Screenshots, <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-cyan-300 to-emerald-300">Instantly.</span>
+               </>
+             )}
           </h1>
           
-          <p className={`mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400 transition-opacity duration-300 ${appData ? 'hidden' : 'opacity-100'}`}>
-            The ultimate SaaS platform for ASO experts. Download high-res screenshots, analyze competitors, and optimize your conversion rate.
+          <p className={`mt-8 text-xl leading-relaxed text-slate-400 transition-opacity duration-300 max-w-2xl mx-auto ${appData ? 'hidden' : 'opacity-100'}`}>
+            Paste any App Store or Google Play link/ID to download all screenshots in seconds. Perfect for designers, marketers, and developers.
           </p>
 
-          <div className="mt-10 max-w-2xl mx-auto">
-             <form onSubmit={handleScrape} className="relative flex gap-2 shadow-xl rounded-2xl bg-white dark:bg-slate-900 p-2 border border-slate-200 dark:border-slate-800">
-                <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <SearchIcon className="h-5 w-5 text-slate-400" />
+          <div className="mt-12 max-w-2xl mx-auto">
+             {/* Store Toggle */}
+             {!appData && (
+                <div className="flex justify-center mb-8">
+                    <div className="bg-white/5 p-1 rounded-full flex gap-1 border border-white/10">
+                        <button 
+                            onClick={() => setSelectedStore(StoreType.APP_STORE)}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${selectedStore === StoreType.APP_STORE ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <AppleIcon className="w-4 h-4" /> App Store
+                        </button>
+                        <button 
+                            onClick={() => setSelectedStore(StoreType.PLAY_STORE)}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${selectedStore === StoreType.PLAY_STORE ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <GooglePlayIcon className="w-4 h-4" /> Google Play
+                        </button>
                     </div>
-                    <input
-                        type="text"
-                        className="block w-full pl-11 pr-3 py-4 bg-transparent border-none text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-0 text-base"
-                        placeholder="Paste Play Store or App Store URL..."
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                    />
                 </div>
+             )}
+
+             <form onSubmit={handleScrape} className="relative flex items-center bg-white/5 rounded-2xl p-2.5 border border-white/10 focus-within:border-brand-500/50 focus-within:ring-4 focus-within:ring-brand-500/10 transition-all shadow-2xl">
+                <input
+                    type="text"
+                    className="block w-full pl-6 pr-3 py-4 bg-transparent border-none text-white placeholder-slate-500 focus:outline-none focus:ring-0 text-lg"
+                    placeholder={selectedStore === StoreType.APP_STORE ? "e.g., Instagram or 389801252" : "e.g., com.google.android.gm"}
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                />
                 <button
                     type="submit"
                     disabled={loading || !url}
-                    className={`inline-flex items-center px-8 py-3 border border-transparent text-base font-semibold rounded-xl text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 shadow-sm ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:scale-105 transition-transform'}`}
+                    className={`ml-2 inline-flex items-center px-8 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-brand-600 hover:bg-brand-500 focus:outline-none shadow-lg shadow-brand-600/20 active:scale-95 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                    {loading ? 'Processing...' : 'Analyze'}
+                    {loading ? (
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : 'Fetch'}
                 </button>
              </form>
 
              {!appData && (
-                <div className="mt-6 flex justify-center gap-6 text-xs text-slate-400 dark:text-slate-500">
-                    <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-green-500"/> Play Store</span>
-                    <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-blue-500"/> App Store</span>
+                <div className="mt-8">
+                    <button onClick={() => setShowPricing(true)} className="text-sm font-medium text-slate-500 hover:text-brand-400 transition-colors">
+                        <span className="underline underline-offset-4 decoration-slate-700">Sign up</span> to get <span className="text-white">5 free fetches</span>.
+                    </button>
                 </div>
              )}
           </div>
         </div>
 
-        {/* Trending Apps - Only Show if NO App Data */}
-        {!appData && <TrendingApps onSelect={(url) => { setUrl(url); handleScrape(url); }} />}
+        {/* Social Proof */}
+        {!appData && (
+            <div className="mt-24 text-center">
+                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-10">Trusted by teams at</h2>
+                <div className="flex flex-wrap justify-center items-center gap-12 opacity-30 grayscale contrast-125">
+                    <div className="flex items-center gap-2">
+                        <GlobeIcon className="w-8 h-8" />
+                        <span className="text-xl font-black">SPHERE</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <SparklesIcon className="w-8 h-8" />
+                        <span className="text-xl font-black">NOVA</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <LayersIcon className="w-8 h-8" />
+                        <span className="text-xl font-black">FLUX</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <LightningIcon className="w-8 h-8" />
+                        <span className="text-xl font-black">VELOX</span>
+                    </div>
+                </div>
+            </div>
+        )}
 
+        {!appData && <TrendingApps onSelect={(url) => { setUrl(url); handleScrape(url); }} />}
       </div>
 
-      {/* RESULTS SECTION - Injected below Hero when active */}
+      {/* RESULTS SECTION */}
       {appData && (
-          <div id="results-section" className="pb-24 pt-4 bg-slate-50 dark:bg-slate-950/50 min-h-screen">
+          <div id="results-section" className="pb-32 pt-10 bg-slate-900/30 backdrop-blur-sm min-h-screen border-t border-white/5">
               <ResultsView 
                  appData={appData} 
                  analysis={analysis}
@@ -316,139 +342,59 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
                  onDownloadZip={handleDownloadZip}
                  onDownloadImage={handleDownloadImage}
                  onClose={() => setAppData(null)}
-                 isDarkMode={isDarkMode}
+                 isDarkMode={true}
               />
           </div>
       )}
 
-      {/* MARKETING SECTIONS - Only visible when NO analysis is active */}
-      {!appData && (
-        <>
-            {/* Trusted By Section */}
-            <div className="py-12 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <h2 className="text-center text-sm font-semibold leading-8 text-gray-500 dark:text-slate-400 uppercase tracking-wide">Trusted by modern product teams</h2>
-                <div className="mx-auto mt-10 grid max-w-lg grid-cols-2 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-3 lg:mx-0 lg:max-w-none lg:grid-cols-5 opacity-50 dark:opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-                    <div className="flex items-center justify-center gap-2 group cursor-default">
-                    <SparklesIcon className="h-8 w-8 text-slate-800 dark:text-white group-hover:text-purple-500 transition-colors" />
-                    <span className="text-xl font-bold text-slate-800 dark:text-white group-hover:text-purple-500 transition-colors">Lumina</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 group cursor-default">
-                    <GlobeIcon className="h-8 w-8 text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors" />
-                    <span className="text-xl font-bold text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">Nebula</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 group cursor-default">
-                    <ChartIcon className="h-8 w-8 text-slate-800 dark:text-white group-hover:text-emerald-500 transition-colors" />
-                    <span className="text-xl font-bold text-slate-800 dark:text-white group-hover:text-emerald-500 transition-colors">Quantico</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 group cursor-default">
-                    <LayersIcon className="h-8 w-8 text-slate-800 dark:text-white group-hover:text-indigo-500 transition-colors" />
-                    <span className="text-xl font-bold text-slate-800 dark:text-white group-hover:text-indigo-500 transition-colors">StackFlow</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 group cursor-default">
-                    <LightningIcon className="h-8 w-8 text-slate-800 dark:text-white group-hover:text-amber-500 transition-colors" />
-                    <span className="text-xl font-bold text-slate-800 dark:text-white group-hover:text-amber-500 transition-colors">Velocy</span>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-            {/* Feature Section */}
-            <div id="features" className="bg-white dark:bg-slate-950 py-24 sm:py-32 transition-colors duration-200">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                <div className="mx-auto max-w-2xl lg:text-center">
-                    <h2 className="text-base font-semibold leading-7 text-brand-600 dark:text-brand-400">Deploy faster</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Everything you need for ASO</p>
-                    <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
-                    Stop manually saving images. Automate your workflow and gain insights that drive downloads.
-                    </p>
-                </div>
-                <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-                    <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-                    {[
-                        {
-                        name: 'Bulk Downloads',
-                        description: 'Download all screenshots from any App Store or Google Play Store listing in one click.',
-                        icon: DownloadIcon,
-                        },
-                        {
-                        name: 'AI Analysis',
-                        description: 'Leverage Gemini models to analyze your visual assets against guidelines and best practices.',
-                        icon: BrainIcon,
-                        },
-                        {
-                        name: 'Competitor Tracking',
-                        description: 'Compare your ASO score against top competitors in your category.',
-                        icon: ChartIcon,
-                        },
-                        {
-                        name: 'Cross-Platform',
-                        description: 'Works seamlessly for both iOS and Android apps with automatic store detection.',
-                        icon: CheckIcon,
-                        },
-                    ].map((feature) => (
-                        <div key={feature.name} className="relative pl-16">
-                        <dt className="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-                            <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600 text-white">
-                            <feature.icon className="h-6 w-6" />
-                            </div>
-                            {feature.name}
-                        </dt>
-                        <dd className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-400">{feature.description}</dd>
-                        </div>
-                    ))}
-                    </dl>
-                </div>
-                </div>
-            </div>
-        </>
-      )}
-
-      {/* Footer */}
-      <footer className="bg-slate-50 dark:bg-slate-900 mt-auto border-t border-slate-200 dark:border-slate-800">
-        <div className="mx-auto max-w-7xl overflow-hidden px-6 py-12 lg:px-8">
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      {/* FOOTER */}
+      <footer className="bg-slate-950 border-t border-white/5 mt-auto">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-12">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
               <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Product</h3>
-                  <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
-                      <li><a href="#" className="hover:text-brand-600">Features</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Pricing</a></li>
-                      <li><a href="#" className="hover:text-brand-600">API</a></li>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Product</h3>
+                  <ul className="space-y-4 text-sm text-slate-500">
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Features</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Pricing</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">API Docs</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Changelog</a></li>
                   </ul>
               </div>
               <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Company</h3>
-                  <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
-                      <li><a href="#" className="hover:text-brand-600">About</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Blog</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Careers</a></li>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Company</h3>
+                  <ul className="space-y-4 text-sm text-slate-500">
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">About Us</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Blog</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Careers</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Customers</a></li>
                   </ul>
               </div>
                <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Resources</h3>
-                  <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
-                      <li><a href="#" className="hover:text-brand-600">Documentation</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Help Center</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Community</a></li>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Resources</h3>
+                  <ul className="space-y-4 text-sm text-slate-500">
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Support</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Documentation</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Guides</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">ASO Bible</a></li>
                   </ul>
               </div>
               <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Legal</h3>
-                  <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
-                      <li><a href="#" className="hover:text-brand-600">Privacy</a></li>
-                      <li><a href="#" className="hover:text-brand-600">Terms</a></li>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Legal</h3>
+                  <ul className="space-y-4 text-sm text-slate-500">
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Privacy Policy</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Terms of Service</a></li>
+                      <li><a href="#" className="hover:text-brand-400 transition-colors">Cookie Policy</a></li>
                   </ul>
               </div>
            </div>
-           <div className="border-t border-slate-200 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-             <div className="flex items-center gap-2 mb-4 md:mb-0">
-               <LayersIcon className="text-brand-600 h-6 w-6" />
-               <p className="text-xs leading-5 text-gray-500 dark:text-gray-400">&copy; 2024 AppShot.ai, Inc. All rights reserved.</p>
+           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+             <div className="flex items-center gap-3">
+               <AppIcon className="text-brand-500 h-6 w-6" />
+               <p className="text-sm text-slate-600">&copy; 2025 getappshots. All rights reserved.</p>
              </div>
-             <div className="flex space-x-6">
-                <a href="#" className="text-gray-400 hover:text-gray-500">
-                   <GlobeIcon className="h-5 w-5" />
-                </a>
+             <div className="flex gap-8 items-center">
+                <a href="#" className="text-slate-600 hover:text-white transition-colors"><GlobeIcon className="w-5 h-5" /></a>
+                <a href="#" className="text-slate-600 hover:text-white transition-colors"><UserIcon className="w-5 h-5" /></a>
              </div>
            </div>
         </div>
@@ -460,14 +406,12 @@ const Landing: React.FC<Props> = ({ isDarkMode, toggleTheme }) => {
         onClose={() => setShowPricing(false)} 
         onUpgrade={(tier) => { handleUpgrade(tier); setShowPricing(false); }}
       />
-
       <HistoryModal 
         isOpen={showHistory} 
         onClose={() => setShowHistory(false)}
         history={history}
         onSelect={(app) => { setAppData(app); setShowHistory(false); }}
       />
-
       <SettingsModal 
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
