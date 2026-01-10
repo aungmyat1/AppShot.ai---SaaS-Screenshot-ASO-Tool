@@ -1,3 +1,4 @@
+
 export enum StoreType {
   PLAY_STORE = 'PLAY_STORE',
   APP_STORE = 'APP_STORE',
@@ -7,12 +8,13 @@ export enum StoreType {
 export interface Screenshot {
   id: string;
   url: string;
-  device: string;
-  width: number;
-  height: number;
-  storagePath?: string; // Path in R2 bucket
-  optimized?: boolean;  // Whether it has been processed by Sharp
-  optimizedUrl?: string; // Public R2 URL
+  // Added optional metadata for processed assets
+  device?: 'phone' | 'tablet';
+  width?: number;
+  height?: number;
+  optimized?: boolean;
+  optimizedUrl?: string;
+  storagePath?: string;
 }
 
 export interface AppData {
@@ -21,44 +23,46 @@ export interface AppData {
   developer: string;
   icon: string;
   rating: number;
-  reviews: number;
+  reviews: number; // Added missing property
   category: string;
   store: StoreType;
   screenshots: Screenshot[];
   description: string;
-  scrapedAt: string;
+  scrapedAt: string; // Added missing property
 }
 
 export interface AnalysisResult {
   score: number;
   strengths: string[];
   weaknesses: string[];
-  suggestions: string[];
-  competitorComparison: {
-    name: string;
-    score: number;
-  }[];
+  suggestions: string[]; // Renamed/Added to match usage in components
+  competitorComparison: { name: string; score: number }[]; // Added missing property
 }
 
-export type SubscriptionTier = 'free' | 'pro' | 'enterprise';
+export type ViewState = 'landing' | 'loading' | 'results';
 
+// Added missing view type used in Landing component
+export type AppView = 'home' | 'dashboard' | 'history' | 'settings' | 'pricing';
+
+// Added missing UserProfile type
 export interface UserProfile {
-  id: string;
   name: string;
   email: string;
-  tier: SubscriptionTier;
+  avatar: string;
+  tier: 'free' | 'pro' | 'enterprise';
+  memberSince: string;
   credits: {
     used: number;
     total: number;
   };
-  memberSince: string;
 }
 
+// Added missing PricingPlan type
 export interface PricingPlan {
-  id: SubscriptionTier;
+  id: string;
   name: string;
   price: string;
-  features: string[];
   limit: string;
+  features: string[];
   recommended?: boolean;
 }
