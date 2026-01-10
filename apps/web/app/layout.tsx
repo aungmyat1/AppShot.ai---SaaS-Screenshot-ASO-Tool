@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignedOut, SignUpButton, UserButton } from "@clerk/nextjs";
 
 import "./globals.css";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             GetAppShots
           </Link>
           <nav className="flex items-center gap-2">
+            <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+              Pricing
+            </Link>
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground">
+              API Docs
+            </Link>
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
+              Contact
+            </Link>
             <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
               Dashboard
             </Link>
@@ -31,9 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {publishableKey ? (
               <>
                 <SignedOut>
-                  <SignInButton mode="modal">
-                    <Button size="sm">Sign in</Button>
-                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button size="sm">Sign up</Button>
+                  </SignUpButton>
                 </SignedOut>
                 <SignedIn>
                   <UserButton afterSignOutUrl="/" />
@@ -41,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </>
             ) : (
               <Button size="sm" asChild>
-                <Link href="/sign-in">Sign in</Link>
+                <Link href="/register">Sign up</Link>
               </Button>
             )}
           </nav>
