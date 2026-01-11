@@ -1,20 +1,42 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+## Monorepo: GetAppShots
 
-# Run and deploy your AI Studio app
+Workspace layout:
 
-This contains everything you need to run your app locally.
+```text
+apps/
+  web/        Next.js 14 SaaS app (GetAppShots)
+  api/        FastAPI backend (optional/companion service)
+  admin/      Admin dashboard (placeholder)
+packages/
+  shared/     Shared JS utilities (placeholder)
+  ui/         Component library (placeholder)
+  types/      Shared TypeScript types (placeholder)
+infrastructure/
+  docker/     Dockerfiles + compose
+  k8s/        Kubernetes manifests (placeholder)
+  terraform/  Terraform modules (placeholder)
+docs/
+  AI_ASSISTANT_CONTEXT.md
+```
 
-View your app in AI Studio: https://ai.studio/apps/drive/1itymf4AN50qcC_hIAIV6kRhDT-3l51yD
+### Run locally
 
-## Run Locally
+- Web:
 
-**Prerequisites:**  Node.js
+```bash
+npm install
+npm run web:dev
+```
 
+- API:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r apps/api/requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Docker
+
+See `infrastructure/docker/README.md`.
+

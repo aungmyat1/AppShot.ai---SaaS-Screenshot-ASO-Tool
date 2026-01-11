@@ -1,29 +1,23 @@
 {
-  "name": "appshot-ai---aso-&-screenshot-tool",
+  "name": "getappshots-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "recharts": "^3.5.1",
-    "react": "^19.2.0",
-    "@google/genai": "^1.30.0",
-    "react-dom": "^19.2.0",
-    "jszip": "^3.10.1",
-    "@aws-sdk/client-s3": "^3.940.0",
-    "@aws-sdk/s3-request-presigner": "^3.940.0",
-    "buffer": "^6.0.3",
-    "sharp": "^0.34.5",
-    "axios": "^1.13.2"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "web:dev": "npm --workspace apps/web run dev",
+    "web:build": "npm --workspace apps/web run build",
+    "web:start": "npm --workspace apps/web run start",
+    "web:lint": "npm --workspace apps/web run lint",
+    "web:worker": "npm --workspace apps/web run worker",
+    "api:dev": "cd apps/api && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "turbo": "^2.3.3"
   }
 }
+

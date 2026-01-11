@@ -1,0 +1,26 @@
+name: Deploy (development)
+
+on:
+  push:
+    branches: ["develop"]
+
+concurrency:
+  group: deploy-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy_dev:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy (development)
+        if: ${{ secrets.DEV_DEPLOY_COMMAND != '' }}
+        run: ${{ secrets.DEV_DEPLOY_COMMAND }}
+
+      - name: Post-deploy health check
+        if: ${{ secrets.DEV_HEALTHCHECK_URL != '' }}
+        run: |
+          curl -fsS "${{ secrets.DEV_HEALTHCHECK_URL }}" >/dev/null
+

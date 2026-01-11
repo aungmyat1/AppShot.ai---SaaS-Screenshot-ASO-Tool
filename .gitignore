@@ -10,7 +10,29 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.next
+.vercel
+out
 *.local
+.turbo
+
+# Test output
+coverage
+**/coverage
+*.tsbuildinfo
+
+# Terraform
+.terraform
+**/.terraform
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 
 # Editor directories and files
 .vscode/*
