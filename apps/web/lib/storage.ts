@@ -29,7 +29,8 @@ export function getStorageClient() {
   const region = pickEnv("STORAGE_REGION") || "auto";
   const r2AccountId = pickEnv("R2_ACCOUNT_ID");
   const endpoint =
-    pickEnv("STORAGE_ENDPOINT", "R2_ENDPOINT") || (r2AccountId ? `https://${r2AccountId}.r2.cloudflarestorage.com` : undefined);
+    pickEnv("STORAGE_ENDPOINT", "STORAGE_ENDPOINT_URL", "R2_ENDPOINT") ||
+    (r2AccountId ? `https://${r2AccountId}.r2.cloudflarestorage.com` : undefined);
   const accessKeyId = pickEnv("STORAGE_ACCESS_KEY_ID", "R2_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID");
   const secretAccessKey = pickEnv("STORAGE_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY");
 
@@ -63,7 +64,7 @@ export async function uploadBuffer(params: {
     }),
   );
 
-  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "R2_PUBLIC_URL");
+  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "STORAGE_PUBLIC_BASE_URL", "R2_PUBLIC_URL");
   const url = publicBase ? `${publicBase.replace(/\/$/, "")}/${params.key}` : null;
 
   return { key: params.key, url };
@@ -71,7 +72,7 @@ export async function uploadBuffer(params: {
 
 export async function getDownloadUrl(params: { key: string; expiresInSeconds?: number }) {
   const Bucket = requiredOneOf("STORAGE_BUCKET", "R2_BUCKET_NAME");
-  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "R2_PUBLIC_URL");
+  const publicBase = pickEnv("STORAGE_PUBLIC_URL", "STORAGE_PUBLIC_BASE_URL", "R2_PUBLIC_URL");
   if (publicBase) return `${publicBase.replace(/\/$/, "")}/${params.key}`;
 
   const s3 = getStorageClient();
