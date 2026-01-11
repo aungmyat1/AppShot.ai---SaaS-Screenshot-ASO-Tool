@@ -1,6 +1,6 @@
+
 import React from 'react';
-// Added missing XIcon import
-import { CheckIcon, SparklesIcon, XIcon } from './Icons';
+import { CheckIcon, XIcon } from './Icons';
 import { PricingPlan } from '../types';
 
 interface Props {
@@ -24,14 +24,7 @@ const plans: PricingPlan[] = [
     price: '$29',
     limit: '100 Fetches / mo',
     recommended: true,
-    features: ['Gemini 3 Pro Audit', 'ZIP Batch Export', 'Unlimited History', 'Full-res WebP optimization', 'Priority ASO queue'],
-  },
-  {
-    id: 'enterprise',
-    name: 'Business',
-    price: '$99',
-    limit: 'Unlimited',
-    features: ['Multi-user teams', 'White-label PDF reports', 'API Access (v2)', 'Custom Webhooks', 'Dedicated Support'],
+    features: ['Gemini 3 Pro Audit', 'ZIP Batch Export', 'Unlimited History', 'Full-res WebP optimization', 'Priority ASO queue', 'Email support'],
   },
 ];
 
@@ -39,14 +32,14 @@ const PricingModal: React.FC<Props> = ({ isOpen, onClose, onUpgrade, isInline = 
   if (!isOpen) return null;
 
   const content = (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left`}>
       {plans.map((plan) => (
         <div 
           key={plan.id} 
           className={`relative rounded-[2.5rem] border ${plan.recommended ? 'border-brand-500 bg-slate-900 shadow-2xl shadow-brand-500/10' : 'border-white/5 bg-slate-900/50'} p-10 flex flex-col transition-all hover:scale-[1.02]`}
         >
           {plan.recommended && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-brand-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl whitespace-nowrap">
               Most Popular
             </div>
           )}
@@ -80,7 +73,7 @@ const PricingModal: React.FC<Props> = ({ isOpen, onClose, onUpgrade, isInline = 
                 : 'bg-white/5 text-white hover:bg-white/10'
             }`}
           >
-            {plan.price === '$0' ? 'Current Plan' : `Get Started`}
+            {plan.id === 'free' ? 'Sign Up Free' : `Get Started`}
           </button>
         </div>
       ))}
@@ -93,7 +86,7 @@ const PricingModal: React.FC<Props> = ({ isOpen, onClose, onUpgrade, isInline = 
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       <div className="flex items-center justify-center min-h-screen p-6">
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-        <div className="relative w-full max-w-6xl animate-fade-in-up">
+        <div className="relative w-full max-w-4xl animate-fade-in-up">
            <button onClick={onClose} className="absolute -top-12 right-0 text-slate-400 hover:text-white transition-colors">
               <XIcon className="w-8 h-8" />
            </button>

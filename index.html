@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
-<html lang="en" class="transition-colors duration-200">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AppShot.ai | Modern ASO Tool 2025</title>
+    <title>getappshots | App Screenshots, Instantly.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -17,23 +18,16 @@
                 400: '#60a5fa',
                 500: '#3b82f6',
                 600: '#2563eb',
-                700: '#1d4ed8',
-                900: '#1e3a8a',
               }
             },
             animation: {
               'fade-in': 'fadeIn 0.5s ease-out',
               'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-              'fade-in-down': 'fadeInDown 0.4s ease-out',
             },
             keyframes: {
               fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
               fadeInUp: { 
                 '0%': { opacity: '0', transform: 'translateY(20px)' }, 
-                '100%': { opacity: '1', transform: 'translateY(0)' } 
-              },
-              fadeInDown: { 
-                '0%': { opacity: '0', transform: 'translateY(-20px)' }, 
                 '100%': { opacity: '1', transform: 'translateY(0)' } 
               }
             }
@@ -46,25 +40,10 @@
       body {
         font-family: 'Plus Jakarta Sans', sans-serif;
         background-color: #020617;
-      }
-      ::selection {
-        background: #3b82f6;
         color: white;
       }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #0f172a; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
+      .glow-top {
+        background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
       }
     </style>
   <script type="importmap">
@@ -76,16 +55,16 @@
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
-    "@aws-sdk/client-s3": "https://aistudiocdn.com/@aws-sdk/client-s3@^3.940.0",
-    "@aws-sdk/s3-request-presigner": "https://aistudiocdn.com/@aws-sdk/s3-request-presigner@^3.940.0",
-    "buffer": "https://aistudiocdn.com/buffer@^6.0.3",
-    "sharp": "https://aistudiocdn.com/sharp@^0.34.5",
-    "axios": "https://aistudiocdn.com/axios@^1.13.2"
+    "axios": "https://aistudiocdn.com/axios@^1.13.2",
+    "@aws-sdk/client-s3": "https://esm.sh/@aws-sdk/client-s3@^3.966.0",
+    "sharp": "https://esm.sh/sharp@^0.34.5",
+    "buffer": "https://esm.sh/buffer@^6.0.3",
+    "@aws-sdk/s3-request-presigner": "https://esm.sh/@aws-sdk/s3-request-presigner@^3.966.0"
   }
 }
 </script>
 </head>
-  <body class="bg-slate-950 text-slate-900 dark:text-slate-50 antialiased transition-colors duration-200">
+  <body class="glow-top antialiased">
     <div id="root"></div>
   </body>
 </html>
