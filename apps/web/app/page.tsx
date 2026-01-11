@@ -67,30 +67,31 @@ export default function HomePage() {
           <h2 className="text-3xl font-semibold tracking-tight">Simple, Transparent Pricing</h2>
           <p className="mt-2 text-sm text-muted-foreground">Choose the plan that fits your usage.</p>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <PricingCard
-            name="Free"
-            price="$0"
-            badge={null}
-            items={["10 screenshots / month", "Standard quality", "Single downloads", "Community support"]}
-            cta={{ label: "Sign Up Free", href: "/sign-up" }}
-          />
-          <PricingCard
-            name="Pro"
-            price="$29"
-            badge="Most Popular"
-            items={["500 screenshots / month", "High quality downloads", "Bulk ZIP downloads", "Developer API access", "Email support"]}
-            cta={{ label: "Get Started", href: "/dashboard/billing" }}
-            highlighted
-          />
-          <PricingCard
-            name="Enterprise"
-            price="Contact Us"
-            badge={null}
-            items={["Unlimited usage", "Highest quality available", "Custom integrations", "Dedicated account manager", "Priority support"]}
-            cta={{ label: "Contact Sales", href: "/contact" }}
-          />
-        </div>
+        <Card>
+          <div className="p-6">
+            <div className="text-sm font-medium">Plans</div>
+            <div className="mt-1 text-sm text-muted-foreground">Straightforward screenshot limits.</div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border bg-background/40 p-5">
+                <div className="font-medium">Free</div>
+                <div className="mt-1 text-sm text-muted-foreground">$0</div>
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  <li>10 screenshots / month</li>
+                  <li>Basic features</li>
+                </ul>
+              </div>
+              <div className="rounded-2xl border bg-background/40 p-5">
+                <div className="font-medium">Pro</div>
+                <div className="mt-1 text-sm text-muted-foreground">$29 / month</div>
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  <li>500 screenshots / month</li>
+                  <li>Priority support</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Card>
       </section>
 
       <section className="space-y-6">
@@ -177,7 +178,6 @@ export default function HomePage() {
 }
 
 import type { ReactNode } from "react";
-import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { LandingHero } from "@/app/landing-hero";
 
@@ -196,49 +196,6 @@ function Testimonial(props: { quote: string; name: string; title: string }) {
       <div className="text-sm text-muted-foreground">“{props.quote}”</div>
       <div className="mt-4 text-sm font-medium">{props.name}</div>
       <div className="text-xs text-muted-foreground">{props.title}</div>
-    </Card>
-  );
-}
-
-function PricingCard(props: {
-  name: string;
-  price: string;
-  badge: string | null;
-  items: string[];
-  cta: { label: string; href: string };
-  highlighted?: boolean;
-}) {
-  return (
-    <Card className={["p-6", props.highlighted ? "border-primary/50 shadow-[0_0_0_1px_hsl(var(--primary)/.2)]" : ""].join(" ")}>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="text-sm font-medium">{props.name}</div>
-          <div className="mt-2 text-3xl font-semibold tracking-tight">
-            {props.price}
-            {props.price.startsWith("$") && props.name !== "Enterprise" ? <span className="text-sm font-normal text-muted-foreground"> / month</span> : null}
-          </div>
-        </div>
-        {props.badge ? <div className="rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">{props.badge}</div> : null}
-      </div>
-
-      <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-        {props.items.map((i) => (
-          <li key={i} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-4 w-4 text-primary" />
-            <span>{i}</span>
-          </li>
-        ))}
-      </ul>
-
-      <a
-        href={props.cta.href}
-        className={[
-          "mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition",
-          props.highlighted ? "bg-primary text-primary-foreground hover:opacity-90" : "bg-muted hover:bg-muted/80",
-        ].join(" ")}
-      >
-        {props.cta.label}
-      </a>
     </Card>
   );
 }
