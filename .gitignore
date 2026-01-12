@@ -16,6 +16,11 @@ out
 *.local
 .turbo
 
+# Environment variables
+.env.local
+.env.production
+.env.test
+
 # Test output
 coverage
 **/coverage
@@ -29,8 +34,6 @@ coverage
 crash.log
 override.tf
 override.tf.json
-*_override.tf
-*_override.tf.json
 .terraformrc
 terraform.rc
 
