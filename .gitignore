@@ -17,9 +17,11 @@ out
 .turbo
 
 # Environment variables
+.env
 .env.local
 .env.production
 .env.test
+# Note: .env.example should NOT be ignored - it's a template file
 
 # Test output
 coverage
