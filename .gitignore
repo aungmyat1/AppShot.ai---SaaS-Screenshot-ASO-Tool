@@ -47,3 +47,183 @@ terraform.rc
 *.njsproj
 *.sln
 *.sw?
+
+# Python related (for the API app)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+.python-version
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Alembic (database migration files)
+*/alembic/versions/
+
+# Database
+*.db
+*.db-journal
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Icon?
+.DS_Store
+
+# IDE
+.vs~
+*.swp
+*.swo
+
+# Build outputs
+*.o
+*.pyc
+*.pyo
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Dependency directories
+jspm_packages/
+jspm_modules/
+
+# Bower
+bower_components/
+
+# Grunt
+.grunt
+grunt-* 
+
+# Temporary folders
+tmp/
+temp/
+
+# Secrets and sensitive info
+secrets/
+*.key
+*.pem
+*.crt
+*.cert
+
+# Docker
+.dockerignore
+*.dockerignore
+
+# Backend Python app specific
+*/__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Alembic Config
+alembic.ini
+
+# Local development overrides
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js specific additions
+.next/
+out/
+build/
+coverage/
+*.log
+
+# Redis
+dump.rdb
+
+# Docker Compose
+.docker/
+
+# Prisma
+prisma/migrations/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+*/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Linux
+*~
+
+# Nuxt
+.nuxt
+.dist
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.sentrycli/*
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Recycle Bin used on Windows
+$RECYCLE.BIN/
+
+# dotenv environment variables file
+.env.test
+.env*.local
+
+# local files
+*.csv
+*.json
+*.xml
+
+# Debug log of yarn installation
+yarn-error.log
+
+# Production
+build/
+
+# Yarn 2
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Next Auth
+next-auth.session-token
+
+# Playwright
+playwright-report/
+test-results/
