@@ -205,7 +205,6 @@ $RECYCLE.BIN/
 
 # local files
 *.csv
-*.json
 *.xml
 
 # Debug log of yarn installation

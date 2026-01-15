@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,7 @@
     "test:ci": "jest --ci --coverage",
     "e2e": "playwright test",
     "e2e:ci": "playwright test --reporter=line",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "worker": "node --loader tsx server/worker.ts"
