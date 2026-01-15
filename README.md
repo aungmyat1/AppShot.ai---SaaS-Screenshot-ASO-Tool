@@ -40,3 +40,17 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 See `infrastructure/docker/README.md`.
 
+### Managing Pricing
+
+Pricing is centralized in `apps/web/lib/pricing-config.ts`. To sync pricing changes to Stripe:
+
+```bash
+# Preview changes
+npm run stripe:sync -- --dry-run
+
+# Sync to Stripe
+npm run stripe:sync
+```
+
+See [docs/STRIPE_PRICING_SYNC.md](./docs/STRIPE_PRICING_SYNC.md) for detailed instructions.
+

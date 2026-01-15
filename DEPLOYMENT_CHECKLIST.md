@@ -1,5 +1,10 @@
 # Deployment Readiness Checklist
 
+**Last Updated**: 2025-01-09
+
+> **⚠️ IMPORTANT**: This checklist is now focused on **Vercel deployment only**.  
+> For complete Vercel deployment instructions, see **[VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)**
+
 ## ✅ Project Status Overview
 
 **Project Type**: Monorepo (Turborepo) with:
@@ -8,6 +13,19 @@
 - **Infrastructure**: Docker, Kubernetes, Terraform configs
 
 **Overall Status**: ✅ **READY FOR DEPLOYMENT** (with required configuration)
+
+### Current State Verification:
+- ✅ **Project Structure**: Monorepo properly configured with Turborepo
+- ✅ **Dependencies**: Package.json files present (dependencies need installation)
+- ⚠️ **Node Modules**: Not installed locally (will be installed during build)
+- ✅ **Environment Examples**: `.env.example` files exist at root and `apps/web/`
+- ✅ **Prisma Schema**: Present at `apps/web/prisma/schema.prisma`
+- ✅ **Migrations**: Migration exists (`20260109_admin_dashboard`)
+- ✅ **Dockerfiles**: Production-ready multi-stage builds present
+- ✅ **Docker Compose**: Staging configuration ready
+- ✅ **Kubernetes**: Manifests available in `infrastructure/k8s/`
+- ✅ **Linter**: No linter errors detected
+- ✅ **TypeScript**: Configurations present
 
 ---
 
@@ -21,12 +39,17 @@
 
 ### Build Verification Needed:
 ```bash
+# Install dependencies first
+npm install
+
 # Test web build
 npm run web:build
 
 # Test API build (Docker)
 docker build -f infrastructure/docker/api.Dockerfile -t api-test .
 ```
+
+**Note**: Dependencies are not currently installed. Run `npm install` before building.
 
 ---
 
@@ -42,6 +65,10 @@ docker build -f infrastructure/docker/api.Dockerfile -t api-test .
 - ⚠️ `CLERK_SECRET_KEY` - **REQUIRED**
 - ⚠️ `NEXT_PUBLIC_CLERK_SIGN_IN_URL` - Recommended: `/sign-in`
 - ⚠️ `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - Recommended: `/sign-up`
+- ⚠️ `CLERK_SIGN_IN_FORCE_REDIRECT_URL` - Recommended: `/dashboard` (always redirect after sign-in)
+- ⚠️ `CLERK_SIGN_UP_FORCE_REDIRECT_URL` - Recommended: `/dashboard` (always redirect after sign-up)
+- ⚠️ `CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` - Recommended: `/dashboard` (fallback if no redirect_url param)
+- ⚠️ `CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` - Recommended: `/dashboard` (fallback if no redirect_url param)
 - ⚠️ `ADMIN_EMAILS` - Comma-separated admin emails
 
 #### **Payment (Stripe)**
@@ -197,39 +224,35 @@ npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
 
 ---
 
-## 7. ⚠️ Deployment-Specific Considerations
+## 7. ✅ Vercel Deployment Configuration
 
-### For Vercel Deployment:
-- ✅ Documentation available: `docs/DEPLOY_VERCEL_R2.md`
-- ⚠️ **Recommended settings**:
-  - Root directory: `apps/web` or repo root
-  - Build command: `npm run build` (or `npm --workspace apps/web run build`)
-  - Install command: `npm ci`
-  - Set `SCRAPE_QUEUE_MODE=sync`
-  - Set `PLAY_SCRAPE_MODE=html`
-  - Set `PLAY_SCRAPE_FALLBACK_PLAYWRIGHT=false`
+### Vercel-Specific Setup:
+- ✅ **`vercel.json`** created with optimal settings
+- ✅ **Next.js config** updated for Vercel compatibility
+- ✅ **Documentation**: Complete guide in `VERCEL_DEPLOYMENT_GUIDE.md`
+- ✅ **Existing docs**: `docs/DEPLOY_VERCEL_R2.md` available
 
-### For Docker Deployment:
-- ✅ Dockerfiles ready
-- ⚠️ **Action Required**: 
-  - Set all environment variables in `.env` or docker-compose
-  - Ensure database and Redis are accessible
-  - Run migrations before starting web service
+### Required Vercel Settings:
+- ⚠️ **Root directory**: Set to `apps/web` (or use `vercel.json`)
+- ⚠️ **Build command**: `npm --workspace apps/web run build` (or use `vercel.json`)
+- ⚠️ **Install command**: `npm ci` (or use `vercel.json`)
+- ⚠️ **Critical environment variables**:
+  - `SCRAPE_QUEUE_MODE=sync` (required for Vercel)
+  - `PLAY_SCRAPE_MODE=html` (required for Vercel)
+  - `PLAY_SCRAPE_FALLBACK_PLAYWRIGHT=false` (required for Vercel)
 
-### For Kubernetes Deployment:
-- ✅ Manifests ready
-- ⚠️ **Action Required**:
-  - Update image references
-  - Create secrets from `infrastructure/k8s/base/secret.placeholder.yaml`
-  - Update ConfigMap values
-  - Apply base configs, then apps
+### Vercel Function Limits:
+- ⚠️ **Timeout**: 10s (Hobby), 60s (Pro), 900s (Enterprise)
+- ⚠️ **Memory**: 1024 MB max
+- ⚠️ **Note**: Scraping operations should complete within timeout limits
 
 ---
 
-## 8. ⚠️ Missing/Recommended Files
+## 8. ✅ Environment Files Status
 
-- ⚠️ **`.env.example`** - Referenced in README but not found
-  - **Recommendation**: Create `.env.example` with all required variables (with placeholder values)
+- ✅ **`.env.example`** - Found at root level
+- ✅ **`apps/web/.env.example`** - Found in web app directory
+- ⚠️ **Action Required**: Review and ensure all required variables are documented in `.env.example`
 
 ---
 
@@ -253,13 +276,17 @@ npm run e2e
 
 Before deploying, ensure:
 
+### Immediate Actions:
+- [ ] **Install dependencies**: Run `npm install` (or will be done during build)
 - [ ] All environment variables are set in deployment platform
 - [ ] Database is provisioned and accessible
-- [ ] Prisma migrations have been run
+- [ ] Prisma migrations have been run (`npx prisma migrate deploy`)
 - [ ] Clerk application is configured
 - [ ] Stripe account is set up with webhooks
 - [ ] Storage bucket (R2/S3) is created and configured
 - [ ] Redis is provisioned (if using)
+
+### Infrastructure:
 - [ ] Docker images are built and pushed (if using Docker/K8s)
 - [ ] Health checks are configured
 - [ ] Monitoring/logging is set up
@@ -269,33 +296,52 @@ Before deploying, ensure:
 - [ ] Rate limiting is configured appropriately
 - [ ] Security secrets are rotated from defaults
 
+### Verification:
+- [ ] Test build locally: `npm run web:build`
+- [ ] Test Docker build: `docker build -f infrastructure/docker/web.Dockerfile -t web-test .`
+- [ ] Verify environment variables are loaded correctly
+- [ ] Test database connection
+- [ ] Test storage upload/download
+
 ---
 
-## 11. 🚀 Quick Start Deployment Commands
+## 11. 🚀 Vercel Deployment Quick Start
 
-### Docker Compose (Staging):
+### Option 1: Using Vercel Dashboard (Recommended)
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "Add New..." → "Project"
+3. Import your Git repository
+4. Vercel will auto-detect settings from `vercel.json`
+5. Add all environment variables (see `VERCEL_DEPLOYMENT_GUIDE.md`)
+6. Click "Deploy"
+
+### Option 2: Using Vercel CLI
 ```bash
-cd infrastructure/docker
-docker compose -f docker-compose.staging.yml up --build
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy (from project root)
+vercel
+
+# Follow prompts:
+# - Link to existing project or create new
+# - Confirm settings
+# - Deploy to production: vercel --prod
 ```
 
-### Kubernetes:
+### Post-Deployment:
 ```bash
-# Apply base configs
-kubectl apply -f infrastructure/k8s/base
+# Run database migrations
+npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
 
-# Apply apps
-kubectl apply -f infrastructure/k8s/apps
-
-# Apply ingress
-kubectl apply -f infrastructure/k8s/ingress
+# Verify deployment
+curl https://your-project.vercel.app/api/health
 ```
 
-### Vercel:
-1. Import repository
-2. Set root directory to `apps/web` or repo root
-3. Configure environment variables
-4. Deploy
+**📖 For detailed instructions, see [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)**
 
 ---
 
@@ -317,13 +363,33 @@ kubectl apply -f infrastructure/k8s/ingress
 
 **Status**: ✅ **READY FOR DEPLOYMENT**
 
-**Critical Actions Required**:
-1. Configure all environment variables
-2. Set up external services (Clerk, Stripe, Storage, Database)
-3. Run database migrations
-4. Update K8s image references (if using K8s)
-5. Create `.env.example` file (recommended)
+**Current Project Health**: 🟢 **GOOD**
+- All core files and configurations are in place
+- No critical code issues detected
+- Infrastructure files are production-ready
+- Environment examples exist
+- Database schema and migrations are ready
+
+**Critical Actions Required for Vercel**:
+1. ✅ `.env.example` files exist (verified)
+2. ✅ `vercel.json` configuration created
+3. ✅ Next.js config optimized for Vercel
+4. ⚠️ **Set up external services** (Clerk, Stripe, R2/S3, PostgreSQL)
+5. ⚠️ **Configure all environment variables in Vercel Dashboard**
+6. ⚠️ **Run database migrations** (`npx prisma migrate deploy`)
+7. ⚠️ **Deploy to Vercel** (see `VERCEL_DEPLOYMENT_GUIDE.md`)
 
 **Estimated Setup Time**: 2-4 hours (depending on external service setup)
 
-**Risk Level**: 🟢 **LOW** - Project structure is solid, well-documented, and deployment-ready. Main work is configuration.
+**Risk Level**: 🟢 **LOW** - Project structure is solid, well-documented, and deployment-ready. Main work is configuration and external service setup.
+
+**Next Steps for Vercel Deployment**:
+1. 📖 **Read the complete guide**: `VERCEL_DEPLOYMENT_GUIDE.md`
+2. Set up external services (Clerk, Stripe, R2/S3, PostgreSQL)
+3. Configure environment variables in Vercel Dashboard
+4. Import project to Vercel (or use CLI)
+5. Run database migrations
+6. Test deployment and verify all integrations
+7. Configure custom domain (optional)
+
+**📚 Full instructions**: See `VERCEL_DEPLOYMENT_GUIDE.md` for step-by-step guide
