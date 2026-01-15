@@ -3,6 +3,7 @@ import { scrapeCore } from "@/lib/core/engine";
 import { createZipFromImageUrls } from "@/lib/zip";
 import { uploadBuffer, getDownloadUrl } from "@/lib/storage";
 import { recordStripeUsage } from "@/lib/billing/usage-record";
+import { getPricingPlan } from "@/lib/pricing-config";
 
 /**
  * Processes a queued scrape job:
@@ -25,7 +26,8 @@ export async function processScrapeJob(scrapeJobId: string, opts?: { screenshotL
 
   try {
     const core = await scrapeCore(job.appUrl, { forceRefresh: false });
-    const screenshotLimit = opts?.screenshotLimit ?? (job.user.plan === "FREE" ? 5 : 30);
+    const pricingPlan = getPricingPlan(job.user.plan);
+    const screenshotLimit = opts?.screenshotLimit ?? pricingPlan.perJobCap;
     const screenshotUrls = core.screenshots.map((s) => s.url).slice(0, screenshotLimit);
 
     await prisma.scrapeJob.update({

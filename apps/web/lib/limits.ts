@@ -1,6 +1,7 @@
 import type { Plan } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { getPricingPlan } from "@/lib/pricing-config";
 
 export type LimitDecision = {
   screenshotLimit: number;
@@ -21,14 +22,15 @@ export async function enforcePlanLimits(params: {
   });
   const usedScreenshots = used._sum.screenshotCount ?? 0;
 
-  const limit = params.plan === "PRO" ? 500 : 10;
+  const pricingPlan = getPricingPlan(params.plan);
+  const limit = pricingPlan.screenshotLimit;
   const remaining = Math.max(0, limit - usedScreenshots);
   if (remaining <= 0) {
     throw new Error(`Monthly screenshot limit reached (${limit}/month).`);
   }
 
   // Cap per-job screenshots to a sane max, while still respecting remaining quota.
-  const perJobCap = params.plan === "PRO" ? 30 : 10;
+  const perJobCap = pricingPlan.perJobCap;
   return { screenshotLimit: Math.min(remaining, perJobCap) };
 }
 
@@ -39,7 +41,8 @@ export async function getUsageSummary(params: { userId: string; plan: Plan }) {
     _sum: { screenshotCount: true },
   });
   const used = agg._sum.screenshotCount ?? 0;
-  const limit = params.plan === "PRO" ? 500 : 10;
+  const pricingPlan = getPricingPlan(params.plan);
+  const limit = pricingPlan.screenshotLimit;
   return { window: "month" as const, limit, used, remaining: Math.max(0, limit - used) };
 }
 

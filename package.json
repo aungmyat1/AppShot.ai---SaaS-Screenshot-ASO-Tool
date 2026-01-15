@@ -16,7 +16,8 @@
     "web:worker": "npm --workspace apps/web run worker",
     "api:dev": "cd apps/api && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "setup": "node scripts/setup-env.js",
-    "setup:env": "node scripts/setup-env.js"
+    "setup:env": "node scripts/setup-env.js",
+    "stripe:sync": "tsx scripts/sync-stripe-pricing.ts"
   },
   "devDependencies": {
     "turbo": "^2.3.3"

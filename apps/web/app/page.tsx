@@ -73,22 +73,21 @@ export default function HomePage() {
             <div className="mt-1 text-sm text-muted-foreground">Straightforward screenshot limits.</div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border bg-background/40 p-5">
-                <div className="font-medium">Free</div>
-                <div className="mt-1 text-sm text-muted-foreground">$0</div>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  <li>10 screenshots / month</li>
-                  <li>Basic features</li>
-                </ul>
-              </div>
-              <div className="rounded-2xl border bg-background/40 p-5">
-                <div className="font-medium">Pro</div>
-                <div className="mt-1 text-sm text-muted-foreground">$29 / month</div>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  <li>500 screenshots / month</li>
-                  <li>Priority support</li>
-                </ul>
-              </div>
+              {Object.values(PRICING_PLANS)
+                .filter((plan) => plan.id === "FREE" || plan.id === "PRO")
+                .map((plan) => (
+                  <div key={plan.id} className="rounded-2xl border bg-background/40 p-5">
+                    <div className="font-medium">{plan.name}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {plan.priceDollars === 0 ? "$0" : `$${plan.priceDollars} / month`}
+                    </div>
+                    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
             </div>
           </div>
         </Card>
@@ -180,6 +179,7 @@ export default function HomePage() {
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { LandingHero } from "@/app/landing-hero";
+import { PRICING_PLANS } from "@/lib/pricing-config";
 
 function FeatureCard(props: { title: string; desc: string }) {
   return (
