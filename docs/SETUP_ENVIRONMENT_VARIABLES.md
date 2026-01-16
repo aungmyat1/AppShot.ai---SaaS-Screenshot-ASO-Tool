@@ -1,6 +1,8 @@
-# Setting Up Environment Variables
+# Environment Variables Guide
 
-This document explains how to configure the required environment variables for the AppShot.ai application.
+This document explains how to configure all required environment variables for GetAppShots, including setup instructions for each external service.
+
+> **For Vercel deployment with automated secrets**, see [Quick Setup Secrets](./QUICK_SETUP_SECRETS.md) instead.
 
 ## Prerequisites
 

@@ -17,9 +17,12 @@
     "api:dev": "cd apps/api && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "setup": "node scripts/setup-env.js",
     "setup:env": "node scripts/setup-env.js",
-    "stripe:sync": "tsx scripts/sync-stripe-pricing.ts"
+    "stripe:sync": "tsx scripts/sync-stripe-pricing.ts",
+    "doppler:setup": "node scripts/doppler-setup.js",
+    "doppler:init": "node scripts/doppler-setup.js",
+    "stripe:check": "tsx scripts/check-stripe-setup.ts"
   },
   "devDependencies": {
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.7"
   }
 }

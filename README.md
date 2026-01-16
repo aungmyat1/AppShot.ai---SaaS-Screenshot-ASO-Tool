@@ -1,56 +1,57 @@
-## Monorepo: GetAppShots
+# AppShot.ai - SaaS Screenshot ASO Tool
 
-Workspace layout:
+This is a monorepo for AppShot.ai - a SaaS tool for generating app screenshots for ASO (App Store Optimization).
 
-```text
-apps/
-  web/        Next.js 14 SaaS app (GetAppShots)
-  api/        FastAPI backend (optional/companion service)
-  admin/      Admin dashboard (placeholder)
-packages/
-  shared/     Shared JS utilities (placeholder)
-  ui/         Component library (placeholder)
-  types/      Shared TypeScript types (placeholder)
-infrastructure/
-  docker/     Dockerfiles + compose
-  k8s/        Kubernetes manifests (placeholder)
-  terraform/  Terraform modules (placeholder)
-docs/
-  AI_ASSISTANT_CONTEXT.md
-```
+## Project Structure
 
-### Run locally
+- [apps/web](./apps/web) - Next.js web application
+- [apps/api](./apps/api) - FastAPI backend
+- [apps/admin](./apps/admin) - Admin panel (placeholder)
+- [packages/ui](./packages/ui) - Shared UI components
+- [packages/types](./packages/types) - Shared TypeScript types
+- [packages/shared](./packages/shared) - Shared utilities
+- [infrastructure/docker](./infrastructure/docker) - Docker configurations
+- [infrastructure/k8s](./infrastructure/k8s) - Kubernetes configurations
+- [infrastructure/terraform](./infrastructure/terraform) - Infrastructure as Code
 
-- Web:
+## Recent Updates
 
-```bash
-npm install
-npm run web:dev
-```
+The repository was recently updated with:
+- Updated web app dependencies to latest stable versions (React 19.1.2, Next.js 15.2.3, etc.)
+- Updated API app dependencies to latest stable versions (FastAPI 0.117.0, uvicorn 0.36.2, etc.)
+- Updated Turbo dependency to version 2.3.7 in the root package.json
 
-- API:
+## Development
 
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r apps/api/requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+### Prerequisites
 
-### Docker
+- Node.js 18+
+- Python 3.12+
+- Docker & Docker Compose
+- Doppler CLI (for secrets management)
 
-See `infrastructure/docker/README.md`.
+### Getting Started
 
-### Managing Pricing
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Setup environment: `npm run setup:env` or `npm run doppler:init`
+4. Run in development mode: `npm run dev`
 
-Pricing is centralized in `apps/web/lib/pricing-config.ts`. To sync pricing changes to Stripe:
+For detailed setup instructions, see [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md).
 
-```bash
-# Preview changes
-npm run stripe:sync -- --dry-run
+## Scripts
 
-# Sync to Stripe
-npm run stripe:sync
-```
+The project uses npm scripts for various tasks:
 
-See [docs/STRIPE_PRICING_SYNC.md](./docs/STRIPE_PRICING_SYNC.md) for detailed instructions.
+- `npm run dev` - Start all apps in development mode
+- `npm run build` - Build all apps
+- `npm run lint` - Lint all apps
+- `npm run web:dev` - Start web app in development mode
+- `npm run api:dev` - Start API in development mode
+- `npm run stripe:sync` - Sync Stripe product/price information
+- `npm run doppler:init` - Initialize Doppler configuration
+
+## Deployment
+
+Deployment configurations for various platforms are located in the [infrastructure](./infrastructure) directory.
 

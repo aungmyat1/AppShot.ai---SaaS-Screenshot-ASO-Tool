@@ -2,9 +2,6 @@
 
 **Last Updated**: 2025-01-09
 
-> **⚠️ IMPORTANT**: This checklist is now focused on **Vercel deployment only**.  
-> For complete Vercel deployment instructions, see **[VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)**
-
 ## ✅ Project Status Overview
 
 **Project Type**: Monorepo (Turborepo) with:
@@ -65,10 +62,6 @@ docker build -f infrastructure/docker/api.Dockerfile -t api-test .
 - ⚠️ `CLERK_SECRET_KEY` - **REQUIRED**
 - ⚠️ `NEXT_PUBLIC_CLERK_SIGN_IN_URL` - Recommended: `/sign-in`
 - ⚠️ `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - Recommended: `/sign-up`
-- ⚠️ `CLERK_SIGN_IN_FORCE_REDIRECT_URL` - Recommended: `/dashboard` (always redirect after sign-in)
-- ⚠️ `CLERK_SIGN_UP_FORCE_REDIRECT_URL` - Recommended: `/dashboard` (always redirect after sign-up)
-- ⚠️ `CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` - Recommended: `/dashboard` (fallback if no redirect_url param)
-- ⚠️ `CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` - Recommended: `/dashboard` (fallback if no redirect_url param)
 - ⚠️ `ADMIN_EMAILS` - Comma-separated admin emails
 
 #### **Payment (Stripe)**
@@ -163,9 +156,17 @@ npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
 
 ### Kubernetes
 - ✅ **K8s manifests** available in `infrastructure/k8s/`
-- ⚠️ **Action Required**: Update image references in manifests
-  - Current: `ghcr.io/OWNER/REPO-web:latest` (placeholder)
-  - Update to your container registry
+- ✅ **Secrets Management**: Multiple options supported
+  - **Vercel**: Built-in integrations (Clerk, Stripe, Vercel Postgres) with environment-specific variables
+  - **Kubernetes**: Environment-specific secret paths (see `infrastructure/k8s/secrets/README.md`)
+  - Supports: AWS Secrets Manager, HashiCorp Vault, and more
+  - Path structure: `dev/database/credentials`, `staging/database/credentials`, `prod/database/credentials`
+- ⚠️ **Action Required**: 
+  - Update image references in manifests
+    - Current: `ghcr.io/OWNER/REPO-web:latest` (placeholder)
+    - Update to your container registry
+  - Set up External Secrets Operator (if using secret manager)
+  - Configure SecretStore and ExternalSecret for your environment
 
 ### Terraform
 - ✅ **Terraform configs** available for:
@@ -217,34 +218,68 @@ npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
 - ✅ **CSRF protection** implemented
 - ✅ **Security headers** configured (CSP, X-Frame-Options, etc.)
 - ✅ **Rate limiting** middleware present
+- ✅ **Secrets Management**: Environment-specific paths supported
+  - Use `dev/database/credentials`, `staging/database/credentials`, `prod/database/credentials`
+  - External Secrets Operator examples provided
+  - Supports AWS Secrets Manager, HashiCorp Vault, and more
 - ⚠️ **Action Required**: 
   - Change `JWT_SECRET_KEY` from default
   - Review and configure CSP policy
   - Set up proper CORS origins for production
+  - Configure secret management service (AWS Secrets Manager, Vault, etc.)
+  - Set up External Secrets Operator (for Kubernetes deployments)
 
 ---
 
-## 7. ✅ Vercel Deployment Configuration
+## 7. ⚠️ Deployment-Specific Considerations
 
-### Vercel-Specific Setup:
-- ✅ **`vercel.json`** created with optimal settings
-- ✅ **Next.js config** updated for Vercel compatibility
-- ✅ **Documentation**: Complete guide in `VERCEL_DEPLOYMENT_GUIDE.md`
-- ✅ **Existing docs**: `docs/DEPLOY_VERCEL_R2.md` available
+### For Vercel Deployment:
+- ✅ Documentation available: 
+  - `docs/DEPLOY_VERCEL_INTEGRATIONS.md` - **Complete guide with built-in integrations**
+  - `docs/DEPLOY_VERCEL_R2.md` - Storage-specific guide
+  - `docs/RECOMMENDED_SECRETS_STRATEGY.md` - **Best practices for secrets management**
+  - `docs/QUICK_SETUP_SECRETS.md` - **Quick setup guide (40 min)**
+- ✅ **Vercel Configuration**: `vercel.json` present with recommended settings
+- ✅ **Built-in Integrations Supported**:
+  - Clerk (automatic auth key sync) - **100% automated**
+  - Stripe (automatic payment key sync) - **100% automated**
+  - Vercel Postgres (automatic database connection) - **100% automated**
+  - Vercel KV (Redis alternative) - **100% automated**
+  - Environment-specific variables (Development, Preview, Production)
+- ✅ **Recommended Secrets Strategy**: Hybrid approach
+  - Vercel integrations for Clerk, Stripe, Database, Redis (16 vars auto-synced)
+  - Doppler/1Password integration for Storage credentials (9 vars auto-synced)
+  - Vercel Sensitive Env Vars for remaining configs (5 vars manual but secure)
+  - **Result**: 85% automation, maximum security, minimal manual setup
+- ⚠️ **Recommended settings**:
+  - Root directory: `apps/web` or repo root
+  - Build command: `npm run build` (or `npm --workspace apps/web run build`)
+  - Install command: `npm ci`
+  - Set `SCRAPE_QUEUE_MODE=sync`
+  - Set `PLAY_SCRAPE_MODE=html`
+  - Set `PLAY_SCRAPE_FALLBACK_PLAYWRIGHT=false`
+- ⚠️ **Action Required**:
+  - Install Clerk integration in Vercel Dashboard
+  - Install Stripe integration in Vercel Dashboard
+  - Set up database (Vercel Postgres recommended)
+  - Set up Doppler/1Password for storage credentials (recommended)
+  - Or configure storage (R2/S3) manually as Sensitive Env Vars
+  - Set environment-specific variables for each environment
 
-### Required Vercel Settings:
-- ⚠️ **Root directory**: Set to `apps/web` (or use `vercel.json`)
-- ⚠️ **Build command**: `npm --workspace apps/web run build` (or use `vercel.json`)
-- ⚠️ **Install command**: `npm ci` (or use `vercel.json`)
-- ⚠️ **Critical environment variables**:
-  - `SCRAPE_QUEUE_MODE=sync` (required for Vercel)
-  - `PLAY_SCRAPE_MODE=html` (required for Vercel)
-  - `PLAY_SCRAPE_FALLBACK_PLAYWRIGHT=false` (required for Vercel)
+### For Docker Deployment:
+- ✅ Dockerfiles ready
+- ⚠️ **Action Required**: 
+  - Set all environment variables in `.env` or docker-compose
+  - Ensure database and Redis are accessible
+  - Run migrations before starting web service
 
-### Vercel Function Limits:
-- ⚠️ **Timeout**: 10s (Hobby), 60s (Pro), 900s (Enterprise)
-- ⚠️ **Memory**: 1024 MB max
-- ⚠️ **Note**: Scraping operations should complete within timeout limits
+### For Kubernetes Deployment:
+- ✅ Manifests ready
+- ⚠️ **Action Required**:
+  - Update image references
+  - Create secrets from `infrastructure/k8s/base/secret.placeholder.yaml`
+  - Update ConfigMap values
+  - Apply base configs, then apps
 
 ---
 
@@ -305,43 +340,55 @@ Before deploying, ensure:
 
 ---
 
-## 11. 🚀 Vercel Deployment Quick Start
+## 11. 🚀 Quick Start Deployment Commands
 
-### Option 1: Using Vercel Dashboard (Recommended)
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "Add New..." → "Project"
-3. Import your Git repository
-4. Vercel will auto-detect settings from `vercel.json`
-5. Add all environment variables (see `VERCEL_DEPLOYMENT_GUIDE.md`)
-6. Click "Deploy"
-
-### Option 2: Using Vercel CLI
+### Docker Compose (Staging):
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login
-vercel login
-
-# Deploy (from project root)
-vercel
-
-# Follow prompts:
-# - Link to existing project or create new
-# - Confirm settings
-# - Deploy to production: vercel --prod
+cd infrastructure/docker
+docker compose -f docker-compose.staging.yml up --build
 ```
 
-### Post-Deployment:
+### Kubernetes:
 ```bash
-# Run database migrations
-npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
+# 1. Install External Secrets Operator (if using secret manager)
+helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets \
+  -n external-secrets-system --create-namespace
 
-# Verify deployment
-curl https://your-project.vercel.app/api/health
+# 2. Set up secrets in your secret manager (AWS Secrets Manager, Vault, etc.)
+# See infrastructure/k8s/secrets/QUICKSTART.md
+
+# 3. Apply SecretStore and ExternalSecret
+kubectl apply -f infrastructure/k8s/secrets/secretstore-aws.yaml
+kubectl apply -f infrastructure/k8s/secrets/externalsecret-dev.yaml -n getappshots-dev
+
+# 4. Apply base configs
+kubectl apply -f infrastructure/k8s/base
+
+# 5. Apply apps
+kubectl apply -f infrastructure/k8s/apps
+
+# 6. Apply ingress
+kubectl apply -f infrastructure/k8s/ingress
 ```
 
-**📖 For detailed instructions, see [VERCEL_DEPLOYMENT_GUIDE.md](./VERCEL_DEPLOYMENT_GUIDE.md)**
+### Vercel:
+1. Import repository to Vercel
+2. Install built-in integrations:
+   - Clerk integration (automatic auth keys)
+   - Stripe integration (automatic payment keys)
+   - Vercel Postgres (if using, automatic DB connection)
+3. Set root directory to `apps/web` or repo root
+4. Configure environment-specific variables:
+   - Development environment variables
+   - Preview environment variables
+   - Production environment variables
+5. Configure storage (R2/S3) manually
+6. Set up webhooks (Stripe, Clerk)
+7. Run database migrations
+8. Deploy
+
+**See `docs/DEPLOY_VERCEL_INTEGRATIONS.md` for complete guide**
 
 ---
 
@@ -370,26 +417,23 @@ curl https://your-project.vercel.app/api/health
 - Environment examples exist
 - Database schema and migrations are ready
 
-**Critical Actions Required for Vercel**:
+**Critical Actions Required**:
 1. ✅ `.env.example` files exist (verified)
-2. ✅ `vercel.json` configuration created
-3. ✅ Next.js config optimized for Vercel
-4. ⚠️ **Set up external services** (Clerk, Stripe, R2/S3, PostgreSQL)
-5. ⚠️ **Configure all environment variables in Vercel Dashboard**
-6. ⚠️ **Run database migrations** (`npx prisma migrate deploy`)
-7. ⚠️ **Deploy to Vercel** (see `VERCEL_DEPLOYMENT_GUIDE.md`)
+2. ⚠️ Configure all environment variables in deployment platform
+3. ⚠️ Set up external services (Clerk, Stripe, Storage, Database)
+4. ⚠️ Run database migrations (`npx prisma migrate deploy`)
+5. ⚠️ Update K8s image references (if using K8s)
+6. ⚠️ Install dependencies (or ensure build process handles it)
 
 **Estimated Setup Time**: 2-4 hours (depending on external service setup)
 
 **Risk Level**: 🟢 **LOW** - Project structure is solid, well-documented, and deployment-ready. Main work is configuration and external service setup.
 
-**Next Steps for Vercel Deployment**:
-1. 📖 **Read the complete guide**: `VERCEL_DEPLOYMENT_GUIDE.md`
+**Next Steps**:
+1. Review and configure environment variables based on `.env.example`
 2. Set up external services (Clerk, Stripe, R2/S3, PostgreSQL)
-3. Configure environment variables in Vercel Dashboard
-4. Import project to Vercel (or use CLI)
-5. Run database migrations
-6. Test deployment and verify all integrations
-7. Configure custom domain (optional)
-
-**📚 Full instructions**: See `VERCEL_DEPLOYMENT_GUIDE.md` for step-by-step guide
+3. Test build process: `npm install && npm run web:build`
+4. Run database migrations
+5. Deploy to staging environment first
+6. Verify all integrations work correctly
+7. Deploy to production

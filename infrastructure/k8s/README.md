@@ -20,6 +20,12 @@ kubectl apply -f infrastructure/k8s/ingress
 
 Use a real secret manager in production (ExternalSecrets/SSM/Secrets Manager). The included `Secret` is a placeholder.
 
+**For environment-specific secret management**, see `infrastructure/k8s/secrets/README.md` for:
+- External Secrets Operator setup
+- Environment-specific paths (dev/staging/prod)
+- Examples for AWS Secrets Manager and HashiCorp Vault
+- Complete configuration examples
+
 ## Kubernetes (placeholder)
 
 This folder is reserved for Kubernetes manifests (Helm/Kustomize/etc.).

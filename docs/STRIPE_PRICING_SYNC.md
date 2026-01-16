@@ -1,12 +1,103 @@
-# Stripe Pricing Sync Guide
+# Stripe Integration & Pricing Management
 
-This guide explains how to manage pricing plans and automatically sync them with Stripe.
+This guide covers Stripe setup, pricing management, and webhook configuration for GetAppShots.
 
 ## Overview
 
-Pricing is now centralized in `apps/web/lib/pricing-config.ts`. When you update prices in this file, you can automatically sync them to Stripe using the sync script.
+This guide covers:
+1. **Stripe Setup** - Initial Stripe integration and configuration
+2. **Pricing Management** - Centralized pricing configuration and sync
+3. **Webhook Setup** - Configuring Stripe webhooks for subscription events
 
-## How It Works
+Pricing is centralized in `apps/web/lib/pricing-config.ts`. When you update prices in this file, you can automatically sync them to Stripe using the sync script.
+
+---
+
+## Part 1: Initial Stripe Setup
+
+### Step 1: Get Stripe API Keys
+
+1. Go to [Stripe Dashboard](https://dashboard.stripe.com/)
+2. Navigate to "Developers" → "API keys"
+3. Copy your keys:
+   - **Secret key** (starts with `sk_test_` for testing or `sk_live_` for production)
+   - **Publishable key** (starts with `pk_test_` for testing or `pk_live_` for production)
+
+### Step 2: Set Environment Variables
+
+**For Local Development:**
+```bash
+# Add to .env.local
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+```
+
+**For Vercel:**
+- Use Vercel's Stripe integration (recommended) - see [Vercel Integrations Guide](./DEPLOY_VERCEL_INTEGRATIONS.md)
+- Or manually add in Vercel Dashboard → Settings → Environment Variables
+
+### Step 3: Create Products and Prices
+
+Run the sync script to automatically create products and prices:
+
+```bash
+npm run stripe:sync
+```
+
+This will:
+- Create "AppShot.ai Pro" product in Stripe
+- Create monthly recurring price ($29.00)
+- Output price IDs for environment variables
+
+### Step 4: Set Price Environment Variables
+
+After running the sync script, copy the price IDs from the output:
+
+```bash
+# Add to .env.local or Vercel
+STRIPE_PRICE_PRO=price_xxxxxxxxxxxxx
+NEXT_PUBLIC_STRIPE_PRICE_PRO=price_xxxxxxxxxxxxx
+```
+
+### Step 5: Configure Webhook
+
+1. Go to Stripe Dashboard → Developers → Webhooks
+2. Click "Add endpoint"
+3. Enter webhook URL:
+   - **Local**: Use Stripe CLI: `stripe listen --forward-to localhost:3000/api/stripe/webhook`
+   - **Production**: `https://yourdomain.com/api/stripe/webhook`
+4. Select events to listen for:
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+   - `invoice.created`
+   - `invoice.finalized`
+   - `invoice.paid`
+   - `invoice.payment_failed`
+5. Copy the webhook signing secret (starts with `whsec_`)
+6. Add to environment variables:
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+### Step 6: Verify Setup
+
+Run the verification script:
+
+```bash
+npm run stripe:check
+```
+
+This checks:
+- ✅ Environment variables are set
+- ✅ Products and prices exist in Stripe
+- ✅ Webhook secret is configured
+
+---
+
+## Part 2: Pricing Management
+
+### How It Works
 
 1. **Single Source of Truth**: All pricing information is defined in `apps/web/lib/pricing-config.ts`
 2. **Automatic Sync**: Run `npm run stripe:sync` to create/update Stripe products and prices
