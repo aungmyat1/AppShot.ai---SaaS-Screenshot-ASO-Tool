@@ -1,0 +1,18 @@
+setup:
+  project: "getappshots"
+  config: "dev"
+
+# Optional: keep a local env file in sync for local development.
+# If you prefer "doppler run" only (no local files), you can ignore this.
+sync:
+  enabled: false
+  path: ".env.local"
+
+# Optional allowlist example (uncomment and edit if you want to restrict what gets synced):
+# secrets:
+#   - DATABASE_URL
+#   - JWT_SECRET_KEY
+#   - R2_ACCOUNT_ID
+#   - R2_ACCESS_KEY_ID
+#   - R2_SECRET_ACCESS_KEY
+

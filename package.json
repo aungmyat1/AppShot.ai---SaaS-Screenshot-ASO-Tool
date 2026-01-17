@@ -7,7 +7,9 @@
   ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:doppler": "doppler run -- turbo dev",
     "build": "turbo build",
+    "build:doppler": "doppler run -- turbo build",
     "lint": "turbo lint",
     "web:dev": "npm --workspace apps/web run dev",
     "web:build": "npm --workspace apps/web run build",
@@ -20,7 +22,15 @@
     "stripe:sync": "tsx scripts/sync-stripe-pricing.ts",
     "doppler:setup": "node scripts/doppler-setup.js",
     "doppler:init": "node scripts/doppler-setup.js",
-    "stripe:check": "tsx scripts/check-stripe-setup.ts"
+    "stripe:check": "tsx scripts/check-stripe-setup.ts",
+
+    "env:sync": "node scripts/sync-doppler-to-vercel.js",
+    "env:sync:dev": "node scripts/sync-doppler-to-vercel.js --env=development",
+    "env:sync:preview": "node scripts/sync-doppler-to-vercel.js --env=preview",
+    "env:sync:prod": "node scripts/sync-doppler-to-vercel.js --env=production",
+    "env:dry-run": "node scripts/sync-doppler-to-vercel.js --dry-run",
+    "env:check": "node scripts/verify-env.js",
+    "env:list": "doppler secrets --plain"
   },
   "devDependencies": {
     "turbo": "^2.3.7"

@@ -2,15 +2,15 @@
 
 /**
  * Setup Script for AppShot.ai
- * 
+ *
  * This script helps with initial environment configuration by:
  * 1. Checking if .env.local exists
  * 2. Creating it from .env.example if it doesn't exist
- * 3. Prompting for required values that don't have defaults
+ * 3. Printing next steps for required values
  */
 
-import fs from 'fs';
-import readline from 'readline';
+const fs = require('fs');
+const readline = require('readline');
 
 const rl = readline.createInterface({
   input: process.stdin,

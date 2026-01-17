@@ -1,0 +1,46 @@
+name: Sync Doppler -> Vercel Env Vars
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "doppler.yaml"
+      - "scripts/sync-doppler-to-vercel.js"
+      - ".github/workflows/sync-env.yml"
+  workflow_dispatch:
+    inputs:
+      vercel_env:
+        description: "Vercel environment to sync (development|preview|production)"
+        required: true
+        default: "production"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Doppler CLI
+        uses: dopplerhq/cli-action@v3
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+
+      - name: Sync env vars
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+        run: |
+          ENV="${{ github.event.inputs.vercel_env }}"
+          if [ -z "$ENV" ]; then ENV="production"; fi
+          node scripts/sync-doppler-to-vercel.js --env="$ENV"
+
