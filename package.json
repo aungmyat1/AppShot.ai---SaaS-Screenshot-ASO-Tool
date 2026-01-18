@@ -33,7 +33,10 @@
     "env:check": "node scripts/verify-env.js",
     "env:list": "doppler secrets --plain",
     "check:deployment": "node scripts/check-deployment-readiness.js",
-    "predeployment": "node scripts/check-deployment-readiness.js"
+    "predeployment": "node scripts/check-deployment-readiness.js",
+    "setup:services": "node scripts/setup-external-services.js",
+    "setup:database": "node scripts/setup-database.js",
+    "deploy:vercel": "node scripts/deploy-to-vercel.js"
   },
   "devDependencies": {
     "turbo": "^2.3.7"
