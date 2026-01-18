@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
-  const res = await fetch(`${apiBaseUrl()}/api/v1/authx/register`, {
+  const res = await fetch(`${apiBaseUrl()}/api/v1/auth/register`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ email: body?.email, password: body?.password }),
