@@ -77,7 +77,7 @@ export default clerkMiddleware((auth, req) => {
     "object-src 'none'",
     "img-src 'self' https: data:",
     "style-src 'self' 'unsafe-inline'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline'",
     "connect-src 'self' https:",
   ].join("; ");
   res.headers.set("X-Content-Type-Options", "nosniff");
