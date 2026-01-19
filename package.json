@@ -36,6 +36,7 @@
     "predeployment": "node scripts/check-deployment-readiness.js",
     "setup:services": "node scripts/setup-external-services.js",
     "setup:database": "node scripts/setup-database.js",
+    "update:database": "node scripts/update-vercel-database.js",
     "deploy:vercel": "node scripts/deploy-to-vercel.js"
   },
   "devDependencies": {
