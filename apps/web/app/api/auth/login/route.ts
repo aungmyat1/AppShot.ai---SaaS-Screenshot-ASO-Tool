@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   if (!data.access_token || !data.refresh_token) {
     return NextResponse.json({ error: "Invalid login response" }, { status: 500 });
   }
-  setAuthCookies({ accessToken: data.access_token, refreshToken: data.refresh_token });
+  await setAuthCookies({ accessToken: data.access_token, refreshToken: data.refresh_token });
   return NextResponse.json({ ok: true });
 }
 

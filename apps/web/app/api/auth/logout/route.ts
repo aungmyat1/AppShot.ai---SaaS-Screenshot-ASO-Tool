@@ -16,7 +16,7 @@ export async function POST() {
       body: JSON.stringify({ refresh_token: refresh }),
     }).catch(() => undefined);
   }
-  clearAuthCookies();
+  await clearAuthCookies();
   return NextResponse.json({ ok: true });
 }
 

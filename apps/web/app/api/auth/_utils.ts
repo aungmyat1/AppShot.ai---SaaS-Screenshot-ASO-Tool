@@ -4,8 +4,8 @@ export function apiBaseUrl() {
   return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 }
 
-export function setAuthCookies(params: { accessToken: string; refreshToken: string }) {
-  const cookieStore = cookies();
+export async function setAuthCookies(params: { accessToken: string; refreshToken: string }) {
+  const cookieStore = await cookies();
   cookieStore.set("access_token", params.accessToken, {
     httpOnly: true,
     sameSite: "lax",
@@ -20,8 +20,8 @@ export function setAuthCookies(params: { accessToken: string; refreshToken: stri
   });
 }
 
-export function clearAuthCookies() {
-  const cookieStore = cookies();
+export async function clearAuthCookies() {
+  const cookieStore = await cookies();
   cookieStore.set("access_token", "", { httpOnly: true, path: "/", maxAge: 0 });
   cookieStore.set("refresh_token", "", { httpOnly: true, path: "/", maxAge: 0 });
 }
