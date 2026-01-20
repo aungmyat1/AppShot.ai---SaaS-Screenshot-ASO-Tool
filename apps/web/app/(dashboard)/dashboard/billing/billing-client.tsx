@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { loadStripe, StripeCardElement } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useQuery } from "@tanstack/react-query";
 

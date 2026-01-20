@@ -20,14 +20,21 @@ function makeQueryClient() {
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = React.useState(makeQueryClient);
 
+  const ThemeProviderAny = ThemeProvider as any;
+
   return (
-    // @ts-ignore - next-themes type compatibility issue
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true} storageKey="app-theme">
+    <ThemeProviderAny 
+      attribute="class" 
+      defaultTheme="dark" 
+      enableSystem 
+      storageKey="app-theme"
+      disableTransitionOnChange
+    >
       <QueryClientProvider client={client}>
         {children}
         {process.env.NODE_ENV === "development" ? <ReactQueryDevtools initialIsOpen={false} /> : null}
       </QueryClientProvider>
-    </ThemeProvider>
+    </ThemeProviderAny>
   );
 }
 
