@@ -6,9 +6,9 @@ echo "Testing Vercel Build Configuration"
 echo "======================================"
 echo ""
 
-# Step 1: Clean install
-echo "Step 1: Testing npm install..."
-npm install
+# Step 1: Clean install (matching Vercel config)
+echo "Step 1: Testing npm install --workspaces..."
+npm install --workspaces
 if [ $? -ne 0 ]; then
   echo "❌ npm install failed"
   exit 1

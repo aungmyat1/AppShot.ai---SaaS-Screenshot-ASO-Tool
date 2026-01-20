@@ -5,9 +5,9 @@ Write-Host "Testing Vercel Build Configuration" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 1: Clean install
-Write-Host "Step 1: Testing npm install..." -ForegroundColor Yellow
-npm install
+# Step 1: Clean install (matching Vercel config)
+Write-Host "Step 1: Testing npm install --workspaces..." -ForegroundColor Yellow
+npm install --workspaces
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ npm install failed" -ForegroundColor Red
     exit 1
