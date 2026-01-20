@@ -1,7 +1,7 @@
 {
   "name": "getappshots-monorepo",
   "private": true,
-  "packageManager": "npm@10.0.0",
+  "packageManager": "npm@11.6.2",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -24,7 +24,6 @@
     "doppler:setup": "node scripts/doppler-setup.js",
     "doppler:init": "node scripts/doppler-setup.js",
     "stripe:check": "tsx scripts/check-stripe-setup.ts",
-
     "env:sync": "node scripts/sync-doppler-to-vercel.js",
     "env:sync:dev": "node scripts/sync-doppler-to-vercel.js --env=development",
     "env:sync:preview": "node scripts/sync-doppler-to-vercel.js --env=preview",
@@ -42,5 +41,9 @@
   },
   "devDependencies": {
     "turbo": "^2.3.7"
+  },
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   }
 }
