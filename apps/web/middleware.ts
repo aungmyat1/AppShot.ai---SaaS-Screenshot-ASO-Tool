@@ -70,6 +70,15 @@ export default clerkMiddleware((auth, req) => {
 
   // ---- Security headers (pages + API) ----
   const enforceCsp = (process.env.CSP_ENFORCE || "").toLowerCase() === "true";
+  const isDev = process.env.NODE_ENV === "development";
+  
+  // In development, allow 'unsafe-eval' for DevTools (React Query DevTools, etc)
+  // In production, remove it to prevent eval() execution
+  const scriptSrcDirectives = ["'self'", "'unsafe-inline'"];
+  if (isDev) {
+    scriptSrcDirectives.push("'unsafe-eval'");
+  }
+  
   const csp = [
     "default-src 'self'",
     "base-uri 'self'",
@@ -77,7 +86,7 @@ export default clerkMiddleware((auth, req) => {
     "object-src 'none'",
     "img-src 'self' https: data:",
     "style-src 'self' 'unsafe-inline'",
-    "script-src 'self' 'unsafe-inline'",
+    `script-src ${scriptSrcDirectives.join(" ")}`,
     "connect-src 'self' https:",
   ].join("; ");
   res.headers.set("X-Content-Type-Options", "nosniff");

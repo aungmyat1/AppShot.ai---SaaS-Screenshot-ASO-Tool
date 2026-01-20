@@ -37,7 +37,8 @@
     "setup:services": "node scripts/setup-external-services.js",
     "setup:database": "node scripts/setup-database.js",
     "update:database": "node scripts/update-vercel-database.js",
-    "deploy:vercel": "node scripts/deploy-to-vercel.js"
+    "deploy:vercel": "node scripts/deploy-to-vercel.js",
+    "deploy:production": "node scripts/deploy-vercel-production.js"
   },
   "devDependencies": {
     "turbo": "^2.3.7"

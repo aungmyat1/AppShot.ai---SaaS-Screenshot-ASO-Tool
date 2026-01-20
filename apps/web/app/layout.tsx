@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-dvh bg-background text-foreground">
         <Providers>
           {publishableKey ? <ClerkProvider publishableKey={publishableKey}>{appShell}</ClerkProvider> : appShell}
