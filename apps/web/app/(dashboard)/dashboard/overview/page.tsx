@@ -4,8 +4,13 @@ export const metadata = {
 
 import { AnalyticsClient } from "./analytics-client";
 
-export default function OverviewPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const asUserId = typeof searchParams?.asUserId === "string" ? searchParams.asUserId : undefined;
+export default async function OverviewPage({ 
+  searchParams 
+}: { 
+  searchParams?: Promise<Record<string, string | string[] | undefined>> 
+}) {
+  const params = await searchParams;
+  const asUserId = typeof params?.asUserId === "string" ? params.asUserId : undefined;
   return (
     <div className="space-y-6">
       <AnalyticsClient asUserId={asUserId} />

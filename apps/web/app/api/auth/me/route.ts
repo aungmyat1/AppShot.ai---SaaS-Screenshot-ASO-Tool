@@ -6,7 +6,8 @@ import { apiBaseUrl } from "@/app/api/auth/_utils";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const token = cookies().get("access_token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Minimal "me" by decoding token on backend would be better; for now call FastAPI v1 users/me from bearer token.

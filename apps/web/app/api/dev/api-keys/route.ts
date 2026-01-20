@@ -5,14 +5,15 @@ import { apiBaseUrl } from "@/app/api/auth/_utils";
 
 export const runtime = "nodejs";
 
-function bearer() {
-  const token = cookies().get("access_token")?.value;
+async function bearer() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
   if (!token) return null;
   return `Bearer ${token}`;
 }
 
 export async function GET() {
-  const authz = bearer();
+  const authz = await bearer();
   if (!authz) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const res = await fetch(`${apiBaseUrl()}/api/v1/api-keys`, { headers: { authorization: authz }, cache: "no-store" });
@@ -22,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const authz = bearer();
+  const authz = await bearer();
   if (!authz) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => null);

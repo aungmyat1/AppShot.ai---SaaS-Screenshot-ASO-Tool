@@ -6,7 +6,8 @@ import { apiBaseUrl, clearAuthCookies } from "@/app/api/auth/_utils";
 export const runtime = "nodejs";
 
 export async function POST() {
-  const refresh = cookies().get("refresh_token")?.value;
+  const cookieStore = await cookies();
+  const refresh = cookieStore.get("refresh_token")?.value;
   if (refresh) {
     // Best-effort revoke
     await fetch(`${apiBaseUrl()}/api/v1/authx/logout`, {

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, StripeCardElement } from "@stripe/stripe-js";
 import { Elements, CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,11 +23,11 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     setError(null);
     setLoading(true);
     try {
-      const card = elements.getElement(CardElement);
-      if (!card) throw new Error("Card element not ready");
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) throw new Error("Card element not ready");
 
       const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: { card },
+        payment_method: { card: cardElement as any },
       });
 
       if (result.error) throw new Error(result.error.message || "Payment failed");

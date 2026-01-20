@@ -6,14 +6,15 @@ import { getOrCreateUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-export async function GET(_req: Request, ctx: { params: { jobId: string } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ jobId: string }> }) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const dbUser = await getOrCreateUser(userId);
+  const { jobId } = await ctx.params;
 
   const job = await prisma.scrapeJob.findFirst({
-    where: { id: ctx.params.jobId, userId: dbUser.id },
+    where: { id: jobId, userId: dbUser.id },
   });
 
   if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });

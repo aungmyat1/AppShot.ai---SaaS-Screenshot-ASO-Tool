@@ -5,11 +5,13 @@ import { apiBaseUrl } from "@/app/api/auth/_utils";
 
 export const runtime = "nodejs";
 
-export async function POST(_req: Request, ctx: { params: { id: string } }) {
-  const token = cookies().get("access_token")?.value;
+export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value;
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const res = await fetch(`${apiBaseUrl()}/api/v1/api-keys/${ctx.params.id}/rotate`, {
+  const { id } = await ctx.params;
+  const res = await fetch(`${apiBaseUrl()}/api/v1/api-keys/${id}/rotate`, {
     method: "POST",
     headers: { authorization: `Bearer ${token}` },
   });
