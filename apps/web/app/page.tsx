@@ -170,7 +170,7 @@ export default function HomePage() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 text-xs text-muted-foreground">© {new Date().getFullYear()} getappshots. All rights reserved.</div>
+        <div className="mt-8 text-xs text-muted-foreground">© <FooterYear /> getappshots. All rights reserved.</div>
       </footer>
     </div>
   );
@@ -179,6 +179,7 @@ export default function HomePage() {
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { LandingHero } from "@/app/landing-hero";
+import { FooterYear } from "@/app/footer-year";
 import { PRICING_PLANS } from "@/lib/pricing-config";
 
 function FeatureCard(props: { title: string; desc: string }) {
