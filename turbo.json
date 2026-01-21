@@ -1,7 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
-    "NODE_ENV"
+    "NODE_ENV",
+    "SCRAPE_QUEUE_MODE",
+    "PLAY_SCRAPE_MODE",
+    "PLAY_SCRAPE_FALLBACK_PLAYWRIGHT"
   ],
   "tasks": {
     "dev": {
