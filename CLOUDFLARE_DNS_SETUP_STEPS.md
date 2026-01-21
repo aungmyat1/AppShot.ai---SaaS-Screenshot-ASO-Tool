@@ -81,9 +81,15 @@ dig www.getappshots.com +short
 
 If it returns a CNAME to Vercel, the root domain A record should point to the same Vercel infrastructure.
 
-**Most Common Solution**: Since your domain shows "Valid Configuration", try using:
-- **A Record**: Point `@` to `76.76.21.21` (Vercel's common apex IP) or check Vercel docs for current IP
-- **CNAME Record**: Point `www` to `cname.vercel-dns.com`
+**✅ GOOD NEWS**: Based on your nslookup results:
+- `getappshots.com` already resolves to `76.76.21.21` (Vercel's IP) ✅
+- This means the root domain A record is configured correctly!
+
+**⚠️ ISSUE FOUND**: `www.getappshots.com` resolves to `216.198.79.65` and `64.29.17.65` which are NOT Vercel IPs. You need to update the `www` CNAME record in Cloudflare.
+
+**Solution**:
+- **A Record for root** (`@`): Already correct - points to `76.76.21.21` ✅
+- **CNAME for www**: Update to point to `cname.vercel-dns.com` (currently pointing to old hosting)
 
 ⚠️ **If unsure, check Vercel's documentation** for current apex domain A record IP addresses.
 
