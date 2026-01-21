@@ -47,6 +47,13 @@ jobs:
           flags: web
           fail_ci_if_error: false
 
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   api_lint_type_test:
     name: API • black / pylint / mypy / pytest
     runs-on: ubuntu-latest
@@ -99,6 +106,13 @@ jobs:
           flags: api
           fail_ci_if_error: false
 
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   api_integration_smoke:
     name: API • integration smoke (uvicorn + /health)
     runs-on: ubuntu-latest
@@ -129,6 +143,13 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:8000/health | python -c "import sys, json; print(json.load(sys.stdin))"
+
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   web_e2e:
     name: Web • E2E (Playwright)
@@ -174,6 +195,13 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           if-no-files-found: ignore
+
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   security_scan:
     name: Security • dependency and secret scanning
@@ -246,6 +274,12 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm --workspace apps/web run build
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   api:
     runs-on: ubuntu-latest
@@ -256,4 +290,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -r apps/api/requirements.txt
       - run: python -c "import fastapi; print(fastapi.__version__)"
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: Vercel - getappshots: Github check
+          token: ${{ secrets.GITHUB_TOKEN }}
 
