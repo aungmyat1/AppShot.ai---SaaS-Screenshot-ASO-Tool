@@ -25,31 +25,67 @@
 
 ## Step-by-Step Instructions
 
-### Step 1: Get Vercel's Configuration
+### Step 1: Get Vercel's DNS Configuration
+
+**Important**: Since Vercel shows "Valid Configuration", the domain is working, but you need to configure the A record in Cloudflare to point to Vercel.
+
+#### Option A: Check Current DNS Resolution (Recommended First Step)
+
+Since your domain already shows "Valid Configuration" in Vercel, let's check what IP it's currently resolving to:
+
+```bash
+# Check what IP your domain currently resolves to
+dig getappshots.com +short
+
+# Or use nslookup on Windows
+nslookup getappshots.com
+```
+
+If it returns an IP address, that's likely the Vercel IP you need. However, it might still be pointing to your old hosting (`216.198.79.1`).
+
+#### Option B: Get Vercel Configuration from Domain Settings
 
 1. **Go to Vercel Dashboard**:
    - Navigate to your project
    - Go to **Settings** → **Domains**
-   - Click on `getappshots.com` (or add it if not already added)
+   - Click on the **"Edit"** button next to `getappshots.com`
 
-2. **Find the DNS Configuration**:
-   - Vercel will show you what DNS records you need
-   - Look for:
-     - **A record** IP address (for root domain `@`)
-     - **CNAME** target (for `www` subdomain, usually `cname.vercel-dns.com`)
+2. **Look for DNS Configuration Section**:
+   - Vercel may show DNS records in a section like "DNS Records" or "Configure DNS"
+   - Look for A record IP address or instructions
 
-3. **Copy these values** - you'll need them in Step 2
+3. **If not visible, check Vercel Documentation**:
+   - Vercel's standard A record IP for apex domains
+   - Or check what `www.getappshots.com` resolves to (if it's working)
 
-**Example of what you might see**:
+#### Option C: Use Vercel's Standard Configuration
+
+Since Vercel uses dynamic IPs, you can use these standard values:
+
+**For Root Domain (`@`)**:
+- **Type**: `A`
+- **Value**: Check what `www.getappshots.com` resolves to, or use Vercel's standard IP
+- **Common Vercel IPs**: `76.76.21.21` (but verify this is correct for your region)
+
+**For WWW Subdomain**:
+- **Type**: `CNAME`
+- **Value**: `cname.vercel-dns.com` (standard Vercel CNAME target)
+
+#### Option D: Check What's Currently Working
+
+If `www.getappshots.com` shows "Valid Configuration", check what it resolves to:
+
+```bash
+dig www.getappshots.com +short
 ```
-Type: A
-Name: @
-Value: 76.76.21.21
 
-Type: CNAME
-Name: www
-Value: cname.vercel-dns.com
-```
+If it returns a CNAME to Vercel, the root domain A record should point to the same Vercel infrastructure.
+
+**Most Common Solution**: Since your domain shows "Valid Configuration", try using:
+- **A Record**: Point `@` to `76.76.21.21` (Vercel's common apex IP) or check Vercel docs for current IP
+- **CNAME Record**: Point `www` to `cname.vercel-dns.com`
+
+⚠️ **If unsure, check Vercel's documentation** for current apex domain A record IP addresses.
 
 ---
 
@@ -59,14 +95,22 @@ Value: cname.vercel-dns.com
    - Navigate to your domain `getappshots.com`
    - Click on **DNS** → **Records**
 
-2. **Update Root Domain A Record**:
+2. **Add/Update Root Domain A Record**:
    
-   - **Find** the existing A record for root domain (name: `@` or `getappshots.com`)
-   - Currently it might point to: `216.198.79.1` (old hosting)
-   - **Click Edit** (pencil icon)
-   - **Update**:
-     - **IPv4 address**: Paste the Vercel IP from Step 1
-     - **Proxy status**: Click the cloud icon to make it **grey** (DNS only)
+   - **Check** if an A record exists for root domain (name: `@` or `getappshots.com`)
+   - **If it exists** and points to `216.198.79.1` (old hosting):
+     - Click **Edit** (pencil icon)
+     - **Update** IPv4 address to Vercel IP (from Step 1)
+   - **If it doesn't exist** (no A record for root domain):
+     - Click **"Add record"**
+     - **Type**: Select `A`
+     - **Name**: Enter `@` (represents root domain)
+   - **Configure**:
+     - **IPv4 address**: Enter the Vercel IP address
+       - Try: `76.76.21.21` (Vercel's common apex IP)
+       - Or check what `www.getappshots.com` resolves to
+       - Or check Vercel documentation for current IP
+     - **Proxy status**: Click the cloud icon to make it **grey** (DNS only) ✅ **Critical**
      - **TTL**: Keep as "Auto" or set to "10 min"
    - **Click Save**
 
