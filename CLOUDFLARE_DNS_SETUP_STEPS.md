@@ -6,6 +6,17 @@
 
 ---
 
+## ⚠️ IMPORTANT: Do NOT Use Cloudflare Domain Connect
+
+If Cloudflare shows a "Domain Connect" authorization dialog for Vercel:
+- **DO NOT click "Authorize"** - It will remove your correct DNS records!
+- **Click "Cancel"** instead
+- See `WARNING_DOMAIN_CONNECT.md` for details
+
+**Why?** Domain Connect tries to add the wrong IP (`216.198.79.1`) and remove the correct one (`76.76.21.21`).
+
+---
+
 ## ✅ What You Should Do
 
 ### DO:
