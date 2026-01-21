@@ -1,5 +1,40 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "APP_URL",
+    "CLERK_SECRET_KEY",
+    "DATABASE_URL",
+    "DATABASE_URL_UNPOOLED",
+    "DOPPLER_CONFIG",
+    "DOPPLER_ENVIRONMENT",
+    "DOPPLER_PROJECT",
+    "NEON_PROJECT_ID",
+    "PGDATABASE",
+    "PGHOST",
+    "PGHOST_UNPOOLED",
+    "PGPASSWORD",
+    "PGUSER",
+    "PLAY_SCRAPE_FALLBACK_PLAYWRIGHT",
+    "PLAY_SCRAPE_MODE",
+    "POSTGRES_DATABASE",
+    "POSTGRES_HOST",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_USER",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL",
+    "POSTGRES_URL_NO_SSL",
+    "POSTGRES_URL_NON_POOLING",
+    "R2_ACCESS_KEY_ID",
+    "R2_ACCOUNT_ID",
+    "R2_BUCKET_NAME",
+    "R2_PUBLIC_URL",
+    "R2_SECRET_ACCESS_KEY",
+    "SCRAPE_QUEUE_MODE",
+    "STORAGE_ENDPOINT",
+    "STRIPE_MCP_KEY",
+    "STRIPE_PUBLISHABLE_KEY",
+    "STRIPE_SECRET_KEY"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
@@ -7,6 +42,12 @@
     },
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "PLAY_SCRAPE_FALLBACK_PLAYWRIGHT",
+        "PLAY_SCRAPE_MODE",
+        "POSTGRES_USER",
+        "SCRAPE_QUEUE_MODE"
+      ],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
     "lint": {

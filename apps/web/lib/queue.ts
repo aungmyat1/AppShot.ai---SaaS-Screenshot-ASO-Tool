@@ -1,8 +1,9 @@
 import { Queue } from "bullmq";
-import IORedis from "ioredis";
+
+import { getRedisConnectionOptions } from "./redis";
 
 let queue: Queue | null = null;
-let connection: IORedis | null = null;
+let connection: ReturnType<typeof getRedisConnectionOptions> | null = null;
 
 export const SCRAPE_QUEUE_NAME = process.env.SCRAPE_QUEUE_NAME || "scrape-jobs";
 
@@ -19,7 +20,7 @@ export function getScrapeQueue() {
   const url = process.env.REDIS_URL;
   if (!url) throw new Error("Missing REDIS_URL (required for queue mode)");
 
-  connection = connection ?? new IORedis(url, { maxRetriesPerRequest: null });
+  connection = connection ?? getRedisConnectionOptions(url);
   queue = new Queue<ScrapeJobPayload>(SCRAPE_QUEUE_NAME, { connection });
   return queue;
 }
