@@ -1,8 +1,8 @@
 import { Worker } from "bullmq";
-import IORedis from "ioredis";
 
 import { SCRAPE_QUEUE_NAME } from "../lib/queue";
 import { processScrapeJob } from "../lib/core/process-scrape-job";
+import { getRedisConnectionOptions } from "../lib/redis";
 
 function requiredEnv(name: string) {
   const v = process.env[name];
@@ -10,10 +10,8 @@ function requiredEnv(name: string) {
   return v;
 }
 
-const connection = requiredEnv("REDIS_URL");
+const connection = getRedisConnectionOptions(requiredEnv("REDIS_URL"));
 const concurrency = Number(process.env.WORKER_CONCURRENCY || 2);
-
-const redis = new IORedis(connection, { maxRetriesPerRequest: null });
 
 // This file is meant to be run as a separate Node process:
 //   node --loader tsx server/worker.ts
@@ -26,7 +24,7 @@ new Worker(
     if (!scrapeJobId) throw new Error("Missing scrapeJobId in job payload");
     await processScrapeJob(scrapeJobId);
   },
-  { connection: redis, concurrency },
+  { connection, concurrency },
 );
 
 // eslint-disable-next-line no-console
