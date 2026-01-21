@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClerkProvider, SignedIn, SignedOut, SignUpButton, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignedOut, SignUpButton, SignInButton, UserButton } from "@clerk/nextjs";
+import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 import { Button } from "@/components/ui/button";
 import { Providers } from "@/app/providers";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CookieConsent } from "@/components/CookieConsent";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "GetAppShots",
@@ -40,6 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {publishableKey ? (
               <>
                 <SignedOut>
+                  <SignInButton mode="modal">
+                    <Button size="sm" variant="ghost">Sign in</Button>
+                  </SignInButton>
                   <SignUpButton mode="modal">
                     <Button size="sm">Sign up</Button>
                   </SignUpButton>
@@ -63,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-dvh bg-background text-foreground">
+      <body className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-background text-foreground antialiased`}>
         <Providers>
           {publishableKey ? <ClerkProvider publishableKey={publishableKey}>{appShell}</ClerkProvider> : appShell}
         </Providers>
