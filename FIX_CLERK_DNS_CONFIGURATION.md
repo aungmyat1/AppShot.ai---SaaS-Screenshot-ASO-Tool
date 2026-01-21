@@ -11,39 +11,43 @@ The "Clerk DNS Configuration" deployment check in Vercel verifies that:
 
 ## Solution Steps
 
-### Step 0: Configure Vercel Nameservers (CRITICAL - Do This First!)
+### Step 0: Configure DNS Records (Choose Your Setup)
 
-**Current Issue**: Your domain's nameservers are not pointing to Vercel, which is required for proper DNS management.
+**⚠️ IMPORTANT**: If you're using **Cloudflare for DNS** (especially for R2 storage, CDN, or DDoS protection), you should **keep Cloudflare nameservers** and configure DNS records in Cloudflare instead of changing nameservers.
+
+#### Option A: Using Cloudflare DNS (Recommended if using R2/Cloudflare services)
+
+**See**: [`CLOUDFLARE_DNS_VERCEL_SETUP.md`](./CLOUDFLARE_DNS_VERCEL_SETUP.md) for detailed instructions.
+
+**Quick steps**:
+1. **Keep Cloudflare nameservers** (do not change them)
+2. **Update Cloudflare DNS records**:
+   - A record for root domain → Point to Vercel IP (from Vercel dashboard)
+   - CNAME for www → Point to `cname.vercel-dns.com`
+   - **Critical**: Set proxy status to "DNS only" (grey cloud) for Vercel records
+3. **Keep Clerk DNS records** in Cloudflare (they're already configured)
+
+#### Option B: Using Vercel Nameservers (Only if NOT using Cloudflare)
+
+If you're **not** using Cloudflare for DNS/CDN/R2, you can use Vercel nameservers:
 
 1. **Copy Vercel Nameservers** (from the DNS Records page):
    - `ns1.vercel-dns.com`
    - `ns2.vercel-dns.com`
 
 2. **Go to Your Domain Registrar** (where you bought `getappshots.com`):
-   - Common registrars: Namecheap, GoDaddy, Google Domains, Cloudflare, etc.
    - Log in to your account
+   - Find DNS/Nameserver Settings
 
-3. **Find DNS/Nameserver Settings**:
-   - Look for "DNS Settings", "Nameservers", or "Domain Settings"
-   - Navigate to the nameserver configuration
-
-4. **Update Nameservers**:
-   - Replace existing nameservers with Vercel's nameservers:
-     ```
-     ns1.vercel-dns.com
-     ns2.vercel-dns.com
-     ```
+3. **Update Nameservers**:
+   - Replace existing nameservers with Vercel's nameservers
    - Save the changes
 
-5. **Wait for Propagation** (5-60 minutes):
-   - DNS changes can take time to propagate
-   - Vercel will automatically detect when nameservers are updated
+4. **Wait for Propagation** (5-60 minutes)
 
-6. **Verify in Vercel**:
+5. **Verify in Vercel**:
    - Return to Vercel Dashboard → Settings → Domains → DNS Records
    - The warning about nameservers should disappear once propagation completes
-
-**Important**: Until nameservers are updated, Vercel cannot fully manage your DNS records, which may cause the Clerk DNS check to fail.
 
 ### Step 1: Get Your Vercel Production Domain
 
@@ -183,15 +187,26 @@ If you see an old A record (like `subdomain` pointing to `76.76.21.21`):
 
 ## Quick Checklist
 
-- [ ] **Nameservers updated** at domain registrar to point to Vercel (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`)
-- [ ] **Nameserver propagation verified** (warning disappeared in Vercel DNS Records page)
+**DNS Configuration** (Choose one):
+- [ ] **Option A (Cloudflare)**: DNS records updated in Cloudflare → Vercel (see `CLOUDFLARE_DNS_VERCEL_SETUP.md`)
+  - [ ] A record for root domain points to Vercel IP
+  - [ ] CNAME for www points to Vercel
+  - [ ] All Vercel records set to "DNS only" (grey cloud)
+  - [ ] Clerk DNS records remain in Cloudflare
+- [ ] **Option B (Vercel Nameservers)**: Nameservers updated at registrar to Vercel
+  - [ ] Nameserver propagation verified (warning disappeared in Vercel)
+
+**Clerk Configuration**:
 - [ ] Production domain added to Clerk allowed origins (`https://getappshots.com`, `https://www.getappshots.com`)
 - [ ] `*.vercel.app` wildcard added for preview deployments
 - [ ] `localhost:3000` added for development
 - [ ] Clerk integration installed in Vercel
 - [ ] Clerk application correctly linked in Vercel integration
+
+**Verification**:
 - [ ] Old/unused DNS records cleaned up (if any)
 - [ ] Deployment check configuration verified
+- [ ] Domain resolves correctly (test in browser)
 - [ ] Redeployed application
 - [ ] Check status is now passing ✅
 
