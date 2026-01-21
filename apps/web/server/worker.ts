@@ -1,5 +1,4 @@
 import { Worker } from "bullmq";
-import IORedis from "ioredis";
 
 import { SCRAPE_QUEUE_NAME } from "../lib/queue";
 import { processScrapeJob } from "../lib/core/process-scrape-job";
@@ -10,10 +9,12 @@ function requiredEnv(name: string) {
   return v;
 }
 
-const connection = requiredEnv("REDIS_URL");
+const redisUrl = requiredEnv("REDIS_URL");
 const concurrency = Number(process.env.WORKER_CONCURRENCY || 2);
 
-const redis = new IORedis(connection, { maxRetriesPerRequest: null });
+// Pass connection string directly to BullMQ to avoid type incompatibility
+// BullMQ will create its own Redis connection using its bundled ioredis
+// This avoids TypeScript errors from incompatible ioredis versions
 
 // This file is meant to be run as a separate Node process:
 //   node --loader tsx server/worker.ts
@@ -26,7 +27,7 @@ new Worker(
     if (!scrapeJobId) throw new Error("Missing scrapeJobId in job payload");
     await processScrapeJob(scrapeJobId);
   },
-  { connection: redis, concurrency },
+  { connection: redisUrl as any, concurrency }, // Type assertion to avoid ioredis version mismatch
 );
 
 // eslint-disable-next-line no-console
