@@ -1,0 +1,77 @@
+$ORIGIN getappshots.com.
+$TTL 3600
+
+; SOA Record (Start of Authority)
+; Format: @ IN SOA primary-nameserver email-address (serial refresh retry expire minimum)
+@    IN SOA ns1.vercel-dns.com. admin.getappshots.com. (
+       2025012101 ; Serial number (YYYYMMDDnn format - update when you change records)
+       3600       ; Refresh (1 hour)
+       900        ; Retry (15 minutes)
+       604800     ; Expire (1 week)
+       300        ; Minimum TTL (5 minutes)
+)
+
+; Nameservers
+@    IN NS ns1.vercel-dns.com.
+@    IN NS ns2.vercel-dns.com.
+
+; ============================================
+; VERCEL RECORDS
+; ============================================
+; IMPORTANT: Replace [Vercel IP] with the actual IP address from Vercel Dashboard
+; Go to: Vercel Dashboard → Settings → Domains → getappshots.com
+; Copy the A record IP address shown there
+
+; Root domain A record pointing to Vercel
+@    IN A [Vercel IP]
+
+; WWW subdomain CNAME pointing to Vercel
+; Note: Vercel may provide a different CNAME target, update if needed
+www  IN CNAME cname.vercel-dns.com.
+
+; ============================================
+; CLERK AUTHENTICATION RECORDS
+; ============================================
+; These records are required for Clerk authentication to work properly
+
+; Clerk accounts subdomain
+accounts      IN CNAME accounts.clerk.services.
+
+; Clerk frontend API subdomain
+clerk         IN CNAME frontend-api.clerk.services.
+
+; Clerk DKIM records for email verification
+; IMPORTANT: Replace [DKIM1_VALUE] and [DKIM2_VALUE] with your actual Clerk DKIM values
+; Get these from Clerk Dashboard → Settings → Email → Domain Keys
+clk._domainkey  IN CNAME dkim1.g6n0hyzukwo.clerk.accounts.dev.
+clk2._domainkey IN CNAME dkim2.g6n0hyzukwo.clerk.accounts.dev.
+
+; Clerk mail subdomain
+; IMPORTANT: Replace [CLERK_MAIL_VALUE] with your actual Clerk mail domain
+clkmail       IN CNAME mail.g6n0hyzukwo.clerk.accounts.dev.
+
+; ============================================
+; OPTIONAL RECORDS
+; ============================================
+
+; TXT record for domain verification (if needed by Vercel or other services)
+; Uncomment and update if Vercel or other services require domain verification
+; @    IN TXT "v=spf1 include:_spf.vercel.com ~all"
+; @    IN TXT "vercel-verification=[VERIFICATION_CODE]"
+
+; MX records for email (if you're using email services)
+; Uncomment and configure if needed
+; @    IN MX 10 mail.getappshots.com.
+
+; ============================================
+; NOTES
+; ============================================
+; 1. Replace [Vercel IP] with actual IP from Vercel Dashboard
+; 2. Verify Clerk CNAME values match your Clerk Dashboard settings
+; 3. Update serial number when you make changes to this file
+; 4. Upload this file via: Vercel Dashboard → Domains → DNS Records → Upload Zone File
+; 5. Or use CLI: vercel dns import getappshots.com getappshots.com.zone
+;
+; ⚠️ IMPORTANT: Only use this if you're using Vercel nameservers.
+; If you're using Cloudflare DNS (for R2 storage), keep Cloudflare nameservers
+; and manage DNS records in Cloudflare instead (see CLOUDFLARE_DNS_VERCEL_SETUP.md)
