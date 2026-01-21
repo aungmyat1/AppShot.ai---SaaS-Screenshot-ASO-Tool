@@ -11,6 +11,40 @@ The "Clerk DNS Configuration" deployment check in Vercel verifies that:
 
 ## Solution Steps
 
+### Step 0: Configure Vercel Nameservers (CRITICAL - Do This First!)
+
+**Current Issue**: Your domain's nameservers are not pointing to Vercel, which is required for proper DNS management.
+
+1. **Copy Vercel Nameservers** (from the DNS Records page):
+   - `ns1.vercel-dns.com`
+   - `ns2.vercel-dns.com`
+
+2. **Go to Your Domain Registrar** (where you bought `getappshots.com`):
+   - Common registrars: Namecheap, GoDaddy, Google Domains, Cloudflare, etc.
+   - Log in to your account
+
+3. **Find DNS/Nameserver Settings**:
+   - Look for "DNS Settings", "Nameservers", or "Domain Settings"
+   - Navigate to the nameserver configuration
+
+4. **Update Nameservers**:
+   - Replace existing nameservers with Vercel's nameservers:
+     ```
+     ns1.vercel-dns.com
+     ns2.vercel-dns.com
+     ```
+   - Save the changes
+
+5. **Wait for Propagation** (5-60 minutes):
+   - DNS changes can take time to propagate
+   - Vercel will automatically detect when nameservers are updated
+
+6. **Verify in Vercel**:
+   - Return to Vercel Dashboard → Settings → Domains → DNS Records
+   - The warning about nameservers should disappear once propagation completes
+
+**Important**: Until nameservers are updated, Vercel cannot fully manage your DNS records, which may cause the Clerk DNS check to fail.
+
 ### Step 1: Get Your Vercel Production Domain
 
 1. Go to Vercel Dashboard → Your Project → **Settings** → **Domains**
@@ -96,7 +130,21 @@ The "Clerk DNS Configuration" deployment check in Vercel verifies that:
 3. **Check "Backend API" URL** (if applicable):
    - Should be your API endpoint if you have a separate API
 
-### Step 7: Test and Redeploy
+### Step 7: Clean Up DNS Records (If Needed)
+
+If you see an old A record (like `subdomain` pointing to `76.76.21.21`):
+
+1. **In Vercel Dashboard** → Settings → Domains → DNS Records
+2. **Review Existing Records**:
+   - Remove any records that are not needed
+   - The `subdomain` A record pointing to `76.76.21.21` appears to be from a different service
+   - You can delete it if it's not needed, or update it if required
+
+3. **Vercel Will Auto-Configure**:
+   - Once nameservers are updated, Vercel will automatically configure the necessary DNS records
+   - You typically don't need to manually add A records for the root domain
+
+### Step 8: Test and Redeploy
 
 1. **Redeploy Your Application**:
    ```bash
@@ -135,12 +183,14 @@ The "Clerk DNS Configuration" deployment check in Vercel verifies that:
 
 ## Quick Checklist
 
-- [ ] Production domain added to Clerk allowed origins
+- [ ] **Nameservers updated** at domain registrar to point to Vercel (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`)
+- [ ] **Nameserver propagation verified** (warning disappeared in Vercel DNS Records page)
+- [ ] Production domain added to Clerk allowed origins (`https://getappshots.com`, `https://www.getappshots.com`)
 - [ ] `*.vercel.app` wildcard added for preview deployments
 - [ ] `localhost:3000` added for development
 - [ ] Clerk integration installed in Vercel
 - [ ] Clerk application correctly linked in Vercel integration
-- [ ] DNS records configured (if required by Clerk)
+- [ ] Old/unused DNS records cleaned up (if any)
 - [ ] Deployment check configuration verified
 - [ ] Redeployed application
 - [ ] Check status is now passing ✅
