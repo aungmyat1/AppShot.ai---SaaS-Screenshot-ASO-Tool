@@ -21,12 +21,35 @@ export async function getOrCreateUser(clerkUserId: string) {
     user = await client.users.getUser(clerkUserId);
   } catch (error: any) {
     // Handle Clerk API errors (e.g., "Resource not found")
-    const errorMessage = error?.message || String(error);
-    const errorCode = error?.status || error?.code;
+    // Clerk errors can come in different formats:
+    // 1. Direct error object with message/code
+    // 2. Error with errors array: {errors: [{message: "...", code: "..."}]}
+    // 3. HTTP error with status code
     
-    // If user not found in Clerk, create a minimal user record
-    if (errorCode === 404 || errorMessage.includes("not found") || errorMessage.includes("resource_not_found")) {
-      console.warn(`Clerk user ${clerkUserId} not found, creating minimal user record`);
+    const errorMessage = error?.message || error?.long_message || String(error);
+    const errorCode = error?.status || error?.statusCode || error?.code;
+    const errorsArray = error?.errors || [];
+    const firstError = errorsArray[0] || {};
+    const clerkErrorCode = firstError?.code || error?.clerkErrorCode || error?.code;
+    const clerkErrorMessage = firstError?.message || firstError?.long_message || errorMessage;
+    
+    // Check for "not found" errors in multiple ways:
+    // 1. HTTP status code 404
+    // 2. Error message contains "not found" or "resource_not_found"
+    // 3. Clerk error code is "resource_not_found"
+    // 4. Error in errors array has "resource_not_found" code
+    const isNotFoundError =
+      errorCode === 404 ||
+      clerkErrorCode === "resource_not_found" ||
+      clerkErrorMessage?.toLowerCase().includes("not found") ||
+      clerkErrorMessage?.toLowerCase().includes("resource_not_found") ||
+      errorMessage.toLowerCase().includes("not found") ||
+      errorMessage.toLowerCase().includes("resource_not_found");
+    
+    if (isNotFoundError) {
+      console.warn(
+        `Clerk user ${clerkUserId} not found (code: ${clerkErrorCode || errorCode}, trace: ${error?.clerk_trace_id || "N/A"}), creating minimal user record`
+      );
       return prisma.user.create({
         data: {
           clerkId: clerkUserId,
@@ -37,7 +60,13 @@ export async function getOrCreateUser(clerkUserId: string) {
       });
     }
     
-    // Re-throw other errors
+    // Re-throw other errors with more context
+    console.error(`Clerk API error for user ${clerkUserId}:`, {
+      message: errorMessage,
+      code: clerkErrorCode || errorCode,
+      traceId: error?.clerk_trace_id,
+      error,
+    });
     throw error;
   }
   
