@@ -16,7 +16,31 @@ export async function getOrCreateUser(clerkUserId: string) {
   if (existing) return existing;
 
   const client = await clerkClient();
-  const user = await client.users.getUser(clerkUserId);
+  let user;
+  try {
+    user = await client.users.getUser(clerkUserId);
+  } catch (error: any) {
+    // Handle Clerk API errors (e.g., "Resource not found")
+    const errorMessage = error?.message || String(error);
+    const errorCode = error?.status || error?.code;
+    
+    // If user not found in Clerk, create a minimal user record
+    if (errorCode === 404 || errorMessage.includes("not found") || errorMessage.includes("resource_not_found")) {
+      console.warn(`Clerk user ${clerkUserId} not found, creating minimal user record`);
+      return prisma.user.create({
+        data: {
+          clerkId: clerkUserId,
+          email: `user-${clerkUserId}@unknown.example.com`,
+          name: null,
+          isAdmin: false,
+        },
+      });
+    }
+    
+    // Re-throw other errors
+    throw error;
+  }
+  
   const primaryEmail = user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress;
 
   return prisma.user.create({
