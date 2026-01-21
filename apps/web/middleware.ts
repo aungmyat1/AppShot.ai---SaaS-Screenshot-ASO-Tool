@@ -72,10 +72,13 @@ export default clerkMiddleware((auth, req) => {
   const enforceCsp = (process.env.CSP_ENFORCE || "").toLowerCase() === "true";
   const isDev = process.env.NODE_ENV === "development";
   
-  // In development, allow 'unsafe-eval' for DevTools (React Query DevTools, etc)
-  // In production, remove it to prevent eval() execution
+  // Allow 'unsafe-eval' in development for DevTools (React Query DevTools, etc)
+  // In production, Next.js webpack may require 'unsafe-eval' for source maps or hot module replacement
+  // Set CSP_ALLOW_UNSAFE_EVAL=false to disable in production (may break some Next.js features)
+  const allowUnsafeEval = process.env.CSP_ALLOW_UNSAFE_EVAL !== "false" && (isDev || process.env.CSP_ALLOW_UNSAFE_EVAL === "true");
+  
   const scriptSrcDirectives = ["'self'", "'unsafe-inline'"];
-  if (isDev) {
+  if (allowUnsafeEval) {
     scriptSrcDirectives.push("'unsafe-eval'");
   }
   
