@@ -25,9 +25,11 @@ This is the main documentation index for GetAppShots project.
 
 ### Clerk Authentication
 - **[CLERK_RESOURCE_NOT_FOUND_FIX.md](./CLERK_RESOURCE_NOT_FOUND_FIX.md)** - Fix for Clerk "Resource not found" errors
+- **[VERIFY_CLERK_ENV.md](./VERIFY_CLERK_ENV.md)** - Verify Clerk environment variables in Vercel ⭐ **New**
 
 ### Turborepo & Build
 - **[TURBO_ENV_VARS_FIX.md](./TURBO_ENV_VARS_FIX.md)** - Environment variables configuration for Turborepo
+- **[FIX_TURBO_CLERK_ISSUES.md](./FIX_TURBO_CLERK_ISSUES.md)** - Fix Turbo & Clerk integration issues ⭐ **New**
 
 ## 📁 Documentation in `docs/` Folder
 
@@ -55,12 +57,20 @@ Additional detailed documentation is available in the `docs/` folder:
 
 ### For Specific Issues
 - **DNS Configuration**: `DNS_SETUP_COMPLETE_OVERVIEW.md`
-- **Clerk Errors**: `CLERK_RESOURCE_NOT_FOUND_FIX.md`
-- **Build Warnings**: `TURBO_ENV_VARS_FIX.md`
+- **Clerk Errors**: `CLERK_RESOURCE_NOT_FOUND_FIX.md` or `VERIFY_CLERK_ENV.md` for new deployments
+- **Build Warnings**: `TURBO_ENV_VARS_FIX.md` or `FIX_TURBO_CLERK_ISSUES.md` for integration issues
 - **Deployment Issues**: `VERCEL_DEPLOYMENT_GUIDE.md`
 - **Secrets Management**: `docs/DOPPLER_VERCEL_INTEGRATION.md`
 
+### New Documentation Files
+- **[FIX_TURBO_CLERK_ISSUES.md](./FIX_TURBO_CLERK_ISSUES.md)** - Guide to fix common Turbo and Clerk integration issues
+- **[VERIFY_CLERK_ENV.md](./VERIFY_CLERK_ENV.md)** - How to verify Clerk environment variables in Vercel
+- **[docs/DOPPLER_VERCEL_INTEGRATION.md](./docs/DOPPLER_VERCEL_INTEGRATION.md)** - Complete guide to Doppler-Vercel integration
+- **[docs/QUICK_START_DOPPLER_VERCEL.md](./docs/QUICK_START_DOPPLER_VERCEL.md)** - Quick start for Doppler-Vercel integration
+- **[scripts/verify-clerk-env.js](./scripts/verify-clerk-env.js)** - Script to verify Clerk environment variables
+- **[scripts/verify-doppler-vercel-integration.js](./scripts/verify-doppler-vercel-integration.js)** - Script to verify Doppler-Vercel integration
+
 ---
 
-**Last Updated**: After documentation cleanup  
+**Last Updated**: After documentation cleanup and integration of new documentation  
 **Status**: All outdated/redundant documentation removed, only current/relevant docs kept

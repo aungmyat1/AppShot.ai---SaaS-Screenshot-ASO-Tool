@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 import path from "path";
+// Validate environment variables at build time
+import "@getappshots/config";
 
 const nextConfig = {
   reactStrictMode: true,

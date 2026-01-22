@@ -33,6 +33,8 @@ Located in the project root (`../`):
 | **[DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)** | Detailed deployment checklist | DevOps |
 | **[DEPLOYMENT_PREPARATION_SUMMARY.md](../DEPLOYMENT_PREPARATION_SUMMARY.md)** | Readiness assessment | Managers |
 | **[IMPLEMENTATION_COMPLETE.md](../IMPLEMENTATION_COMPLETE.md)** | Implementation summary | Everyone |
+| **[FIX_TURBO_CLERK_ISSUES.md](../FIX_TURBO_CLERK_ISSUES.md)** | Fix Turbo & Clerk integration issues | Developers |
+| **[VERIFY_CLERK_ENV.md](../VERIFY_CLERK_ENV.md)** | Verify Clerk environment variables in Vercel | DevOps |
 
 ---
 
@@ -86,6 +88,29 @@ Complete Vercel deployment with integrations:
 - Post-deployment steps
 
 **Use when**: Deploying to Vercel with built-in integrations
+
+---
+
+### Integration Guides
+
+#### **[DOPPLER_VERCEL_INTEGRATION.md](./DOPPLER_VERCEL_INTEGRATION.md)**
+Complete Doppler to Vercel integration guide:
+- Native integration setup
+- Script-based sync approach
+- Verification steps
+- Troubleshooting
+
+**Use when**: Setting up Doppler to sync secrets to Vercel
+
+---
+
+#### **[QUICK_START_DOPPLER_VERCEL.md](./QUICK_START_DOPPLER_VERCEL.md)**
+Quick start guide for Doppler-Vercel integration:
+- Essential steps only
+- Quick reference for common commands
+- Troubleshooting tips
+
+**Use when**: You need a quick reference for Doppler-Vercel setup
 
 ---
 
@@ -176,8 +201,11 @@ Configure everything manually
 | Understand the project | [README.md](../README.md) |
 | Set up environment variables | [SETUP_ENVIRONMENT_VARIABLES.md](./SETUP_ENVIRONMENT_VARIABLES.md) |
 | Deploy to Vercel | [DEPLOY_VERCEL_INTEGRATIONS.md](./DEPLOY_VERCEL_INTEGRATIONS.md) |
+| Configure secrets with Doppler | [DOPPLER_VERCEL_INTEGRATION.md](./DOPPLER_VERCEL_INTEGRATION.md) |
 | Configure Stripe | [STRIPE_PRICING_SYNC.md](./STRIPE_PRICING_SYNC.md) |
 | Choose secrets strategy | [RECOMMENDED_SECRETS_STRATEGY.md](./RECOMMENDED_SECRETS_STRATEGY.md) |
+| Fix Turbo/Clerk issues | [FIX_TURBO_CLERK_ISSUES.md](../FIX_TURBO_CLERK_ISSUES.md) |
+| Verify Clerk env vars | [VERIFY_CLERK_ENV.md](../VERIFY_CLERK_ENV.md) |
 | Get command reference | [QUICK_REFERENCE.md](../QUICK_REFERENCE.md) |
 | Check deployment readiness | Run `npm run check:deployment` |
 
@@ -189,11 +217,13 @@ Configure everything manually
 1. [README.md](../README.md) - Project overview
 2. [SETUP_LOCAL.md](./SETUP_LOCAL.md) - Local setup
 3. [QUICK_REFERENCE.md](../QUICK_REFERENCE.md) - Commands
+4. [FIX_TURBO_CLERK_ISSUES.md](../FIX_TURBO_CLERK_ISSUES.md) - Fix common issues
 
 **DevOps Engineer**:
 1. [DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md) - Complete guide
 2. [DEPLOY_VERCEL_INTEGRATIONS.md](./DEPLOY_VERCEL_INTEGRATIONS.md) - Vercel setup
 3. [RECOMMENDED_SECRETS_STRATEGY.md](./RECOMMENDED_SECRETS_STRATEGY.md) - Secrets
+4. [VERIFY_CLERK_ENV.md](../VERIFY_CLERK_ENV.md) - Verify Clerk configuration
 
 **Manager/Owner**:
 1. [DEPLOYMENT_PREPARATION_SUMMARY.md](../DEPLOYMENT_PREPARATION_SUMMARY.md) - Status
@@ -219,6 +249,12 @@ npm run deploy:vercel
 
 # Verify environment
 npm run env:check
+
+# Sync Doppler secrets to Vercel
+npm run env:sync:prod
+
+# Verify Doppler integration
+npm run env:check:doppler
 ```
 
 ---
@@ -274,5 +310,5 @@ When adding documentation:
 
 ---
 
-**Last Updated**: January 18, 2026  
+**Last Updated**: January 22, 2026  
 **Status**: Complete and production-ready
