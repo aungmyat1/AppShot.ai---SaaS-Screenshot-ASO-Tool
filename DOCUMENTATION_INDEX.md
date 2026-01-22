@@ -35,6 +35,9 @@ Additional detailed documentation is available in the `docs/` folder:
 - **[docs/README.md](./docs/README.md)** - Documentation overview
 - **[docs/SETUP_ENVIRONMENT_VARIABLES.md](./docs/SETUP_ENVIRONMENT_VARIABLES.md)** - Environment variables setup
 - **[docs/DEPLOY_VERCEL_INTEGRATIONS.md](./docs/DEPLOY_VERCEL_INTEGRATIONS.md)** - Vercel integrations guide
+- **[docs/DOPPLER_VERCEL_INTEGRATION.md](./docs/DOPPLER_VERCEL_INTEGRATION.md)** - ⭐ Complete Doppler to Vercel integration guide
+- **[docs/QUICK_START_DOPPLER_VERCEL.md](./docs/QUICK_START_DOPPLER_VERCEL.md)** - Quick reference for Doppler-Vercel setup
+- **[docs/RECOMMENDED_SECRETS_STRATEGY.md](./docs/RECOMMENDED_SECRETS_STRATEGY.md)** - Secrets management strategy
 
 ## 🗂️ Project Structure Documentation
 
@@ -55,6 +58,7 @@ Additional detailed documentation is available in the `docs/` folder:
 - **Clerk Errors**: `CLERK_RESOURCE_NOT_FOUND_FIX.md`
 - **Build Warnings**: `TURBO_ENV_VARS_FIX.md`
 - **Deployment Issues**: `VERCEL_DEPLOYMENT_GUIDE.md`
+- **Secrets Management**: `docs/DOPPLER_VERCEL_INTEGRATION.md`
 
 ---
 

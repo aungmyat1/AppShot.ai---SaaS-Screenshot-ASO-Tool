@@ -3,7 +3,22 @@ name: Sync Doppler to Vercel
 on:
   push:
     branches: [main]
+    paths:
+      - "doppler.yaml"
+      - "scripts/sync-doppler-to-vercel.js"
+      - ".github/workflows/sync-doppler-vercel.yml"
   workflow_dispatch: # Allows manual triggering
+    inputs:
+      environment:
+        description: "Environment to sync (development|preview|production|all)"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - development
+          - preview
+          - production
   schedule:
     - cron: '0 0 * * 0' # Weekly sync (every Sunday at midnight)
 
@@ -20,90 +35,49 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      - name: Install Doppler CLI
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup Doppler CLI
+        uses: dopplerhq/cli-action@v3
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+      
+      - name: Determine sync environments
+        id: envs
         run: |
-          curl -Ls https://cli.doppler.com/install.sh | sh
-          doppler --version
+          ENV_INPUT="${{ github.event.inputs.environment }}"
+          if [ "$ENV_INPUT" = "all" ] || [ -z "$ENV_INPUT" ]; then
+            echo "environments=development preview production" >> $GITHUB_OUTPUT
+          else
+            echo "environments=$ENV_INPUT" >> $GITHUB_OUTPUT
+          fi
       
-      - name: Fetch secrets from Doppler
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_SERVICE_TOKEN }}
-        run: |
-          echo "Fetching secrets from Doppler..."
-          doppler secrets download --no-file --format json --token="$DOPPLER_TOKEN" > doppler_secrets.json
-          echo "✅ Fetched $(cat doppler_secrets.json | jq 'length') secrets"
-      
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-      
-      - name: Sync secrets to Vercel Development
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: |
-          echo "Syncing secrets to Vercel Development environment..."
-          
-          # Parse secrets and add to Vercel
-          cat doppler_secrets.json | jq -r 'to_entries[] | 
-            select(.key | startswith("DOPPLER_") | not) | 
-            "\(.key)=\(.value)"' | while IFS='=' read -r key value; do
-            if [ ! -z "$key" ]; then
-              echo "Adding $key to Vercel Development..."
-              echo "$value" | vercel env add "$key" development --force \
-                --token="$VERCEL_TOKEN" 2>/dev/null || echo "⚠️ Failed to add $key"
-            fi
-          done
-          
-          echo "✅ Sync to Development complete"
-      
-      - name: Sync secrets to Vercel Preview
+      - name: Sync secrets to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TEAM_SLUG: ${{ secrets.VERCEL_TEAM_SLUG }}
         run: |
-          echo "Syncing secrets to Vercel Preview environment..."
-          
-          cat doppler_secrets.json | jq -r 'to_entries[] | 
-            select(.key | startswith("DOPPLER_") | not) | 
-            "\(.key)=\(.value)"' | while IFS='=' read -r key value; do
-            if [ ! -z "$key" ]; then
-              echo "Adding $key to Vercel Preview..."
-              echo "$value" | vercel env add "$key" preview --force \
-                --token="$VERCEL_TOKEN" 2>/dev/null || echo "⚠️ Failed to add $key"
-            fi
+          for env in ${{ steps.envs.outputs.environments }}; do
+            echo "🔄 Syncing to Vercel $env environment..."
+            node scripts/sync-doppler-to-vercel.js --env="$env" || {
+              echo "❌ Failed to sync to $env"
+              exit 1
+            }
+            echo "✅ Sync to $env complete"
           done
-          
-          echo "✅ Sync to Preview complete"
       
-      - name: Sync secrets to Vercel Production
+      - name: Verify sync
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
-          echo "Syncing secrets to Vercel Production environment..."
-          
-          cat doppler_secrets.json | jq -r 'to_entries[] | 
-            select(.key | startswith("DOPPLER_") | not) | 
-            "\(.key)=\(.value)"' | while IFS='=' read -r key value; do
-            if [ ! -z "$key" ]; then
-              echo "Adding $key to Vercel Production..."
-              echo "$value" | vercel env add "$key" production --force \
-                --token="$VERCEL_TOKEN" 2>/dev/null || echo "⚠️ Failed to add $key"
-            fi
-          done
-          
-          echo "✅ Sync to Production complete"
+          echo "🔍 Verifying sync..."
+          node scripts/verify-doppler-vercel-integration.js --env="${{ github.event.inputs.environment || 'production' }}" || true
       
-      - name: Clean up
-        if: always()
-        run: |
-          rm -f doppler_secrets.json
-          echo "✅ Cleaned up temporary files"
-      
-      - name: Notify completion
+      - name: Summary
         run: |
           echo "🎉 Doppler → Vercel sync completed successfully!"
-          echo "All 48 secrets synced to Development, Preview, and Production"
+          echo "Synced to: ${{ steps.envs.outputs.environments }}"

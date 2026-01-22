@@ -73,6 +73,8 @@ For services without Vercel integrations (Storage), use a secret manager with Ve
 
 **Setup Steps:**
 
+> 📖 **For detailed setup instructions, see [Doppler-Vercel Integration Guide](./DOPPLER_VERCEL_INTEGRATION.md)**
+
 1. **Install Doppler Integration**
    - Vercel Dashboard → Project → Settings → Integrations
    - Search "Doppler" → Add Integration
@@ -121,6 +123,15 @@ For services without Vercel integrations (Storage), use a secret manager with Ve
    - Audit logs
 
 **Total Variables Managed**: ~9 storage-related variables
+
+**Verification:**
+```bash
+# Check integration status
+npm run env:check:doppler
+
+# Or manually verify
+node scripts/verify-doppler-vercel-integration.js
+```
 
 #### Option B: 1Password Secrets Automation
 
@@ -220,6 +231,8 @@ For remaining custom secrets that don't need rotation:
 
 ### Step 2: Set Up Doppler (20 minutes)
 
+> 📖 **For comprehensive setup instructions, see [Doppler-Vercel Integration Guide](./DOPPLER_VERCEL_INTEGRATION.md)**
+
 1. **Create Doppler Account**
    - Sign up at [doppler.com](https://doppler.com)
    - Free tier is sufficient
@@ -258,6 +271,11 @@ For remaining custom secrets that don't need rotation:
      - Development → `dev` config
      - Preview → `staging` config
      - Production → `prod` config
+
+6. **Verify Integration**
+   ```bash
+   npm run env:check:doppler
+   ```
 
 ### Step 3: Set Remaining Variables (5 minutes)
 
