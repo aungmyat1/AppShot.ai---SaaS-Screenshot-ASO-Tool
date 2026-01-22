@@ -4,6 +4,8 @@ This guide covers two approaches for integrating Doppler with Vercel:
 1. **Native Vercel Integration** (Recommended) - Automatic sync via Vercel Dashboard
 2. **Script-Based Sync** - Manual/CI-based sync using scripts
 
+> ⚠️ **Important**: When copying commands from this guide, **do NOT copy the markdown code fences** (```). Only copy the actual command lines inside the code blocks. PowerShell will error if you paste the fences.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -68,9 +70,13 @@ The native integration provides automatic, real-time sync of secrets from Dopple
 3. **Doppler Configs Created**
    ```bash
    # Create environment-specific configs
-   doppler configs create dev
-   doppler configs create staging
-   doppler configs create prod
+   # Note: Each config requires an environment flag
+   doppler configs create dev --environment development
+   doppler configs create staging --environment staging
+   doppler configs create prod --environment production
+   
+   # Or use the automated setup script:
+   npm run doppler:setup
    ```
 
 ### Step-by-Step Setup
@@ -498,7 +504,10 @@ npm run env:sync:prod
 ### Verification
 ```bash
 # Check integration status
-# Vercel Dashboard → Settings → Integrations
+npm run env:check:doppler
+
+# Or check in Vercel Dashboard
+# Settings → Integrations
 
 # Check synced secrets
 vercel env ls
@@ -506,3 +515,7 @@ vercel env ls
 # Test deployment
 vercel --prod
 ```
+
+### Command Reference
+For a complete command reference with all options and examples, see:
+- **[DOPPLER_VERCEL_COMMANDS.md](./DOPPLER_VERCEL_COMMANDS.md)** - Complete command reference

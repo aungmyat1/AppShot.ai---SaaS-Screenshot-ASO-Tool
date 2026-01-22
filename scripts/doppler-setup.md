@@ -47,9 +47,13 @@ Alternatively, you can run the commands manually:
 doppler setup --project getappshots
 
 # Create configurations for different environments
-doppler configs create dev
-doppler configs create staging
-doppler configs create prod
+# Note: Each config requires an environment flag
+doppler configs create dev --environment development
+doppler configs create staging --environment staging
+doppler configs create prod --environment production
+
+# Or use the automated setup script:
+npm run doppler:setup
 ```
 
 ### Adding Secrets

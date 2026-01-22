@@ -88,9 +88,12 @@ Reduce manual setup by 85%+ while maximizing security.
 3. **Create Project & Configs**
    ```bash
    doppler setup --project getappshots
-   doppler configs create dev
-   doppler configs create staging
-   doppler configs create prod
+   doppler configs create dev --environment development
+   doppler configs create staging --environment staging
+   doppler configs create prod --environment production
+   
+   # Or use the automated setup script:
+   npm run doppler:setup
    ```
 
 4. **Add Storage Secrets**
