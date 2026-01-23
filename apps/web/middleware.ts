@@ -117,7 +117,9 @@ function fallbackMiddleware(req: NextRequest) {
 
   if (isPublicApi(req)) return res;
 
-  if (authMode === "fastapi") {
+  // Type assertion needed because TypeScript narrows authMode type in conditional export
+  const currentAuthMode: AuthMode = authMode;
+  if (currentAuthMode === "fastapi") {
     // Cookie-based guard for pages; API auth happens inside Next route handlers.
     if (isProtectedRoute(req)) {
       const hasAccess = req.cookies.get("access_token")?.value;
@@ -229,7 +231,9 @@ export default isValidClerkKey && authMode === "clerk"
 
       if (isPublicApi(req)) return res;
 
-      if (authMode === "fastapi") {
+      // Type assertion needed because TypeScript narrows authMode type in conditional export
+      const currentAuthMode: AuthMode = authMode;
+      if (currentAuthMode === "fastapi") {
         // Cookie-based guard for pages; API auth happens inside Next route handlers.
         if (isProtectedRoute(req)) {
           const hasAccess = req.cookies.get("access_token")?.value;
