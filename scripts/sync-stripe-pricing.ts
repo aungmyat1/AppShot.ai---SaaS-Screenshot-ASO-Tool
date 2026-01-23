@@ -12,7 +12,7 @@
  */
 
 import Stripe from "stripe";
-import { PRICING_PLANS, getActivePricingPlans } from "./apps/web/lib/pricing-config";
+import { PRICING_PLANS, getActivePricingPlans } from "../apps/web/lib/pricing-config";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const FORCE_UPDATE = process.argv.includes("--force");

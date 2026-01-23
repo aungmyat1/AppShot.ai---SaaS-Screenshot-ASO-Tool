@@ -108,6 +108,12 @@ Complete Doppler to Vercel integration guide:
 Quick start guide for Doppler-Vercel integration:
 - Essential steps only
 - Quick reference for common commands
+
+#### **[DOPPLER_VERCEL_COMMANDS.md](./DOPPLER_VERCEL_COMMANDS.md)**
+Complete command reference for Doppler-Vercel integration:
+- All npm scripts and options
+- Common workflows
+- Troubleshooting commands
 - Troubleshooting tips
 
 **Use when**: You need a quick reference for Doppler-Vercel setup

@@ -26,12 +26,22 @@ This key format is incorrect - it appears to be a corrupted or encoded value ins
 
 ### Step 2: Update in Doppler
 
+**First, create the configs if they don't exist:**
+```bash
+doppler configs create dev --environment development
+doppler configs create staging --environment staging  
+doppler configs create prod --environment production
+```
+
+**Then set the key:**
 ```bash
 # Update for all environments
 doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config prod
 doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config staging
 doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config dev
 ```
+
+**Note**: If Doppler configs don't exist or you can't access Doppler, you can fix the key directly in Vercel Dashboard (see `FIX_CLERK_KEY_NOW.md` for fastest option).
 
 ### Step 3: Update Local .env.local
 

@@ -102,6 +102,7 @@ npm run web:build             # Build web app only
 # Testing
 npm run lint                  # Lint all code
 npm run env:check             # Verify environment variables
+npm run env:check:doppler     # Verify Doppler-Vercel integration
 
 # Setup & Deployment
 npm run setup:services        # Interactive setup wizard
@@ -156,6 +157,7 @@ npm run stripe:check          # Verify Stripe setup
 - [Setup Environment Variables](./docs/SETUP_ENVIRONMENT_VARIABLES.md)
 - [Setup Local Development](./docs/SETUP_LOCAL.md)
 - [Vercel Deployment with Integrations](./docs/DEPLOY_VERCEL_INTEGRATIONS.md)
+- [Doppler to Vercel Integration](./docs/DOPPLER_VERCEL_INTEGRATION.md) ⭐ **New**
 - [Quick Secrets Setup (40 min)](./docs/QUICK_SETUP_SECRETS.md)
 - [Stripe Configuration](./docs/STRIPE_PRICING_SYNC.md)
 
