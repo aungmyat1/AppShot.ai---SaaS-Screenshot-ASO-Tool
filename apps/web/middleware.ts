@@ -1,6 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+// Validate server-side environment variables at startup
+// This will throw if env vars are invalid, catching config errors early
+import "@/lib/env";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/admin(.*)"]);
 const isProtectedApi = createRouteMatcher(["/api/(.*)"]);

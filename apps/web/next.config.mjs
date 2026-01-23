@@ -2,8 +2,8 @@
 import path from "path";
 // Validate environment variables at build time
 import "@getappshots/config";
-// Validate server-side environment variables
-import "./lib/env";
+// Note: Server-side env validation (lib/env.ts) runs when imported by application code
+// We don't import it here because next.config.mjs can't import TypeScript files directly
 
 const nextConfig = {
   reactStrictMode: true,
