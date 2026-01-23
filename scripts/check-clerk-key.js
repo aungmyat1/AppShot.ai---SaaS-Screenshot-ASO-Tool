@@ -7,6 +7,7 @@
 
 const { spawnSync } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
 const args = process.argv.slice(2);
 const dopplerConfig = args.find(a => a.startsWith('--config='))?.slice('--config='.length) || 'prod';
@@ -18,6 +19,8 @@ console.log(`Vercel Environment: ${vercelEnv}\n`);
 
 // Check Doppler
 console.log('📦 Checking Doppler...');
+let dopplerValue = null;
+
 const dopplerResult = spawnSync(
   'doppler',
   ['secrets', 'get', 'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', '--plain', '--config', dopplerConfig],
@@ -25,26 +28,86 @@ const dopplerResult = spawnSync(
 );
 
 if (dopplerResult.status !== 0) {
-  console.error('❌ Failed to get key from Doppler');
-  console.error(dopplerResult.stderr);
+  console.warn('⚠️  Failed to get key from Doppler');
+  if (dopplerResult.stderr) {
+    const errorMsg = dopplerResult.stderr.toString();
+    console.warn(`   Error: ${errorMsg.trim()}`);
+    
+    // Check if config doesn't exist
+    if (errorMsg.includes('Could not find requested config')) {
+      console.log('\n💡 The config might not exist. Checking available configs...');
+      const configsResult = spawnSync('doppler', ['configs', '--json'], { encoding: 'utf8' });
+      if (configsResult.status === 0) {
+        try {
+          const configs = JSON.parse(configsResult.stdout);
+          if (configs.configs && configs.configs.length > 0) {
+            console.log('   Available configs:');
+            configs.configs.forEach(c => {
+              console.log(`     - ${c.name} (${c.environment})`);
+            });
+            console.log(`\n   Try using one of these configs, e.g.:`);
+            console.log(`   npm run env:check:clerk-key -- --config=${configs.configs[0].name}`);
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+    }
+  }
+  console.log('\n📄 Checking local .env.local file instead...');
+  
+  // Fallback to .env.local
+  const envLocalPath = path.join(process.cwd(), '.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    const envContent = fs.readFileSync(envLocalPath, 'utf8');
+    const match = envContent.match(/NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=["']?([^"'\n]+)["']?/);
+    if (match && match[1]) {
+      dopplerValue = match[1].trim();
+      console.log('   Found key in .env.local');
+    } else {
+      console.log('   Key not found in .env.local');
+    }
+  } else {
+    console.log('   .env.local file not found');
+  }
+} else {
+  dopplerValue = dopplerResult.stdout.trim();
+}
+
+if (dopplerValue) {
+  console.log(`\n📋 Key Value: ${dopplerValue.substring(0, 20)}...${dopplerValue.substring(dopplerValue.length - 10)}`);
+  console.log(`   Length: ${dopplerValue.length} characters`);
+} else {
+  console.log('\n❌ No key found in Doppler or .env.local');
+  console.log('\n💡 Next steps:');
+  console.log('1. Check if Doppler is configured: doppler setup --project getappshots');
+  console.log('2. Check available configs: doppler configs');
+  console.log('3. Or check your .env.local file directly');
   process.exit(1);
 }
 
-const dopplerValue = dopplerResult.stdout.trim();
-console.log(`Doppler Value: ${dopplerValue.substring(0, 20)}...${dopplerValue.substring(dopplerValue.length - 10)}`);
-console.log(`Length: ${dopplerValue.length} characters`);
-
-// Validate format
+// Validate format - check for the specific corrupted pattern
+const hasCorruptedPattern = dopplerValue && dopplerValue.includes('Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA');
 const isValidFormat = dopplerValue && 
   (dopplerValue.startsWith('pk_test_') || dopplerValue.startsWith('pk_live_')) &&
-  dopplerValue.length > 50;
+  dopplerValue.length > 50 &&
+  !hasCorruptedPattern &&
+  // Additional check: valid Clerk keys have alphanumeric characters after the prefix
+  /^pk_(test_|live_)[A-Za-z0-9]{40,}$/.test(dopplerValue);
 
 if (isValidFormat) {
   console.log('✅ Key format is VALID\n');
 } else {
   console.log('❌ Key format is INVALID');
-  console.log('   Expected: Starts with pk_test_ or pk_live_ and is 50+ characters');
-  console.log(`   Got: ${dopplerValue.substring(0, 50)}...\n`);
+  console.log('   Expected: Starts with pk_test_ or pk_live_ followed by 40+ alphanumeric characters');
+  console.log(`   Got: ${dopplerValue.substring(0, 60)}...\n`);
+  
+  if (hasCorruptedPattern) {
+    console.log('   ⚠️  DETECTED: This appears to be a corrupted/encoded value!');
+    console.log('   The key contains: Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA');
+    console.log('   This is NOT a valid Clerk publishable key.');
+    console.log('   You need to get the actual key from https://dashboard.clerk.com\n');
+  }
   
   // Try to decode if it looks like base64
   if (dopplerValue.length > 20 && !dopplerValue.includes(' ')) {
