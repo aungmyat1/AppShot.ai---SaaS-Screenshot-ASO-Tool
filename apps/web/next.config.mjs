@@ -2,6 +2,8 @@
 import path from "path";
 // Validate environment variables at build time
 import "@getappshots/config";
+// Validate server-side environment variables
+import "./lib/env";
 
 const nextConfig = {
   reactStrictMode: true,
