@@ -9,7 +9,12 @@ const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/admin(.*)"]);
 const isProtectedApi = createRouteMatcher(["/api/(.*)"]);
 const isPublicApi = createRouteMatcher(["/api/stripe/webhook(.*)", "/api/webhooks/stripe(.*)", "/api/auth/(.*)"]);
 
-const authMode: "clerk" | "fastapi" = (process.env.NEXT_PUBLIC_AUTH_MODE || process.env.AUTH_MODE || "clerk") as "clerk" | "fastapi";
+type AuthMode = "clerk" | "fastapi";
+const getAuthMode = (): AuthMode => {
+  const mode = process.env.NEXT_PUBLIC_AUTH_MODE || process.env.AUTH_MODE || "clerk";
+  return (mode === "fastapi" ? "fastapi" : "clerk") as AuthMode;
+};
+const authMode = getAuthMode();
 
 // Validate Clerk publishable key format
 const rawPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
