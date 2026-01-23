@@ -32,6 +32,7 @@
     "env:check": "node scripts/verify-env.js",
     "env:check:clerk": "node scripts/verify-clerk-env.js",
     "env:check:doppler": "node scripts/verify-doppler-vercel-integration.js",
+    "env:check:clerk-key": "node scripts/check-clerk-key.js",
     "env:list": "doppler secrets --plain",
     "check:deployment": "node scripts/check-deployment-readiness.js",
     "predeployment": "node scripts/check-deployment-readiness.js",

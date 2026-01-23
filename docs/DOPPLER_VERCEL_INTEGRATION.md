@@ -386,6 +386,89 @@ node scripts/sync-doppler-to-vercel.js --project=your-project-id --env=productio
 
 ### General Issues
 
+#### Clerk Publishable Key Invalid Error
+
+**Problem**: Build fails with error:
+```
+Error: @clerk/clerk-react: The publishableKey passed to Clerk is invalid.
+(key=Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA)
+```
+
+**Cause**: The `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` environment variable in Vercel is set to an invalid value (placeholder, corrupted, or wrong format).
+
+**Common Causes**:
+1. **Doppler sync issue**: The value in Doppler might be incorrect or corrupted
+2. **Wrong value stored**: Someone may have stored a URL or encoded value instead of the actual key
+3. **Sync not completed**: The sync from Doppler to Vercel may not have run or failed
+
+**Diagnosis**:
+Run the diagnostic script to check what's in Doppler:
+```bash
+npm run env:check:clerk-key -- --config=prod --env=production
+```
+
+This will show:
+- What value is stored in Doppler
+- Whether the format is valid
+- Whether it matches what's in Vercel
+
+**Solutions**:
+
+**Step 1: Check what's in Doppler**
+```bash
+# Check the current value in Doppler
+doppler secrets get NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --plain --config prod
+
+# Or use the diagnostic script
+npm run env:check:clerk-key -- --config=prod
+```
+
+**Step 2: Fix the value in Doppler** (if wrong):
+```bash
+# Get your valid Clerk key from https://dashboard.clerk.com
+# Then update in Doppler:
+doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config prod
+doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config staging
+doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE" --config dev
+```
+
+**Step 3: Re-sync to Vercel**:
+```bash
+# Sync to all environments
+npm run env:sync:prod
+npm run env:sync:preview
+npm run env:sync:dev
+```
+
+**Alternative: Update directly in Vercel** (if not using Doppler sync):
+1. **Get your valid Clerk key**:
+   - Go to [Clerk Dashboard](https://dashboard.clerk.com)
+   - Navigate to **API Keys** (or your application → **API Keys**)
+   - Copy the **Publishable Key** (should start with `pk_test_` or `pk_live_`)
+
+2. **Update in Vercel**:
+   - Go to Vercel Dashboard → Your Project → **Settings** → **Environment Variables**
+   - Find `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+   - Delete the invalid value
+   - Add the correct key (should be ~51+ characters, starting with `pk_test_` or `pk_live_`)
+   - Ensure it's set for **Production**, **Preview**, and **Development** environments
+
+3. **If using Vercel Clerk Integration**:
+   - Go to **Settings** → **Integrations** → **Clerk**
+   - Reconnect or refresh the integration
+   - The key should auto-sync from Clerk
+
+4. **If using Doppler**:
+   - Verify the key in Doppler: `doppler secrets get NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --plain`
+   - Ensure it's the correct format (not a placeholder)
+   - Re-sync to Vercel: `npm run env:sync:prod`
+
+5. **Verify the key format**:
+   - ✅ Valid: `pk_test_51AbCdEf...` (51+ characters)
+   - ❌ Invalid: Placeholder values, base64 strings, or truncated keys
+
+6. **Redeploy** after fixing the key
+
 #### Secrets Not Available in Deployment
 
 **Solutions**:
