@@ -40,7 +40,9 @@
     "setup:database": "node scripts/setup-database.js",
     "update:database": "node scripts/update-vercel-database.js",
     "deploy:vercel": "node scripts/deploy-to-vercel.js",
-    "deploy:production": "node scripts/deploy-vercel-production.js"
+    "deploy:production": "node scripts/deploy-vercel-production.js",
+    "deploy:monitor": "node scripts/monitor-vercel-deployment.js --watch",
+    "deploy:check": "node scripts/monitor-vercel-deployment.js"
   },
   "devDependencies": {
     "turbo": "^2.7.5"

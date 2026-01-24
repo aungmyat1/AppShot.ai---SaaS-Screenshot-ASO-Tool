@@ -1,0 +1,72 @@
+name: Deployment Notifications
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  notify-deployment:
+    name: Send Deployment Notification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "message=$(git log -1 --pretty=%B | head -n 1)" >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+
+      - name: Deployment Started
+        run: |
+          echo "🚀 Deployment started for commit ${{ steps.commit.outputs.sha }}"
+          echo "📝 Message: ${{ steps.commit.outputs.message }}"
+          echo "👤 Author: ${{ steps.commit.outputs.author }}"
+
+      # Optional: Send to Slack
+      - name: Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK_URL }}
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Deployment started",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Deployment Started*\n\n*Commit:* `${{ steps.commit.outputs.sha }}`\n*Message:* ${{ steps.commit.outputs.message }}\n*Author:* ${{ steps.commit.outputs.author }}\n*Branch:* `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      # Optional: Send to Discord
+      - name: Send Discord notification
+        if: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "🚀 Deployment Started",
+                "description": "New deployment triggered",
+                "color": 3447003,
+                "fields": [
+                  {"name": "Commit", "value": "`${{ steps.commit.outputs.sha }}`", "inline": true},
+                  {"name": "Branch", "value": "`${{ github.ref_name }}`", "inline": true},
+                  {"name": "Author", "value": "${{ steps.commit.outputs.author }}", "inline": true},
+                  {"name": "Message", "value": "${{ steps.commit.outputs.message }}"}
+                ],
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'"
+              }]
+            }' \
+            "${{ secrets.DISCORD_WEBHOOK_URL }}"
