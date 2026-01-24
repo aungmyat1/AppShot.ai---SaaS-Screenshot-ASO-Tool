@@ -53,5 +53,11 @@
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
+  },
+  "overrides": {
+    "glob": "^10.0.0",
+    "whatwg-encoding": "^3.1.1",
+    "inflight": "^1.0.7",
+    "node-domexception": "^4.0.0"
   }
 }

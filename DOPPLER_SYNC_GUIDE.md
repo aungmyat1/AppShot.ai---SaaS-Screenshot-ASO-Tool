@@ -24,7 +24,7 @@
 
 ```
 Name:  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-Value: pk_live_***********************
+Value:  pk_live_*******************
 ```
 
 ```

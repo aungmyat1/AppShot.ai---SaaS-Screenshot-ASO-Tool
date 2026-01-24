@@ -4,7 +4,7 @@
 
 The Clerk publishable key in your environment is **invalid**:
 ```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_****************************"
 ```
 
 This key format is incorrect - it appears to be a corrupted or encoded value instead of a valid Clerk publishable key.
@@ -46,7 +46,7 @@ doppler secrets set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_H
 ### Step 3: Update Local .env.local
 
 Update line 9 in `.env.local`:
-```env
+```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_ACTUAL_KEY_HERE"
 ```
 
@@ -71,7 +71,7 @@ doppler secrets get NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --plain --config prod
 ## Valid Key Format
 
 ✅ **Valid**: `pk_test_51AbCdEf...` (51+ characters, starts with `pk_test_` or `pk_live_`)  
-❌ **Invalid**: `pk_test_Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA` (corrupted/encoded value)
+❌ **Invalid**: `pk_test_***********` (corrupted/encoded value)
 
 ## Diagnostic Tools
 

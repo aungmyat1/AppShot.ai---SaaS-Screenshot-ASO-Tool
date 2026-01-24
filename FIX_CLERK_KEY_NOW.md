@@ -4,7 +4,7 @@
 
 Your Clerk publishable key is **corrupted/invalid**:
 ```
-pk_test_Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA
+pk_test_****************************
 ```
 
 This is causing build failures on Vercel.
@@ -71,8 +71,8 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_YOUR_REAL_KEY_HERE"
 
 ## Valid Key Format
 
-✅ **Valid**: `pk_test_51AbCdEfGhIjKlMnOpQrStUvWxYz1234567890AbCdEf` (51+ characters)  
-❌ **Invalid**: `pk_test_Y3JlZGlibGUtYmx1ZWdpbGwtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA` (corrupted)
+✅ **Valid**: `pk_test_fake_key_for_documentation_only_no_real_key` (example format)
+❌ **Invalid**: `pk_test_***********` (corrupted)
 
 ## Verify the Fix
 
