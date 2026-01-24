@@ -24,13 +24,18 @@
 
 ```
 Name:  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-Value: pk_live_Y2xlcmsuZ2V0YXBwc2hvdHMuY29tJA
+Value: pk_live_YOUR_CLERK_PUBLISHABLE_KEY
 ```
 
 ```
 Name:  CLERK_SECRET_KEY
-Value: sk_live_fLUXoF09A0ifLBojSWA580fpod5Zxho5kiheVM10tI
+Value: sk_live_YOUR_CLERK_SECRET_KEY
 ```
+
+**Get these from Clerk Dashboard:**
+- Go to: https://dashboard.clerk.com
+- Select your app → API Keys
+- Copy "Publishable Key" (starts with `pk_live_`) and "Secret Key" (starts with `sk_live_`)
 
 ```
 Name:  NEXT_PUBLIC_CLERK_SIGN_IN_URL

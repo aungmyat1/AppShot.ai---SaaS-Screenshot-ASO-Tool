@@ -31,13 +31,18 @@ npm run doppler:guide
 
 Go to **Doppler Dashboard** → **Getappshots** → **prd** config
 
-Add these keys:
+Add these keys (get real values from your Clerk Dashboard):
 ```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = pk_live_Y2xlcmsuZ2V0YXBwc2hvdHMuY29tJA
-CLERK_SECRET_KEY = sk_live_fLUXoF09A0ifLBojSWA580fpod5Zxho5kiheVM10tI
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = pk_live_YOUR_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY = sk_live_YOUR_CLERK_SECRET_KEY
 NEXT_PUBLIC_CLERK_SIGN_IN_URL = /sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL = /sign-up
 ```
+
+**Where to find these:**
+- Go to: https://dashboard.clerk.com
+- Select your app → API Keys
+- Copy "Publishable Key" and "Secret Key"
 
 ### 3. Connect Doppler to Vercel
 

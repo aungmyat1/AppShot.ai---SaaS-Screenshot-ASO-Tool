@@ -3,10 +3,12 @@
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
 const PROJECT_ID = 'prj_LPfgsI5roKyo3CFHWInU4hlg2jxs';
 
-// Clerk keys from Doppler (you already have these in Doppler prd config)
+// IMPORTANT: Replace these with your actual Clerk keys from Doppler
+// Get them from: https://dashboard.doppler.com/ → getappshots → prd config
+// Or run: doppler secrets --project getappshots --config prd
 const CLERK_KEYS = {
-  'CLERK_SECRET_KEY': 'sk_live_fLUXoF09AOifLBojSWA580fpod5Zxho5kiheVM10tI',
-  'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY': 'pk_live_Y2xlcmsuZ2V0YXBwc2hvdHMuY29tJA',
+  'CLERK_SECRET_KEY': process.env.CLERK_SECRET_KEY || 'GET_FROM_DOPPLER',
+  'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY': process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'GET_FROM_DOPPLER',
   'NEXT_PUBLIC_CLERK_SIGN_IN_URL': '/sign-in',
   'NEXT_PUBLIC_CLERK_SIGN_UP_URL': '/sign-up'
 };
