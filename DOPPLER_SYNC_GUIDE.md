@@ -24,12 +24,12 @@
 
 ```
 Name:  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-Value: pk_live_YOUR_CLERK_PUBLISHABLE_KEY
+Value: pk_live_***********************
 ```
 
 ```
 Name:  CLERK_SECRET_KEY
-Value: sk_live_YOUR_CLERK_SECRET_KEY
+Value: sk_live_***********************
 ```
 
 **Get these from Clerk Dashboard:**
@@ -394,7 +394,7 @@ You'll know it's working when:
 
 **Ready to begin?**
 
-```powershell
+```
 # Run the interactive guide
 npm run doppler:guide
 ```
