@@ -42,7 +42,10 @@
     "deploy:vercel": "node scripts/deploy-to-vercel.js",
     "deploy:production": "node scripts/deploy-vercel-production.js",
     "deploy:monitor": "node scripts/monitor-vercel-deployment.js --watch",
-    "deploy:check": "node scripts/monitor-vercel-deployment.js"
+    "deploy:check": "node scripts/monitor-vercel-deployment.js",
+    "clerk:check": "node scripts/check-clerk-vercel.js",
+    "doppler:verify": "node scripts/verify-doppler-sync.js",
+    "doppler:guide": "node scripts/setup-doppler-guide.js"
   },
   "devDependencies": {
     "turbo": "^2.7.5"
