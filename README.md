@@ -23,6 +23,16 @@ npm run env:sync:prod     # Sync production environment
 npm run env:check         # Verify environment variables
 ```
 
+## Branch Protection
+
+This project implements branch protection rules to ensure code quality and enforce proper workflow practices:
+
+- `main` branch: Protected with required pull request reviews, status checks, and up-to-date requirements
+- `develop` branch: Protected with basic checks for ongoing development
+- `staging` branch: Protected for pre-production validation
+
+See [GITHUB_BRANCH_PROTECTION_GUIDE.md](GITHUB_BRANCH_PROTECTION_GUIDE.md) for detailed setup instructions.
+
 ## Quick Start
 
 1. Install dependencies: `npm install`
