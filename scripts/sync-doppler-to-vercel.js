@@ -44,10 +44,17 @@ const options = {
   allowlistPath: parseArgValue('--allowlist='),
 };
 
+/**
+ * Mapping of Vercel environments to Doppler configuration names.
+ * Note: This project uses the following Doppler config names:
+ * - development: 'dev'
+ * - preview: 'preview' (not 'staging')
+ * - production: 'prd' (not 'prod')
+ */
 const ENV_TO_DOPPLER_CONFIG = {
   development: 'dev',
-  preview: 'staging',
-  production: 'prod',
+  preview: 'preview',
+  production: 'prd',
 };
 
 const TARGETS = new Set(['development', 'preview', 'production']);
