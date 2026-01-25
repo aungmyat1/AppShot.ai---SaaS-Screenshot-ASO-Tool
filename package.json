@@ -48,16 +48,13 @@
     "doppler:guide": "node scripts/setup-doppler-guide.js"
   },
   "devDependencies": {
-    "turbo": "^2.7.5"
+    "turbo": "2.7.6"
   },
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "overrides": {
-    "glob": "^10.0.0",
-    "whatwg-encoding": "^3.1.1",
-    "inflight": "^1.0.7",
-    "node-domexception": "^4.0.0"
+    "glob": "^9.5.0"
   }
 }

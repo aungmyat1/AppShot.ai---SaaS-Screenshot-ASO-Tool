@@ -1,173 +1,175 @@
 # Comprehensive Launch Plan for AppShot.ai SaaS Platform
 
-Based on my analysis of the AppShot.ai project and taking into account the technical specifications and best practices, I've created a comprehensive launch plan that includes testing phases.
+Based on the AppShot.ai project structure and best practices, this plan covers pre-launch preparation, testing, staging, production, and post-launch activities.
 
-## Phase 1: Pre-Launch Preparation (Week 1-2)
+**Timeline:** ~9 days to full launch (aggressive, parallel work)  
+**Last updated:** 2026-01-25
 
-### 1.1 Environment Setup
-- Set up Doppler project for environment variable management
-- Configure three environments: Development, Staging, Production
-- Populate all required environment variables following the security guidelines
-- Sync environment variables to Vercel using `npm run env:sync`
+---
 
-### 1.2 Third-party Service Configuration
-- Configure Clerk for authentication:
-  - Set up production domains
-  - Configure authentication settings
-  - Set up user management flows
-- Configure Stripe for billing:
-  - Run `npm run stripe:sync` to create products and prices
-  - Set up webhook endpoints
-  - Configure payment methods
-- Configure Cloudflare R2 or AWS S3 for file storage
-- Set up PostgreSQL database with appropriate capacity
+## Current Condition (as of last update)
 
-### 1.3 Code and Dependency Verification
-- Run `npm install` to ensure all dependencies are correctly installed
-- Verify the `overrides` in package.json are still appropriate
-- Run `npm run typecheck` to ensure TypeScript compilation works
-- Execute `npm run lint` to check code quality
+| Area | Status |
+|------|--------|
+| **Vercel** | `vercel.json` configured: `npm ci` install, `npx turbo run build --filter=getappshots`, Next.js, `iad1`, 60s API timeout. Auto-deploy on push to production branch when Git linked. |
+| **Doppler** | Env sync via `npm run env:sync:dev` \| `env:sync:preview` \| `env:sync:prod`. Use for all secrets; avoid duplicating in Vercel. |
+| **Preview / waitlist** | Dev-only `/preview` page: password gate + email collection (`WaitlistEmail`). Set `DEV_PASSWORD` in dev; APIs restricted to `NODE_ENV === "development"`. |
+| **Monorepo** | Turborepo; app package `getappshots` in `apps/web`. Tests, typecheck, e2e live in `apps/web` — run via `npm --workspace apps/web run <script>`. |
+| **Clerk** | Ensure `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` in Vercel/Doppler matches production Clerk app (e.g. `pk_live_...` for getappshots.com). Wrong key blocks deployment. |
+| **Vercel install 404s** | If you see `aiofiles@^24.7.0` (or similar) 404: use `npm ci` as Install Command; clear any overrides in Vercel → Settings → General. See `VERCEL_DEPLOYMENT_CONFIGURATION.md` Troubleshooting. |
 
-## Phase 2: Testing Strategy (Week 2-3)
+---
 
-### 2.1 Unit Testing
+## Phase 1: Pre-Launch Preparation (Days 1–3)
+
+**Parallel work:** Run environment setup, service config, and code verification simultaneously.
+
+### 1.1 Environment Setup (Day 1)
+- Set up Doppler project (if not done): `npm run doppler:setup`
+- Configure environments: **Development**, **Staging** (preview), **Production**
+- Populate required env vars; sync to Vercel: `npm run env:sync:dev` | `env:sync:preview` | `env:sync:prod`
+
+### 1.2 Third-Party Service Configuration (Day 1–2)
+- **Clerk**: production domains, auth settings; verify keys in Vercel/Doppler
+- **Stripe**: `npm run stripe:sync` for products/prices; configure webhooks
+- **Storage**: Cloudflare R2 or AWS S3 (env: `STORAGE_*` / `R2_*`)
+- **Database**: PostgreSQL (e.g. Neon); run Prisma migrations if needed
+
+### 1.3 Code and Dependency Verification (Day 1–2, parallel)
+- Install: `npm ci`
+- Typecheck: `npm --workspace apps/web run typecheck`
+- Lint: `npm run lint`
+- Build: `npm run build` (verify it works)
+
+## Phase 2: Testing Strategy (Days 2–4)
+
+**Parallel work:** Run unit tests while setting up integration tests; E2E in parallel with performance checks.
+
+### 2.1 Unit Testing (Day 2)
 ```bash
-# Run all unit tests
-npm run test
+npm --workspace apps/web run test
 ```
-- Verify all core functions work as expected
-- Test utility functions in the lib directory
-- Validate pricing calculations and plan restrictions
+- Core functions, `lib/` utilities, pricing logic
 
-### 2.2 Integration Testing
-- Test the complete user journey from signup to subscription
-- Verify database operations (user creation, plan updates, usage tracking)
-- Test API integrations (Clerk authentication, Stripe payments, storage services)
-- Validate screenshot extraction functionality for both iOS and Android apps
+### 2.2 Integration Testing (Day 2–3)
+- Full user journey: signup → subscription
+- DB operations, Clerk/Stripe/storage integrations
+- Screenshot extraction (iOS & Android)
 
-### 2.3 End-to-End Testing
+### 2.3 End-to-End Testing (Day 3)
 ```bash
-# Run e2e tests
-npm run e2e
+npm --workspace apps/web run e2e
 ```
-- Test complete user workflows
-- Verify subscription flows
-- Validate download functionality
-- Test admin panel capabilities
+- Critical user workflows, subscription flows, downloads
 
-### 2.4 Performance Testing
-- Load test the screenshot extraction functionality
-- Test concurrent user sessions
-- Validate response times under load
-- Test database performance under expected loads
+### 2.4 Performance & Security (Day 3–4, minimal)
+- Quick load test on screenshot extraction
+- Basic security checks: auth flows, input validation, authorization
+- **Note:** Full penetration testing can be post-launch
 
-### 2.5 Security Testing
-- Penetration testing of authentication flows
-- Verify sensitive data protection
-- Test input validation and sanitization
-- Verify proper authorization controls
+## Phase 3: Staging Validation (Days 4–5)
 
-## Phase 3: Staging Validation (Week 3-4)
+### 3.1 Staging Deployment (Day 4)
+- Deploy via Vercel preview: `npm run env:sync:preview` → push to preview branch
+- Smoke tests on staging URL
+- Verify Vercel Install Command is `npm ci`
 
-### 3.1 Staging Deployment
-- Deploy to staging environment using Vercel
-- Configure staging-specific environment variables
-- Run smoke tests on staging environment
+### 3.2 Quick Validation (Day 4–5)
+- Internal team validation (critical paths only)
+- Fix critical bugs immediately; defer non-critical fixes
 
-### 3.2 User Acceptance Testing
-- Internal team validation of all features
-- Beta user testing if applicable
-- Stakeholder approval of all functionalities
+## Phase 4: Production Preparation (Day 5)
 
-### 3.3 Bug Fixes and Refinements
-- Address any issues found during staging validation
-- Optimize performance based on testing results
-- Finalize all content and copy
+### 4.1 Production Deployment (Day 5)
+- Deploy to production: push `main` → Vercel production
+- Verify monitoring, backups, SSL
 
-## Phase 4: Production Preparation (Week 4)
+### 4.2 Final Checks (Day 5)
+```bash
+npm run check:deployment
+npm run deploy:check
+```
+- Verify external services (Clerk, Stripe, DB, storage)
 
-### 4.1 Production Environment Setup
-- Deploy to production environment
-- Configure production monitoring and alerting
-- Set up backup procedures
-- Verify SSL certificates and security headers
+## Phase 5: Soft Launch (Days 6–8)
 
-### 4.2 Final Pre-Launch Checks
-- Execute deployment readiness check: `npm run check:deployment`
-- Verify all external services are properly connected
-- Confirm backup systems are operational
-- Validate disaster recovery procedures
-
-## Phase 5: Soft Launch (Week 5)
-
-### 5.1 Limited Release
+### 5.1 Limited Release (Day 6)
 - Launch to limited audience (early adopters, beta users)
-- Monitor system performance and user feedback
-- Track key metrics and usage patterns
-- Be prepared to rollback if critical issues arise
+- Monitor closely for 48 hours; ready to rollback
 
-### 5.2 Monitoring and Adjustment
-- Monitor system resources and performance metrics
-- Track user engagement and satisfaction
-- Make adjustments based on real-world usage
-- Document lessons learned
+### 5.2 Quick Validation (Days 6–8)
+- Monitor performance, user feedback, metrics
+- Fix critical issues; iterate quickly
 
-## Phase 6: Full Launch (Week 6)
+## Phase 6: Full Launch (Day 9+)
 
-### 6.1 Marketing Push
+### 6.1 Full Launch (Day 9)
 - Announce to full user base
 - Execute marketing campaigns
-- Engage with community channels
-- Monitor social media and feedback channels
+- Monitor closely for first 48 hours
 
-### 6.2 Post-Launch Activities
-- 24/7 monitoring for first week
+### 6.2 Post-Launch (Days 9–14)
+- Active monitoring for first week
 - Daily performance reviews
 - Customer support readiness
 - Rapid response plan for issues
 
+---
+
+## Timeline Summary
+
+| Phase | Duration | Days |
+|-------|----------|------|
+| **Phase 1: Pre-Launch** | 3 days | 1–3 |
+| **Phase 2: Testing** | 3 days | 2–4 (parallel) |
+| **Phase 3: Staging** | 2 days | 4–5 |
+| **Phase 4: Production Prep** | 1 day | 5 |
+| **Phase 5: Soft Launch** | 3 days | 6–8 |
+| **Phase 6: Full Launch** | Day 9+ | 9+ |
+| **Total to Full Launch** | **~9 days** | **1–9** |
+
+**Note:** Phases overlap where possible to compress timeline. Critical path is ~9 days to full launch.
+
 ## Technical Execution Commands
 
-### Environment Setup Scripts:
+### Environment setup
 ```bash
-# Set up services
 npm run setup:services
-
-# Set up database
 npm run setup:database
-
-# Configure Doppler
 npm run doppler:setup
-
-# Sync environment variables
+# Sync env to Vercel (choose env):
+npm run env:sync:dev    # development
+npm run env:sync:preview
 npm run env:sync:prod
+# Optional checks:
+npm run env:check
+npm run env:check:clerk
+npm run stripe:sync     # create Stripe products/prices
+npm run stripe:check
 ```
 
-### Testing Commands:
+### Testing
 ```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run e2e
-
-# Build verification
+npm ci
 npm run build
-
-# Type checking
-npm run typecheck
-
-# Linting
 npm run lint
+npm --workspace apps/web run typecheck
+npm --workspace apps/web run test
+npm --workspace apps/web run e2e
 ```
 
-### Deployment Commands:
+### Deployment
 ```bash
-# Deploy to Vercel
+# Trigger deploy (or push to main)
 npm run deploy:vercel
+# Production: npm run deploy:production
 
-# Monitor deployment
-npm run deploy:monitor
+# Readiness check
+npm run check:deployment
+
+# Monitor latest deployment
+npm run deploy:check
+npm run deploy:monitor   # watch mode
 ```
 
 ## Success Metrics
@@ -181,9 +183,18 @@ npm run deploy:monitor
 
 ## Rollback Plan
 
-- Maintain staging environment identical to production
-- Have immediate rollback procedures documented
-- Monitor for 24 hours post-launch
-- Criteria for initiating rollback defined and communicated
+- Keep staging/preview aligned with production (same build, env pattern)
+- Document rollback steps (Vercel: redeploy previous deployment, revert Git)
+- Monitor closely for 24h post-launch
+- Define and communicate rollback criteria (e.g. auth/payment outages, data issues)
 
-This comprehensive launch plan ensures all aspects of the AppShot.ai SaaS platform are thoroughly tested and validated before going live, with appropriate safeguards and monitoring in place for a successful launch.
+---
+
+## References
+
+- **Vercel**: `vercel.json`, `VERCEL_DEPLOYMENT_CONFIGURATION.md`, `VERCEL_DEPLOYMENT_GUIDE.md`
+- **Doppler / env**: `docs/DOPPLER_VERCEL_SETUP_COMPLETE.md`, `docs/QUICK_SETUP_SECRETS.md`
+- **Project status**: `PROJECT_STATUS.md`, `DEPLOYMENT_CHECKLIST.md`
+- **Preview / waitlist**: `/preview` (dev-only), `WaitlistEmail` model, `DEV_PASSWORD`
+
+This launch plan aligns with the current AppShot.ai setup and ensures thorough testing and validation before go-live, with clear commands and safeguards. The timeline is compressed to ~9 days through parallel work and focused testing on critical paths.
