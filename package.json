@@ -30,7 +30,7 @@
     "env:sync:prod": "node scripts/sync-doppler-to-vercel.js --env=production",
     "env:dry-run": "node scripts/sync-doppler-to-vercel.js --dry-run",
     "env:check": "node scripts/verify-env.js",
-    "env:check:clerk": "node scripts/verify-clerk-env.js",
+    "env:check:clerk": "node scripts/check-clerk-key.js",
     "env:check:doppler": "node scripts/verify-doppler-vercel-integration.js",
     "env:check:clerk-key": "node scripts/check-clerk-key.js",
     "env:list": "doppler secrets --plain",
@@ -43,6 +43,7 @@
     "deploy:production": "node scripts/deploy-vercel-production.js",
     "deploy:monitor": "node scripts/monitor-vercel-deployment.js --watch",
     "deploy:check": "node scripts/monitor-vercel-deployment.js",
+    "check:git-deploy": "node scripts/check-vercel-git-deploy.js",
     "clerk:check": "node scripts/check-clerk-vercel.js",
     "doppler:verify": "node scripts/verify-doppler-sync.js",
     "doppler:guide": "node scripts/setup-doppler-guide.js"
@@ -55,9 +56,6 @@
     "react-dom": "^19.2.3"
   },
   "overrides": {
-    "glob": "^10.0.0",
-    "whatwg-encoding": "^3.1.1",
-    "inflight": "^1.0.7",
-    "node-domexception": "^4.0.0"
+    "glob": "^9.5.0"
   }
 }

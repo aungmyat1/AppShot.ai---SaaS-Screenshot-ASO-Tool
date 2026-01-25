@@ -1,10 +1,29 @@
 {
   "name": "@getappshots/types",
-  "version": "0.1.0",
   "private": true,
-  "type": "module",
+  "version": "0.1.0",
+  "description": "Types for the GetAppShots monorepo",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "biome lint src",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "glob": "^9.5.0"
   }
 }
-

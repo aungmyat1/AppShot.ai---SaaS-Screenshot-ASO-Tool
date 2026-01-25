@@ -8,6 +8,8 @@ Your domains are properly configured in Vercel's DNS settings but are not linked
 ## Deployment Solutions
 
 ### Solution 1: Using Git (Recommended)
+Vercel deploys automatically when you push to your **production branch** (usually `main`). Ensure your project is connected to Git and the production branch is set in Vercel → Settings → Git.
+
 ```bash
 # Ensure you're on your main branch
 git checkout main
@@ -19,6 +21,8 @@ git commit -m "Prepare for production deployment"
 # Push to your repository to trigger automatic deployment
 git push origin main
 ```
+
+**Verify auto-deploy on push to main:** Run `npm run check:git-deploy` (requires `VERCEL_TOKEN`). This checks Git connection, production branch, and that deployments on push are enabled. See [Check auto-deploy](#check-auto-deploy-on-push-to-main) below.
 
 ### Solution 2: Using the New Production Deployment Script
 We've added a script to simplify the production deployment process:
@@ -102,6 +106,26 @@ To check your domain configuration after deployment:
 ```bash
 vercel domains
 ```
+
+### Check auto-deploy on push to main
+To confirm that **new commits to `main` (or your production branch) trigger a new Vercel deployment**:
+
+1. **Run the check script** (requires [Vercel token](https://vercel.com/account/tokens)):
+   ```bash
+   # PowerShell
+   $env:VERCEL_TOKEN="your_token"; npm run check:git-deploy
+
+   # Bash
+   VERCEL_TOKEN=your_token npm run check:git-deploy
+   ```
+   Optionally set `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` if using a different project or team.
+
+2. **In Vercel Dashboard:** Project → **Settings** → **Git**
+   - **Connect Git Repository** — must be connected (e.g. GitHub).
+   - **Production Branch** — set to `main` (or your production branch).
+   - **Create Deployments** — ensure deployments on push are enabled (default).
+
+3. **Quick test:** Push a small commit to `main` and watch the [Deployments](https://vercel.com/dashboard) tab for a new deployment.
 
 ## Verification Steps After Deployment
 
