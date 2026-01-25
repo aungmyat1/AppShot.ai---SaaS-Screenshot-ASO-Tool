@@ -17,6 +17,7 @@ Based on the AppShot.ai project structure and best practices, this plan covers p
 | **Monorepo** | Turborepo; app package `getappshots` in `apps/web`. Tests, typecheck, e2e live in `apps/web` — run via `npm --workspace apps/web run <script>`. |
 | **Clerk** | Ensure `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` in Vercel/Doppler matches production Clerk app (e.g. `pk_live_...` for getappshots.com). Wrong key blocks deployment. |
 | **Vercel install 404s** | If you see `aiofiles@^24.7.0` (or similar) 404: use `npm ci` as Install Command; clear any overrides in Vercel → Settings → General. See `VERCEL_DEPLOYMENT_CONFIGURATION.md` Troubleshooting. |
+| **Lockfile hygiene** | `npm ci` requires `package.json` and `package-lock.json` to match exactly. Check with `npm run lockfile:check`. Fix: `npm install` → commit lockfile. See `LOCKFILE_FIX.md`. |
 
 ---
 
@@ -36,7 +37,9 @@ Based on the AppShot.ai project structure and best practices, this plan covers p
 - **Database**: PostgreSQL (e.g. Neon); run Prisma migrations if needed
 
 ### 1.3 Code and Dependency Verification (Day 1–2, parallel)
-- Install: `npm ci`
+- **Lockfile check**: `npm run lockfile:check` (ensure `package.json` and `package-lock.json` match)
+  - If mismatch: `npm install` → commit `package-lock.json` → push (see `LOCKFILE_FIX.md`)
+- Install: `npm ci` (should pass after lockfile is synced)
 - Typecheck: `npm --workspace apps/web run typecheck`
 - Lint: `npm run lint`
 - Build: `npm run build` (verify it works)
