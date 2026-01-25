@@ -227,3 +227,6 @@ next-auth.session-token
 # Playwright
 playwright-report/
 test-results/
+
+.vercel
+.env*.local

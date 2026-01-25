@@ -15,10 +15,19 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.string().optional(),
 
-  // Database
-  DATABASE_URL: z.string().url().optional(), // Used by Prisma (required for web app)
-  DATABASE_URL_ASYNC: z.string().url().optional(), // For async operations if different from DATABASE_URL
-  REDIS_URL: z.string().url().optional(), // Optional - falls back to in-memory cache if not set
+  // Database - validate URL format if provided, but allow any string to prevent validation failures
+  DATABASE_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // Used by Prisma (required for web app)
+  DATABASE_URL_ASYNC: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // For async operations if different from DATABASE_URL
+  REDIS_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // Optional - falls back to in-memory cache if not set
 
   // Security
   JWT_SECRET_KEY: z.string().min(32).optional(), // Only needed if using JWT auth (web app uses Clerk)
@@ -34,18 +43,30 @@ const serverEnvSchema = z.object({
   // At least one storage method must be configured (validated at runtime in storage.ts)
   STORAGE_BUCKET: z.string().min(1).optional(), // Or R2_BUCKET_NAME
   STORAGE_REGION: z.string().min(1).optional().default("auto"),
-  STORAGE_ENDPOINT_URL: z.string().url().optional(), // Required for R2, optional for AWS S3
+  STORAGE_ENDPOINT_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // Required for R2, optional for AWS S3
   STORAGE_ACCESS_KEY_ID: z.string().optional(), // Or R2_ACCESS_KEY_ID
   STORAGE_SECRET_ACCESS_KEY: z.string().optional(), // Or R2_SECRET_ACCESS_KEY
-  STORAGE_PUBLIC_BASE_URL: z.string().url().optional(), // For public file access
-  STORAGE_PUBLIC_URL: z.string().url().optional(), // Alias for STORAGE_PUBLIC_BASE_URL
+  STORAGE_PUBLIC_BASE_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // For public file access
+  STORAGE_PUBLIC_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ), // Alias for STORAGE_PUBLIC_BASE_URL
 
   // R2-specific (alternative to STORAGE_*)
   R2_ACCOUNT_ID: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
-  R2_PUBLIC_URL: z.string().url().optional(),
+  R2_PUBLIC_URL: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Must be a valid URL format if provided" }
+  ),
 
   // CORS
   CORS_ORIGINS: z.string().optional(), // Comma-separated list of allowed origins

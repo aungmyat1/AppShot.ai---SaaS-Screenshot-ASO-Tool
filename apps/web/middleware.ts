@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-// Validate server-side environment variables at startup
-// This will throw if env vars are invalid, catching config errors early
-import "@/lib/env";
+// Note: Environment validation is intentionally skipped in middleware to prevent Edge Runtime crashes
+// Validation happens in API routes and server components where errors can be handled gracefully
+// Middleware runs in Edge Runtime which has limitations with error handling during module load
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/admin(.*)"]);
 const isProtectedApi = createRouteMatcher(["/api/(.*)"]);
