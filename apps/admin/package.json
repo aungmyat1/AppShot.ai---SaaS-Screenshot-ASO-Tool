@@ -17,8 +17,5 @@
   "devDependencies": {
     "@types/react": "19.2.9",
     "typescript": "^5.8.2"
-  },
-  "overrides": {
-    "glob": "^9.5.0"
   }
 }

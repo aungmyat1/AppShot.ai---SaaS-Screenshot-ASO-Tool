@@ -1,29 +1,10 @@
 {
   "name": "@getappshots/shared",
-  "private": true,
   "version": "0.1.0",
-  "description": "Shared utilities for the GetAppShots monorepo",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "private": true,
+  "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "biome lint src",
-    "type-check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@types/react": "^19.1.2",
-    "tsup": "^8.3.5",
-    "typescript": "^5.8.2"
-  },
-  "overrides": {
-    "glob": "^9.5.0"
+    ".": "./src/index.ts"
   }
 }
+

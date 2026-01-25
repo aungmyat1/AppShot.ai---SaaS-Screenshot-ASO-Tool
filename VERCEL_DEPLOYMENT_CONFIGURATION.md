@@ -9,7 +9,7 @@
 ```json
 {
   "buildCommand": "npx turbo run build --filter=getappshots",
-  "installCommand": "npm install --workspaces",
+  "installCommand": "npm ci",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
@@ -38,12 +38,12 @@
   - Matches the package name in `apps/web/package.json` (`"name": "getappshots"`)
 
 ### 2. Install Command ✅
-- **Value**: `npm install --workspaces`
+- **Value**: `npm ci`
 - **Status**: ✅ **CORRECT**
 - **Reason**: 
-  - Installs all workspace dependencies
-  - Required for Turborepo monorepo structure
-  - Ensures all packages are available for build
+  - Installs strictly from `package-lock.json` (no surprise deps)
+  - Works with npm workspaces; all workspace deps are in the lockfile
+  - Avoids 404s from bogus npm deps (e.g. `aiofiles` is PyPI-only, not npm)
 
 ### 3. Framework ✅
 - **Value**: `nextjs`
@@ -123,7 +123,7 @@ The same environment variables are properly declared in `turbo.json`:
 ## ✅ Verification Checklist
 
 - [x] Build command uses correct Turborepo filter
-- [x] Install command installs all workspaces
+- [x] Install command uses `npm ci` (lockfile-only install)
 - [x] Framework preset is Next.js
 - [x] Region is configured
 - [x] Environment variables are set correctly
@@ -149,8 +149,8 @@ All configuration is correct and verified:
 ## 📋 What This Configuration Does
 
 1. **Install Phase**:
-   - Runs `npm install --workspaces`
-   - Installs all dependencies for all workspaces
+   - Runs `npm ci`
+   - Installs all dependencies from lockfile (including workspaces)
    - Sets up the monorepo structure
 
 2. **Build Phase**:
@@ -183,6 +183,19 @@ All configuration is correct and verified:
    - Check deployment logs
    - Verify build completes successfully
    - Test deployed application
+
+---
+
+---
+
+## ⚠️ Troubleshooting
+
+### `npm error 404 ... aiofiles@^24.7.0 ... Not found`
+- **Cause**: `aiofiles` is a **Python** (PyPI) package, not npm. Something requested it via npm, hence 404.
+- **Fix**:
+  1. Use **`npm ci`** as Install Command (see `vercel.json`). It installs only from `package-lock.json`, so no extra npm deps are pulled.
+  2. In **Vercel Dashboard** → Project → **Settings** → **General**: ensure **Install Command** is not overridden. If it is, clear it so `vercel.json`’s `installCommand` is used, or set it explicitly to `npm ci`.
+  3. Ensure **Root Directory** is `.` (repo root) so the correct `package.json` / `package-lock.json` are used.
 
 ---
 

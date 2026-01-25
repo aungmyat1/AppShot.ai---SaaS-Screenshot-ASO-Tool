@@ -1,6 +1,6 @@
 {
   "buildCommand": "npx turbo run build --filter=getappshots",
-  "installCommand": "npm install --workspaces",
+  "installCommand": "npm ci",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
