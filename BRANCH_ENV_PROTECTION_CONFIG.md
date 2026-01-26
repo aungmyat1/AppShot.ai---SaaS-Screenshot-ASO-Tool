@@ -91,8 +91,16 @@ LOG_LEVEL=info
 
 ### Verify Environment Variables
 
-Run these commands to verify your production environment:
+**Quick Verification (All-in-One):**
+```bash
+# Run all verification checks
+npm run branch:env:verify
 
+# Run verification and sync production environment
+npm run branch:env:verify:sync
+```
+
+**Manual Step-by-Step Verification:**
 ```bash
 # Check current branch
 git branch --show-current
@@ -106,6 +114,12 @@ npm run env:sync:prod
 # Check Clerk configuration
 npm run env:check:clerk
 ```
+
+**What the verification script checks:**
+- ✅ Current git branch and environment mapping
+- ✅ Doppler integration status
+- ✅ Clerk configuration
+- ✅ Optional: Production environment sync (with `--sync` flag)
 
 ---
 

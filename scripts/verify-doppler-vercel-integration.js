@@ -114,15 +114,31 @@ function checkDopplerAuth() {
 
 function checkDopplerProject() {
   log(`Checking Doppler project 'getappshots'...`, 'info');
+  
+  // First, try to get project from current config
+  const configResult = runCommand('doppler', ['configure', 'get', 'project'], {
+    stdio: 'pipe',
+  });
+  
+  if (configResult.success && configResult.output.includes('getappshots')) {
+    log('Doppler project configured: getappshots', 'success');
+    return true;
+  }
+  
+  // Fallback: try to get project info directly
   const result = runCommand('doppler', ['projects', 'get', 'getappshots', '--plain'], {
     stdio: 'pipe',
   });
+  
   if (result.success) {
     log('Doppler project exists', 'success');
     return true;
   }
-  log("Doppler project 'getappshots' not found. Run: doppler setup --project getappshots", 'error');
-  return false;
+  
+  // If config check will pass, this is non-critical
+  log("Doppler project 'getappshots' not found via API. Checking config access...", 'warning');
+  log("  Note: If config check passes, project is accessible.", 'info');
+  return false; // Non-critical if config works
 }
 
 function checkDopplerConfig() {

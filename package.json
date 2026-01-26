@@ -57,7 +57,12 @@
     "branch:protection:gh": "node scripts/configure-branch-protection.js --generate-gh-cli",
     "branch:protection:tf": "node scripts/configure-branch-protection.js --generate-terraform",
     "branch:protection:apply": "node scripts/apply-branch-protection-from-json.js",
-    "branch:protection:apply:dry": "node scripts/apply-branch-protection-from-json.js --dry-run"
+    "branch:protection:apply:dry": "node scripts/apply-branch-protection-from-json.js --dry-run",
+    "branch:env:verify": "node scripts/verify-branch-env.js",
+    "branch:env:verify:sync": "node scripts/verify-branch-env.js --sync",
+    "branch:env:configure": "node scripts/configure-branch-env.js",
+    "branch:env:configure:apply": "node scripts/configure-branch-env.js --apply-protection",
+    "vercel:verify": "node scripts/verify-vercel-project.js"
   },
   "devDependencies": {
     "turbo": "2.7.6"

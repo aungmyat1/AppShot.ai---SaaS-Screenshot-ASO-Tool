@@ -207,9 +207,57 @@ function vercelBaseUrl() {
 
 let existingEnvVarsCache = null;
 
+async function verifyProjectAccess() {
+  // First, verify the project exists and we have access
+  const projectUrl = `https://api.vercel.com/v9/projects/${encodeURIComponent(options.project)}`;
+  const qp = new URLSearchParams();
+  if (options.teamId) qp.set('teamId', options.teamId);
+  if (options.teamSlug) qp.set('slug', options.teamSlug);
+  const verifyUrl = `${projectUrl}${qp.toString() ? '?' + qp.toString() : ''}`;
+
+  const res = await fetch(verifyUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${vercelToken}`,
+    },
+  });
+
+  if (res.status === 404) {
+    throw new Error(
+      `Project not found: ${options.project}\n` +
+      `This could mean:\n` +
+      `  1. The VERCEL_PROJECT_ID is incorrect\n` +
+      `  2. The VERCEL_TOKEN doesn't have access to this project\n` +
+      `  3. The project doesn't exist\n\n` +
+      `To fix:\n` +
+      `  - Verify project ID in Vercel dashboard: Settings → General → Project ID\n` +
+      `  - Check VERCEL_TOKEN has access to this project\n` +
+      `  - Ensure you're using the correct team ID if project is under a team`
+    );
+  }
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(
+      `Failed to verify project access (${res.status}): ${errorText}\n` +
+      `Project ID: ${options.project}`
+    );
+  }
+
+  return true;
+}
+
 async function getExistingEnvVars() {
   if (existingEnvVarsCache !== null) {
     return existingEnvVarsCache;
+  }
+
+  // Verify project access first
+  try {
+    await verifyProjectAccess();
+  } catch (error) {
+    // If project verification fails, don't cache empty array - throw the error
+    throw error;
   }
 
   const url = vercelBaseUrl();
@@ -220,9 +268,18 @@ async function getExistingEnvVars() {
     },
   });
 
+  if (res.status === 404) {
+    throw new Error(
+      `Project not found: ${options.project}\n` +
+      `Verify the VERCEL_PROJECT_ID is correct in Doppler or environment variables.`
+    );
+  }
+
   if (!res.ok) {
-    existingEnvVarsCache = [];
-    return [];
+    const errorText = await res.text();
+    throw new Error(
+      `Failed to fetch environment variables (${res.status}): ${errorText}`
+    );
   }
 
   const data = await res.json();
@@ -480,8 +537,26 @@ async function main() {
   // Pre-fetch existing env vars to cache them
   if (!options.dryRun && vercelToken) {
     console.log('Fetching existing Vercel environment variables...');
-    await getExistingEnvVars();
-    console.log(`Found ${existingEnvVarsCache.length} existing variables.`);
+    try {
+      await getExistingEnvVars();
+      console.log(`Found ${existingEnvVarsCache.length} existing variables.`);
+    } catch (error) {
+      console.error('\n❌ Failed to access Vercel project:');
+      console.error(error.message);
+      console.error('\n💡 Troubleshooting:');
+      console.error('  1. Verify VERCEL_PROJECT_ID is correct:');
+      console.error('     - Go to Vercel Dashboard → Project → Settings → General');
+      console.error('     - Copy the "Project ID" (starts with prj_)');
+      console.error('     - Update in Doppler: doppler secrets set VERCEL_PROJECT_ID="prj_..."');
+      console.error('\n  2. Verify VERCEL_TOKEN has access:');
+      console.error('     - Check token at: https://vercel.com/account/tokens');
+      console.error('     - Ensure token has access to this project');
+      console.error('     - If project is under a team, you may need VERCEL_TEAM_ID');
+      console.error('\n  3. Check if project exists:');
+      console.error('     - Visit: https://vercel.com/dashboard');
+      console.error('     - Verify the project exists and you have access');
+      process.exit(1);
+    }
   }
 
   let ok = 0;
@@ -501,8 +576,26 @@ async function main() {
       }
     } catch (e) {
       failed += 1;
+      const errorMsg = String(e && e.message ? e.message : e);
       console.error(`\nFailed: ${key}`);
-      console.error(String(e && e.message ? e.message : e));
+      
+      // Provide helpful guidance for 404 errors
+      if (errorMsg.includes('404') || errorMsg.includes('not found')) {
+        console.error(`   Error: ${errorMsg}`);
+        if (failed === 1) {
+          // Only show detailed help on first failure
+          console.error('\n   💡 This usually means:');
+          console.error('      - VERCEL_PROJECT_ID is incorrect');
+          console.error('      - VERCEL_TOKEN doesn\'t have access to this project');
+          console.error('      - Project doesn\'t exist or was deleted');
+          console.error('\n   🔧 To fix:');
+          console.error('      1. Verify project ID: Vercel Dashboard → Project → Settings → General');
+          console.error('      2. Check token access: https://vercel.com/account/tokens');
+          console.error('      3. Update in Doppler: doppler secrets set VERCEL_PROJECT_ID="correct_id"');
+        }
+      } else {
+        console.error(`   ${errorMsg}`);
+      }
     }
   }
 

@@ -25,17 +25,34 @@ This JSON file contains all branch protection rules for:
 
 **Setup GitHub Token (if not using CLI):**
 ```powershell
-# Windows PowerShell
+# Windows PowerShell - Quick setup
+$env:GITHUB_TOKEN="your_token_here"
+
+# Or use the setup script
 .\scripts\setup-github-token.ps1
 
-# Or manually set
-$env:GITHUB_TOKEN="your_token_here"
+# To make it persistent (adds to PowerShell profile)
+# Run the setup script and choose 'y' when asked
 ```
 
 ```bash
 # Linux/Mac
 export GITHUB_TOKEN="your_token_here"
+
+# To make it persistent, add to ~/.bashrc or ~/.zshrc:
+# echo 'export GITHUB_TOKEN="your_token_here"' >> ~/.bashrc
 ```
+
+**⚠️ Security Note:**
+- Never commit the token to git
+- The token is already set in your current session
+- For persistence, use the setup script or add to your shell profile
+
+**⚠️ Token Permissions Required:**
+- **Classic Token:** `repo` scope (Full control of private repositories)
+- **Fine-grained Token:** `Administration` permission (read and write)
+- **Repository Access:** You must have **admin access** to the repository
+- If you get a 403 error, verify your token scopes and repository permissions
 
 **Apply Rules:**
 ```bash

@@ -31,18 +31,46 @@ function readJsonFile(filePath) {
   }
 }
 
-function testGitHubCLI() {
+function findGitHubCLI() {
+  // Try to find gh in PATH first
   try {
     execSync('gh --version', { stdio: 'ignore' });
-    return true;
+    return 'gh'; // gh is in PATH
   } catch {
-    return false;
+    // Try common installation paths (Windows)
+    const path = require('path');
+    const os = require('os');
+    const platform = os.platform();
+    
+    if (platform === 'win32') {
+      const commonPaths = [
+        path.join(process.env.ProgramFiles || 'C:\\Program Files', 'GitHub CLI', 'gh.exe'),
+        path.join(process.env.LOCALAPPDATA || '', 'Programs', 'GitHub CLI', 'gh.exe'),
+        path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'GitHub CLI', 'gh.exe')
+      ];
+      
+      const fs = require('fs');
+      for (const ghPath of commonPaths) {
+        if (fs.existsSync(ghPath)) {
+          return ghPath; // Return full path
+        }
+      }
+    }
+    
+    return null; // Not found
   }
+}
+
+function testGitHubCLI() {
+  return findGitHubCLI() !== null;
 }
 
 function testGitHubAuth() {
   try {
-    execSync('gh auth status', { stdio: 'ignore' });
+    const ghCommand = findGitHubCLI();
+    if (!ghCommand) return false;
+    
+    execSync(`"${ghCommand}" auth status`, { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -133,14 +161,21 @@ function applyBranchProtectionViaCLI(branchName, rule, dryRun = false) {
   }
 
   try {
+    // Find GitHub CLI (handles PATH issues)
+    const ghCommand = findGitHubCLI();
+    if (!ghCommand) {
+      console.error(`❌ GitHub CLI not found. Please install it or restart your terminal.`);
+      return false;
+    }
+
     // Create temporary file for payload
     const tempFile = path.join(__dirname, '..', '.temp-protection-payload.json');
     fs.writeFileSync(tempFile, payloadJson);
 
-    // Build GitHub CLI command
-    const command = `gh api ${apiUrl} --method PUT --input ${tempFile}`;
+    // Build GitHub CLI command (use full path if needed)
+    const command = `"${ghCommand}" api ${apiUrl} --method PUT --input ${tempFile}`;
     
-    console.log(`   Executing: gh api ${apiUrl} --method PUT`);
+    console.log(`   Executing: ${ghCommand} api ${apiUrl} --method PUT`);
     execSync(command, { stdio: 'inherit' });
 
     // Clean up temp file
@@ -198,7 +233,25 @@ function applyBranchProtectionViaAPI(branchName, rule, token, dryRun = false) {
           console.error(`   Status: ${res.statusCode}`);
           try {
             const errorData = JSON.parse(data);
-            console.error(`   Message: ${errorData.message || 'Unknown error'}`);
+            const errorMessage = errorData.message || 'Unknown error';
+            console.error(`   Message: ${errorMessage}`);
+            
+            // Provide helpful guidance for common errors
+            if (res.statusCode === 403) {
+              console.error('\n   💡 Troubleshooting 403 Forbidden:');
+              console.error('   1. Verify you have admin access to the repository');
+              console.error('   2. Check token has required scopes:');
+              console.error('      - Classic token: repo (Full control)');
+              console.error('      - Fine-grained token: Administration (read and write)');
+              console.error('   3. Verify token hasn\'t expired');
+              console.error('   4. Check repository ownership: aungmyat1/AppShot.ai---SaaS-Screenshot-ASO-Tool');
+              console.error('   5. Try using GitHub CLI instead: gh auth login');
+            } else if (res.statusCode === 401) {
+              console.error('\n   💡 Troubleshooting 401 Unauthorized:');
+              console.error('   1. Token may be invalid or expired');
+              console.error('   2. Regenerate token at: https://github.com/settings/tokens');
+              console.error('   3. Ensure token has repo scope');
+            }
           } catch {
             console.error(`   Response: ${data.substring(0, 200)}`);
           }
@@ -287,7 +340,10 @@ async function main() {
       console.error('     Windows: $env:GITHUB_TOKEN="your_token_here"');
       console.error('     Linux/Mac: export GITHUB_TOKEN="your_token_here"');
       console.error('\n  3. Get token from: https://github.com/settings/tokens');
-      console.error('     Required scope: repo (Full control of private repositories)');
+      console.error('     Required scopes:');
+      console.error('       - Classic token: repo (Full control of private repositories)');
+      console.error('       - Fine-grained token: Administration (read and write)');
+      console.error('     Note: You must have admin access to the repository');
       console.error('\n💡 For dry-run mode, authentication is not required.');
       process.exit(1);
     } else {
