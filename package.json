@@ -62,7 +62,8 @@
     "branch:env:verify:sync": "node scripts/verify-branch-env.js --sync",
     "branch:env:configure": "node scripts/configure-branch-env.js",
     "branch:env:configure:apply": "node scripts/configure-branch-env.js --apply-protection",
-    "vercel:verify": "node scripts/verify-vercel-project.js"
+    "vercel:verify": "node scripts/verify-vercel-project.js",
+    "github:test-token": "node scripts/test-github-token.js"
   },
   "devDependencies": {
     "turbo": "2.7.6"

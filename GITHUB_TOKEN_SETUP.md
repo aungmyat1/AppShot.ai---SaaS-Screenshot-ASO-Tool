@@ -1,8 +1,8 @@
 # GitHub Token Setup - Quick Reference
 
-## ✅ Token is Set for Current Session
+## ✅ Token is Set
 
-Your `GITHUB_TOKEN` has been set for the current PowerShell session. You can now use branch protection scripts.
+Your `GITHUB_TOKEN` has been configured and is available in your PowerShell sessions. You can now use branch protection scripts.
 
 ## Quick Commands
 
@@ -17,9 +17,9 @@ npm run branch:protection:apply:dry
 npm run branch:protection:apply
 ```
 
-## Making Token Persistent
+## Token Configuration
 
-The token is currently only set for this PowerShell session. To make it persistent:
+Your token has been added to your PowerShell profile and will be available in all new PowerShell sessions.
 
 ### Option 1: Add to PowerShell Profile (Recommended)
 

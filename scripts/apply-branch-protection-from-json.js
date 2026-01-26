@@ -84,6 +84,15 @@ function getGitHubToken() {
          null;
 }
 
+function getAuthHeader(token) {
+  // Fine-grained tokens (github_pat_) should use Bearer
+  // Classic tokens (ghp_, gho_) can use token
+  if (token.startsWith('github_pat_')) {
+    return `Bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+
 function testGitHubToken(token) {
   if (!token) return false;
   try {
@@ -96,7 +105,7 @@ function testGitHubToken(token) {
         path: '/user',
         method: 'GET',
         headers: {
-          'Authorization': `token ${token}`,
+          'Authorization': getAuthHeader(token),
           'User-Agent': 'Node.js',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -191,6 +200,15 @@ function applyBranchProtectionViaCLI(branchName, rule, dryRun = false) {
   }
 }
 
+function getAuthHeader(token) {
+  // Fine-grained tokens (github_pat_) should use Bearer
+  // Classic tokens (ghp_, gho_) can use token
+  if (token.startsWith('github_pat_')) {
+    return `Bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+
 function applyBranchProtectionViaAPI(branchName, rule, token, dryRun = false) {
   const https = require('https');
   const payload = buildApiPayload(rule);
@@ -210,7 +228,7 @@ function applyBranchProtectionViaAPI(branchName, rule, token, dryRun = false) {
       path: `/repos/${REPO_OWNER}/${REPO_NAME}/branches/${branchName}/protection`,
       method: 'PUT',
       headers: {
-        'Authorization': `token ${token}`,
+        'Authorization': getAuthHeader(token),
         'User-Agent': 'Node.js',
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
