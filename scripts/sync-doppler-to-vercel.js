@@ -15,8 +15,10 @@
  *   node scripts/sync-doppler-to-vercel.js --env=production --config=prod
  *
  * Notes:
- * - This script uses Vercel REST API (v10) with `upsert=true`.
+ * - This script uses Vercel REST API (v10) to sync environment variables.
+ * - It handles existing variables by updating them with PATCH to avoid conflicts.
  * - It does NOT delete/prune variables that exist in Vercel but not in Doppler.
+ * - Variables that are already up-to-date are skipped.
  */
 
 const { spawnSync } = require('child_process');
@@ -67,9 +69,41 @@ if (!TARGETS.has(options.env)) {
 
 const dopplerConfig = options.dopplerConfig || ENV_TO_DOPPLER_CONFIG[options.env];
 
-const vercelToken = process.env.VERCEL_TOKEN;
+// Try to get VERCEL_TOKEN from environment or Doppler
+let vercelToken = process.env.VERCEL_TOKEN;
+
+// If not in environment, try to get it from Doppler
 if (!vercelToken && !options.dryRun) {
-  console.error('Missing VERCEL_TOKEN. Set it in your shell/CI secrets.');
+  try {
+    const dopplerResult = spawnSync(
+      'doppler',
+      ['secrets', 'get', 'VERCEL_TOKEN', '--plain', '--config', dopplerConfig],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+    );
+    if (dopplerResult.status === 0 && dopplerResult.stdout) {
+      vercelToken = dopplerResult.stdout.trim();
+    }
+  } catch (e) {
+    // Ignore errors, will show helpful message below
+  }
+}
+
+if (!vercelToken && !options.dryRun) {
+  console.error('❌ Missing VERCEL_TOKEN');
+  console.error('');
+  console.error('The VERCEL_TOKEN is required to sync environment variables to Vercel.');
+  console.error('');
+  console.error('Options:');
+  console.error('  1. Set it as an environment variable:');
+  console.error('     PowerShell: $env:VERCEL_TOKEN = "your_token_here"');
+  console.error('     Bash:       export VERCEL_TOKEN="your_token_here"');
+  console.error('');
+  console.error('  2. Store it in Doppler (recommended):');
+  console.error('     doppler secrets set VERCEL_TOKEN="your_token_here" --config=' + dopplerConfig);
+  console.error('');
+  console.error('  3. Get your token from: https://vercel.com/account/tokens');
+  console.error('');
+  console.error('Then run the sync command again.');
   process.exit(1);
 }
 
@@ -163,15 +197,186 @@ function getDopplerSecrets() {
   return secrets;
 }
 
-function vercelUrl() {
+function vercelBaseUrl() {
   const base = `https://api.vercel.com/v10/projects/${encodeURIComponent(options.project)}/env`;
-  const qp = new URLSearchParams({ upsert: 'true' });
+  const qp = new URLSearchParams();
   if (options.teamId) qp.set('teamId', options.teamId);
   if (options.teamSlug) qp.set('slug', options.teamSlug);
-  return `${base}?${qp.toString()}`;
+  return `${base}${qp.toString() ? '?' + qp.toString() : ''}`;
+}
+
+let existingEnvVarsCache = null;
+
+async function getExistingEnvVars() {
+  if (existingEnvVarsCache !== null) {
+    return existingEnvVarsCache;
+  }
+
+  const url = vercelBaseUrl();
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${vercelToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    existingEnvVarsCache = [];
+    return [];
+  }
+
+  const data = await res.json();
+  existingEnvVarsCache = (data && data.envs) ? data.envs : [];
+  return existingEnvVarsCache;
+}
+
+async function getExistingEnvVar(key) {
+  const envVars = await getExistingEnvVars();
+  const matching = envVars.filter((env) => env.key === key);
+  const withTarget = matching.find((env) => env.target && env.target.includes(options.env));
+  return withTarget || matching[0] || null;
+}
+
+async function getAllExistingEnvVarsForKey(key) {
+  const envVars = await getExistingEnvVars();
+  return envVars.filter((env) => env.key === key);
+}
+
+async function updateEnvVar(envVarId, existing, { key, value, type }) {
+  const url = `${vercelBaseUrl()}/${envVarId}`;
+  const qp = new URLSearchParams();
+  if (options.teamId) qp.set('teamId', options.teamId);
+  if (options.teamSlug) qp.set('slug', options.teamSlug);
+  const updateUrl = `${url}${qp.toString() ? '?' + qp.toString() : ''}`;
+
+  const existingTargets = existing.target || [];
+  const hasTargetEnv = existingTargets.includes(options.env);
+  const newTargets = hasTargetEnv 
+    ? existingTargets
+    : [...existingTargets, options.env];
+
+  // Vercel doesn't allow changing the type of sensitive/encrypted variables
+  const existingIsEncrypted = existing.type === 'encrypted' || existing.type === 'sensitive';
+  const finalType = existingIsEncrypted ? existing.type : type;
+
+  const body = {
+    value,
+    type: finalType,
+    target: newTargets,
+  };
+
+  const res = await fetch(updateUrl, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${vercelToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    let errorData;
+    try {
+      errorData = JSON.parse(text);
+    } catch {
+      errorData = text;
+    }
+    throw new Error(`Failed to update variable: ${JSON.stringify(errorData)}`);
+  }
+
+  return true;
+}
+
+async function deleteEnvVar(envVarId) {
+  const url = `${vercelBaseUrl()}/${envVarId}`;
+  const qp = new URLSearchParams();
+  if (options.teamId) qp.set('teamId', options.teamId);
+  if (options.teamSlug) qp.set('slug', options.teamSlug);
+  const deleteUrl = `${url}${qp.toString() ? '?' + qp.toString() : ''}`;
+
+  const res = await fetch(deleteUrl, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${vercelToken}`,
+    },
+  });
+
+  return res.ok;
 }
 
 async function upsertEnvVar({ key, value, type }) {
+  const allExisting = await getAllExistingEnvVarsForKey(key);
+  const existingWithTarget = allExisting.find((env) => env.target && env.target.includes(options.env));
+  const existing = existingWithTarget || allExisting[0] || null;
+
+  if (existing) {
+    const hasTargetEnv = existing.target && existing.target.includes(options.env);
+    const existingIsEncrypted = existing.type === 'encrypted' || existing.type === 'sensitive';
+    const newIsEncrypted = type === 'encrypted';
+    const isEncrypted = existingIsEncrypted || newIsEncrypted;
+    const finalType = existingIsEncrypted ? existing.type : type;
+    const valueMatches = isEncrypted ? false : (existing.value === value);
+    const typeMatches = existing.type === finalType;
+    
+    if (hasTargetEnv && valueMatches && typeMatches && !isEncrypted) {
+      return { skipped: true, reason: 'already up to date' };
+    }
+
+    try {
+      await updateEnvVar(existing.id, existing, { key, value, type: finalType });
+      return { updated: true };
+    } catch (updateError) {
+      const hasMultipleEntries = allExisting.length > 1;
+      const isSingleEnv = existing.target && existing.target.length === 1 && existing.target[0] === options.env;
+      const protectedVars = ['VERCEL_TOKEN', 'VERCEL_PROJECT_ID'];
+      const isProtected = protectedVars.includes(key);
+      
+      if (isProtected) {
+        throw new Error(`Failed to update protected variable ${key}: ${updateError.message}`);
+      }
+      
+      if (hasMultipleEntries && hasTargetEnv) {
+        const deleted = await deleteEnvVar(existing.id);
+        if (!deleted) {
+          existingEnvVarsCache = null;
+          const freshExisting = await getExistingEnvVar(key);
+          if (freshExisting && freshExisting.id !== existing.id) {
+            const existingIsEncrypted = freshExisting.type === 'encrypted' || freshExisting.type === 'sensitive';
+            const finalType = existingIsEncrypted ? freshExisting.type : type;
+            try {
+              await updateEnvVar(freshExisting.id, freshExisting, { key, value, type: finalType });
+              return { updated: true, retried: true };
+            } catch {
+              throw new Error(`Failed to delete or update variable ${key} for ${options.env}: ${updateError.message}`);
+            }
+          }
+          throw new Error(`Failed to delete existing variable ${key} for ${options.env}: ${updateError.message}`);
+        }
+      } else if (isSingleEnv) {
+        const deleted = await deleteEnvVar(existing.id);
+        if (!deleted) {
+          throw new Error(`Failed to delete existing variable ${key}: ${updateError.message}`);
+        }
+      } else {
+        existingEnvVarsCache = null;
+        const freshExisting = await getExistingEnvVar(key);
+        if (freshExisting) {
+          const existingIsEncrypted = freshExisting.type === 'encrypted' || freshExisting.type === 'sensitive';
+          const finalType = existingIsEncrypted ? freshExisting.type : type;
+          try {
+            await updateEnvVar(freshExisting.id, freshExisting, { key, value, type: finalType });
+            return { updated: true, retried: true };
+          } catch (retryError) {
+            throw new Error(`Failed to update variable ${key} (exists for multiple environments): ${updateError.message}. Retry also failed: ${retryError.message}`);
+          }
+        }
+        throw new Error(`Failed to update variable ${key} (exists for multiple environments): ${updateError.message}`);
+      }
+    }
+  }
+
+  // Variable doesn't exist or was deleted - create new
   const body = {
     key,
     value,
@@ -180,7 +385,13 @@ async function upsertEnvVar({ key, value, type }) {
     comment: `Synced from Doppler config '${dopplerConfig}'`,
   };
 
-  const res = await fetch(vercelUrl(), {
+  const url = vercelBaseUrl();
+  const qp = new URLSearchParams({ upsert: 'true' });
+  if (options.teamId) qp.set('teamId', options.teamId);
+  if (options.teamSlug) qp.set('slug', options.teamSlug);
+  const createUrl = `${url}?${qp.toString()}`;
+
+  const res = await fetch(createUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${vercelToken}`,
@@ -198,6 +409,46 @@ async function upsertEnvVar({ key, value, type }) {
   }
 
   if (!res.ok) {
+    if (res.status === 400) {
+      try {
+        const errorData = typeof data === 'object' ? data : JSON.parse(text);
+        if (errorData.error && errorData.error.code === 'ENV_CONFLICT') {
+          existingEnvVarsCache = null;
+          const existingNow = await getExistingEnvVar(key);
+          if (existingNow) {
+            const existingIsEncrypted = existingNow.type === 'encrypted' || existingNow.type === 'sensitive';
+            const finalType = existingIsEncrypted ? existingNow.type : type;
+            
+            try {
+              await updateEnvVar(existingNow.id, existingNow, { key, value, type: finalType });
+              return { updated: true, retried: true };
+            } catch (retryError) {
+              const isSingleEnv = existingNow.target && existingNow.target.length === 1 && existingNow.target[0] === options.env;
+              if (isSingleEnv && !existingIsEncrypted) {
+                const deleted = await deleteEnvVar(existingNow.id);
+                if (deleted) {
+                  return await upsertEnvVar({ key, value, type });
+                }
+              }
+              throw new Error(`Failed to update variable ${key} after conflict: ${retryError.message}`);
+            }
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            existingEnvVarsCache = null;
+            const existingRetry = await getExistingEnvVar(key);
+            if (existingRetry) {
+              const existingIsEncrypted = existingRetry.type === 'encrypted' || existingRetry.type === 'sensitive';
+              const finalType = existingIsEncrypted ? existingRetry.type : type;
+              await updateEnvVar(existingRetry.id, existingRetry, { key, value, type: finalType });
+              return { updated: true, retried: true };
+            }
+          }
+        }
+      } catch (parseError) {
+        // Fall through to throw original error
+      }
+    }
+    
     const msg = typeof data === 'string' ? data : JSON.stringify(data);
     throw new Error(`Vercel API error (${res.status}): ${msg}`);
   }
@@ -226,15 +477,28 @@ async function main() {
 
   if (options.dryRun) return;
 
+  // Pre-fetch existing env vars to cache them
+  if (!options.dryRun && vercelToken) {
+    console.log('Fetching existing Vercel environment variables...');
+    await getExistingEnvVars();
+    console.log(`Found ${existingEnvVarsCache.length} existing variables.`);
+  }
+
   let ok = 0;
+  let skipped = 0;
   let failed = 0;
 
   for (const [key, value] of entries) {
     const type = isSensitiveKey(key) ? 'encrypted' : 'plain';
     try {
-      await upsertEnvVar({ key, value, type });
-      ok += 1;
-      process.stdout.write('.');
+      const result = await upsertEnvVar({ key, value, type });
+      if (result && result.skipped) {
+        skipped += 1;
+        process.stdout.write('s');
+      } else {
+        ok += 1;
+        process.stdout.write('.');
+      }
     } catch (e) {
       failed += 1;
       console.error(`\nFailed: ${key}`);
@@ -242,7 +506,7 @@ async function main() {
     }
   }
 
-  console.log(`\nDone. Updated ${ok} vars. Failed ${failed}.`);
+  console.log(`\nDone. Updated ${ok} vars. Skipped ${skipped} (already up to date). Failed ${failed}.`);
 
   if (failed > 0) process.exit(1);
 }
@@ -251,4 +515,3 @@ main().catch((e) => {
   console.error(String(e && e.message ? e.message : e));
   process.exit(1);
 });
-
