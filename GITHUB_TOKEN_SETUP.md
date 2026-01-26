@@ -25,7 +25,8 @@ The token is currently only set for this PowerShell session. To make it persiste
 
 ```powershell
 # Add to your PowerShell profile
-Add-Content -Path $PROFILE -Value "`$env:GITHUB_TOKEN = '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'"
+# Replace 'your_token_here' with your actual GitHub token
+Add-Content -Path $PROFILE -Value "`$env:GITHUB_TOKEN = 'your_token_here'"
 
 # Then reload profile
 . $PROFILE
@@ -43,7 +44,8 @@ Add-Content -Path $PROFILE -Value "`$env:GITHUB_TOKEN = 'github_pat_11AVA34QA0HE
 
 ```powershell
 # Run this each time you open PowerShell
-$env:GITHUB_TOKEN="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"
+# Replace 'your_token_here' with your actual GitHub token
+$env:GITHUB_TOKEN="your_token_here"
 ```
 
 ## Security Notes
