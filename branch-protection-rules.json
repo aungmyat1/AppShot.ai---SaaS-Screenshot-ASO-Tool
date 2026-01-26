@@ -1,0 +1,147 @@
+{
+  "repository": {
+    "owner": "aungmyat1",
+    "name": "AppShot.ai---SaaS-Screenshot-ASO-Tool",
+    "url": "https://github.com/aungmyat1/AppShot.ai---SaaS-Screenshot-ASO-Tool"
+  },
+  "branch_protection_rules": {
+    "main": {
+      "branch_name_pattern": "main",
+      "description": "Production branch - Full protection with strict requirements",
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "Web • lint / typecheck / unit tests",
+          "API • black / pylint / mypy / pytest",
+          "API • integration smoke (uvicorn + /health)",
+          "Web • E2E (Playwright)",
+          "Security • dependency and secret scanning"
+        ]
+      },
+      "enforce_admins": true,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 2,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": true,
+        "dismissal_restrictions": null,
+        "bypass_pull_request_allowances": null
+      },
+      "restrictions": null,
+      "required_linear_history": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "required_conversation_resolution": true,
+      "require_signed_commits": true,
+      "lock_branch": false,
+      "allow_fork_syncing": false
+    },
+    "staging": {
+      "branch_name_pattern": "staging",
+      "description": "Staging branch - Pre-production testing environment",
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "Web • lint / typecheck / unit tests",
+          "API • black / pylint / mypy / pytest",
+          "Web • E2E (Playwright)"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": false,
+        "dismissal_restrictions": null,
+        "bypass_pull_request_allowances": null
+      },
+      "restrictions": null,
+      "required_linear_history": false,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "required_conversation_resolution": true,
+      "require_signed_commits": false,
+      "lock_branch": false,
+      "allow_fork_syncing": false
+    },
+    "develop": {
+      "branch_name_pattern": "develop",
+      "description": "Development branch - Active development integration",
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "Web • lint / typecheck / unit tests",
+          "API • black / pylint / mypy / pytest"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": false,
+        "dismissal_restrictions": null,
+        "bypass_pull_request_allowances": null
+      },
+      "restrictions": null,
+      "required_linear_history": false,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "required_conversation_resolution": true,
+      "require_signed_commits": false,
+      "lock_branch": false,
+      "allow_fork_syncing": false
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created_date": "2026-01-26",
+    "last_updated": "2026-01-26",
+    "ci_workflow_file": ".github/workflows/ci.yml",
+    "cd_workflow_file": ".github/workflows/cd.yml"
+  },
+  "status_checks_reference": {
+    "Web • lint / typecheck / unit tests": {
+      "workflow": "CI",
+      "job": "web_lint_type_test",
+      "description": "Web app linting, type checking, and unit tests"
+    },
+    "API • black / pylint / mypy / pytest": {
+      "workflow": "CI",
+      "job": "api_lint_type_test",
+      "description": "API code formatting, linting, type checking, and tests"
+    },
+    "API • integration smoke (uvicorn + /health)": {
+      "workflow": "CI",
+      "job": "api_integration_smoke",
+      "description": "API health check and integration test"
+    },
+    "Web • E2E (Playwright)": {
+      "workflow": "CI",
+      "job": "web_e2e",
+      "description": "End-to-end tests with Playwright"
+    },
+    "Security • dependency and secret scanning": {
+      "workflow": "CI",
+      "job": "security_scan",
+      "description": "Security vulnerability scanning"
+    }
+  },
+  "usage_instructions": {
+    "github_cli": {
+      "description": "Apply rules using GitHub CLI",
+      "example": "gh api repos/aungmyat1/AppShot.ai---SaaS-Screenshot-ASO-Tool/branches/main/protection --method PUT --input branch-protection-rules.json"
+    },
+    "github_api": {
+      "description": "Apply rules using GitHub REST API",
+      "endpoint": "PUT /repos/{owner}/{repo}/branches/{branch}/protection",
+      "authentication": "Requires GitHub token with admin:repo scope"
+    },
+    "terraform": {
+      "description": "Use with GitHub Terraform provider",
+      "resource": "github_branch_protection"
+    },
+    "web_interface": {
+      "description": "Manually configure via GitHub web interface",
+      "url": "https://github.com/aungmyat1/AppShot.ai---SaaS-Screenshot-ASO-Tool/settings/branches"
+    }
+  }
+}
