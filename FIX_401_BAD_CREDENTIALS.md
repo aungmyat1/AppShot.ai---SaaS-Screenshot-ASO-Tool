@@ -15,7 +15,8 @@
 echo $env:GITHUB_TOKEN
 
 # If not set, set it:
-$env:GITHUB_TOKEN="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"
+# IMPORTANT: Always use quotes around the token value!
+$env:GITHUB_TOKEN='your_token_here'
 ```
 
 ### Step 2: Test Token Validity

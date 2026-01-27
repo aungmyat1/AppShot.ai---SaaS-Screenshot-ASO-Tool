@@ -6,7 +6,8 @@ The token needs to be set correctly. Run this in PowerShell:
 
 ```powershell
 # Set the token in current session
-$env:GITHUB_TOKEN="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"
+# IMPORTANT: Always use quotes around the token value!
+$env:GITHUB_TOKEN='your_token_here'
 
 # Verify it's set
 echo $env:GITHUB_TOKEN

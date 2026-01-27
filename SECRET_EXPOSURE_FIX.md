@@ -8,7 +8,7 @@ A GitHub Personal Access Token was exposed in the `GITHUB_TOKEN_SETUP.md` file a
 
 ### 1. Revoke the Exposed Token
 
-**URGENT:** The token `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` must be revoked immediately.
+**URGENT:** The exposed token must be revoked immediately. Go to GitHub settings to revoke any tokens that were exposed.
 
 1. Go to: https://github.com/settings/tokens
 2. Find the token (look for one created around the time of the commit)
