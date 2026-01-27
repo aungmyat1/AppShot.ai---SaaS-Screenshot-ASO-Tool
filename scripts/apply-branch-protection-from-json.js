@@ -200,15 +200,6 @@ function applyBranchProtectionViaCLI(branchName, rule, dryRun = false) {
   }
 }
 
-function getAuthHeader(token) {
-  // Fine-grained tokens (github_pat_) should use Bearer
-  // Classic tokens (ghp_, gho_) can use token
-  if (token.startsWith('github_pat_')) {
-    return `Bearer ${token}`;
-  }
-  return `token ${token}`;
-}
-
 function applyBranchProtectionViaAPI(branchName, rule, token, dryRun = false) {
   const https = require('https');
   const payload = buildApiPayload(rule);
