@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - staging
-      - preview
+      - develop
   workflow_dispatch:
 
 jobs:

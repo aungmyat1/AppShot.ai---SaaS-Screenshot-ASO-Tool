@@ -48,6 +48,7 @@
     "doppler:guide": "node scripts/setup-doppler-guide.js",
     "lockfile:check": "node scripts/fix-lockfile.js",
     "lockfile:fix": "npm install && node scripts/fix-lockfile.js",
+    "lockfile:verify": "node scripts/verify-lockfile.js",
     "branch:check": "node scripts/branch-setup.js --check",
     "branch:sync": "node scripts/branch-setup.js --sync",
     "branch:setup": "node scripts/branch-setup.js",
