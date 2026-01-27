@@ -7,15 +7,15 @@ GitHub secret scanning detected exposed GitHub Personal Access Tokens in your re
 ### Exposed Tokens Found
 
 1. **SECRET_EXPOSURE_FIX.md** (line 11)
-   - Token: `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`
+   - Token: (old GitHub personal access token, now revoked)
    - Status: ✅ **FIXED** - Replaced with generic warning message
 
 2. **QUICK_FIX_401.md** (line 9)
-   - Token: `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`
+   - Token: (old GitHub personal access token, now revoked)
    - Status: ✅ **FIXED** - Replaced with `your_token_here` placeholder
 
 3. **FIX_401_BAD_CREDENTIALS.md** (line 18)
-   - Token: `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`
+   - Token: (old GitHub personal access token, now revoked)
    - Status: ✅ **FIXED** - Replaced with `your_token_here` placeholder
 
 ## ✅ Files Fixed
@@ -57,12 +57,10 @@ According to GitHub's secret scanning:
 
 ### 1. Revoke Exposed Tokens (URGENT)
 
-**You must revoke these tokens immediately:**
+**You must revoke any exposed tokens immediately:**
 
 1. Go to: https://github.com/settings/tokens
-2. Find and revoke:
-   - `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`
-   - `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`
+2. Find and revoke any tokens that were exposed in this repository (as reported by GitHub)
 3. Create new tokens if needed
 
 ### 2. Handle Git History

@@ -4,7 +4,7 @@
 
 **Incorrect syntax (will cause error):**
 ```powershell
-$env:GITHUB_TOKEN=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
+$env:GITHUB_TOKEN=github_pat_EXAMPLE_TOKEN
 ```
 
 **Error message:**
@@ -18,10 +18,10 @@ The term 'github_pat_...' is not recognized as the name of a cmdlet, function, s
 
 ```powershell
 # Single quotes (recommended - no variable expansion)
-$env:GITHUB_TOKEN='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'
+$env:GITHUB_TOKEN='github_pat_EXAMPLE_TOKEN'
 
 # OR double quotes (works, but allows variable expansion)
-$env:GITHUB_TOKEN="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"
+$env:GITHUB_TOKEN="github_pat_EXAMPLE_TOKEN"
 ```
 
 ## 🔒 Security Warning
@@ -31,11 +31,9 @@ $env:GITHUB_TOKEN="github_pat_11AVA34QA0A8SibS0E6k31_gEuSvARcSBELcPnbLT81h56MJZG
 
 **Immediate actions required:**
 
-1. **Revoke the exposed tokens:**
+1. **Revoke any real tokens you previously pasted:**
    - Go to: https://github.com/settings/tokens
-   - Find and revoke:
-     - `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`
-     - `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`
+   - Revoke any tokens that were exposed in this terminal/session
    - Create new tokens if needed
 
 2. **Clear terminal history:**
