@@ -60,6 +60,7 @@
     "branch:sync": "node scripts/branch-setup.js --sync",
     "branch:setup": "node scripts/branch-setup.js",
     "branch:create": "node scripts/create-branch.js",
+    "branch:rollback": "node scripts/create-rollback-branch.js",
     "branch:init": "node scripts/setup-branches.js",
     "branch:protection": "node scripts/configure-branch-protection.js",
     "branch:protection:gh": "node scripts/configure-branch-protection.js --generate-gh-cli",
