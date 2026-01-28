@@ -1,0 +1,127 @@
+name: Sync Vercel Environment Variables
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  schedule:
+    - cron: '0 8 * * *'  # Daily at 8 AM UTC
+
+jobs:
+  sync-env:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      secrets: write
+      variables: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}  # Personal Access Token with repo access
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Variables
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Pull environment variables from Vercel for all environments
+          vercel env pull .env.production --environment production --yes
+          vercel env pull .env.preview --environment preview --yes
+          vercel env pull .env.development --environment development --yes
+
+      - name: Process and Sync to GitHub Secrets and Variables
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Process production environment variables
+          if [ -f .env.production ]; then
+            while IFS='=' read -r key value; do
+              # Skip empty lines and comments
+              if [[ ! -z "$key" && ! "$key" =~ ^# ]] && [[ -n "$value" ]]; then
+                # Determine if it's a sensitive secret or a public variable
+                if [[ "$key" =~ SECRET|TOKEN|KEY|PASSWORD|AUTH|PRIVATE|DB_URL|DATABASE_URL ]]; then
+                  # Update GitHub Secret
+                  gh secret set "$key" --body "$value" --repo "$REPO"
+                  echo "Updated GitHub Secret: $key"
+                elif [[ "$key" =~ ^NEXT_PUBLIC_|^PUBLIC_ ]]; then
+                  # Update GitHub Variable (non-sensitive)
+                  gh variable set "$key" --body "$value" --repo "$REPO"
+                  echo "Updated GitHub Variable: $key"
+                fi
+              fi
+            done < .env.production
+          fi
+
+          # Process preview environment variables
+          if [ -f .env.preview ]; then
+            while IFS='=' read -r key value; do
+              if [[ ! -z "$key" && ! "$key" =~ ^# ]] && [[ -n "$value" ]]; then
+                # Only update preview-specific variables if they don't conflict with prod
+                if [[ "$key" =~ SECRET|TOKEN|KEY|PASSWORD|AUTH|PRIVATE|DB_URL|DATABASE_URL ]]; then
+                  # For preview, we might want to use different handling
+                  # For now, we'll skip preview secrets to avoid conflicts
+                  echo "Preview secret $key detected (not updated)"
+                elif [[ "$key" =~ ^NEXT_PUBLIC_|^PUBLIC_ ]]; then
+                  # Update GitHub Variable for preview
+                  gh variable set "${key}_PREVIEW" --body "$value" --repo "$REPO"
+                  echo "Updated GitHub Preview Variable: ${key}_PREVIEW"
+                fi
+              fi
+            done < .env.preview
+          fi
+
+      - name: Create/Update environment template
+        run: |
+          # Create a safe template with placeholder values
+          if [ -f .env.production ]; then
+            # Create a template from the pulled env file
+            sed 's/=.*$/=/' .env.production | sed 's/NEXT_PUBLIC_/NEXT_PUBLIC_/g' | sed 's/SECRET/SECRET/g' > .env.example
+            
+            # Add comments and instructions to the template
+            cat > temp_header << 'EOF'
+    # ========================================
+    # AppShot.ai - Environment Variables Template
+    # ========================================
+    #
+    # This file contains templates for required environment variables.
+    # Copy this file to .env.local and fill in your actual values.
+    # Values in this template are intentionally left blank or as placeholders.
+    #
+    # ========================================
+    EOF
+            
+            # Combine header with the processed content
+            cat temp_header .env.example > .env.example.tmp
+            mv .env.example.tmp .env.example
+            rm temp_header
+          fi
+
+      - name: Commit and push template if changed
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Add the .env.example file if it exists
+          if [ -f .env.example ]; then
+            git add .env.example
+          fi
+          
+          # Commit and push only if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update environment variables template from Vercel sync"
+            git push
+            echo "Changes committed and pushed"
+          fi

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-const PROJECT_ID = 'prj_LPfgsI5roKyo3CFHWInU4hlg2jxs';
+const PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 
 if (!VERCEL_TOKEN) {
   console.error('❌ Error: VERCEL_TOKEN environment variable is required');
+  process.exit(1);
+}
+if (!PROJECT_ID) {
+  console.error('❌ Error: VERCEL_PROJECT_ID required. Get from Vercel → Project → Settings → General');
   process.exit(1);
 }
 

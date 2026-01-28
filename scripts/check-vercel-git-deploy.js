@@ -15,17 +15,19 @@
  *
  * Env:
  *   VERCEL_TOKEN   - Required. https://vercel.com/account/tokens
- *   VERCEL_PROJECT_ID - Optional. Defaults to getappshots project id.
+ *   VERCEL_PROJECT_ID - Required. From Vercel → Project → Settings → General.
  *   VERCEL_TEAM_ID - Optional. For team projects.
  */
 
 const VERCEL_API = 'https://api.vercel.com';
-const DEFAULT_PROJECT_ID = 'prj_LPfgsI5roKyo3CFHWInU4hlg2jxs';
 
 async function getProject() {
   const token = process.env.VERCEL_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID || DEFAULT_PROJECT_ID;
+  const projectId = process.env.VERCEL_PROJECT_ID;
   const teamId = process.env.VERCEL_TEAM_ID;
+  if (!projectId) {
+    throw new Error('VERCEL_PROJECT_ID is required. Get it from Vercel → Project → Settings → General');
+  }
 
   let url = `${VERCEL_API}/v9/projects/${encodeURIComponent(projectId)}`;
   if (teamId) url += `?teamId=${encodeURIComponent(teamId)}`;
@@ -45,8 +47,13 @@ async function getProject() {
 function main() {
   console.log('🔍 Checking Vercel Git integration & auto-deploy on push to main/origin\n');
   const token = process.env.VERCEL_TOKEN;
+  const projectId = process.env.VERCEL_PROJECT_ID;
   if (!token) {
     console.error('❌ VERCEL_TOKEN is required. Get it from https://vercel.com/account/tokens');
+    process.exit(1);
+  }
+  if (!projectId) {
+    console.error('❌ VERCEL_PROJECT_ID is required. Get it from Vercel → Project → Settings → General');
     process.exit(1);
   }
 

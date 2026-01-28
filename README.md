@@ -57,6 +57,44 @@ This project implements branch protection rules to ensure code quality and enfor
 
 See [GITHUB_BRANCH_PROTECTION_GUIDE.md](GITHUB_BRANCH_PROTECTION_GUIDE.md) for detailed setup instructions.
 
+## Environment Variable Synchronization
+
+This project includes automated workflows to synchronize environment variables between Vercel and GitHub:
+
+### GitHub Actions Workflows
+
+Two workflows are included for bidirectional synchronization:
+
+1. **Vercel → GitHub Sync** ([`.github/workflows/sync-vercel-env.yml`](file:///d:/ddev/getappshots/AppShot.ai---SaaS-Screenshot-ASO-Tool/AppShot.ai---SaaS-Screenshot-ASO-Tool/.github/workflows/sync-vercel-env.yml)):
+   - Pulls environment variables from Vercel
+   - Updates corresponding GitHub secrets and variables
+   - Updates the `.env.example` template file
+   - Runs daily at 8 AM UTC or can be triggered manually
+
+2. **GitHub → Vercel Sync** ([`.github/workflows/sync-github-to-vercel.yml`](file:///d:/ddev/getappshots/AppShot.ai---SaaS-Screenshot-ASO-Tool/AppShot.ai---SaaS-Screenshot-ASO-Tool/.github/workflows/sync-github-to-vercel.yml)):
+   - Pushes environment variables from GitHub to Vercel
+   - Triggered when `.env.managed` file is updated
+   - Requires a `.env.managed` file in the repository root
+
+### Setup Requirements
+
+To use these workflows, you need to configure the following secrets in your GitHub repository:
+
+- `GH_PAT`: GitHub Personal Access Token with appropriate permissions
+- `VERCEL_TOKEN`: Vercel access token
+- `VERCEL_ORG_ID`: Your Vercel organization ID
+- `VERCEL_PROJECT_ID`: Your Vercel project ID
+
+See [SYNC_ENV_SETUP.md](file:///d:/ddev/getappshots/AppShot.ai---SaaS-Screenshot-ASO-Tool/AppShot.ai---SaaS-Screenshot-ASO-Tool/SYNC_ENV_SETUP.md) for detailed setup instructions.
+
+### Manual Verification
+
+You can verify your Clerk configuration using:
+
+```bash
+npm run clerk:verify-config
+```
+
 ## Quick Start
 
 1. Install dependencies: `npm install`

@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-const PROJECT_ID = 'prj_LPfgsI5roKyo3CFHWInU4hlg2jxs';
+const PROJECT_ID = process.env.VERCEL_PROJECT_ID;
+const TEAM_ID = process.env.VERCEL_TEAM_ID;
 
 if (!VERCEL_TOKEN) {
-  console.error('❌ VERCEL_TOKEN required');
-  console.log('Usage: $env:VERCEL_TOKEN = "your_token"; node scripts/trigger-redeploy.js');
+  console.error('❌ VERCEL_TOKEN required. Set in env or https://vercel.com/account/tokens');
+  console.log('Usage: VERCEL_TOKEN=... VERCEL_PROJECT_ID=... node scripts/trigger-redeploy.js');
+  process.exit(1);
+}
+if (!PROJECT_ID) {
+  console.error('❌ VERCEL_PROJECT_ID required. Get from Vercel → Project → Settings → General');
   process.exit(1);
 }
 
@@ -14,12 +19,13 @@ async function triggerRedeploy() {
     console.log('🚀 Triggering Vercel redeploy with cleared cache...\n');
 
     // Get the latest deployment
-    const listResponse = await fetch(
-      `https://api.vercel.com/v6/deployments?projectId=${PROJECT_ID}&limit=1`,
-      {
-        headers: { 'Authorization': `Bearer ${VERCEL_TOKEN}` }
-      }
-    );
+    const listUrl = new URL('https://api.vercel.com/v6/deployments');
+    listUrl.searchParams.set('projectId', PROJECT_ID);
+    listUrl.searchParams.set('limit', '1');
+    if (TEAM_ID) listUrl.searchParams.set('teamId', TEAM_ID);
+    const listResponse = await fetch(listUrl.toString(), {
+      headers: { 'Authorization': `Bearer ${VERCEL_TOKEN}` }
+    });
 
     if (!listResponse.ok) {
       throw new Error(`Failed to fetch deployments: ${await listResponse.text()}`);
@@ -68,15 +74,15 @@ async function triggerRedeploy() {
     console.log(`🆔 ID: ${newDeployment.id}\n`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     console.log('📋 Monitor deployment:\n');
-    console.log(`   Vercel Dashboard: https://vercel.com/aung-myats-projects-142f3377/getappshots`);
+    const dashboardUrl = process.env.VERCEL_DASHBOARD_URL || 'https://vercel.com/dashboard';
+    console.log(`   Vercel Dashboard: ${dashboardUrl}`);
     console.log(`   Direct: https://${newDeployment.url}\n`);
     console.log('⏱️  This will take 2-3 minutes to complete.\n');
 
   } catch (error) {
     console.error('❌ Error:', error.message);
     console.log('\n💡 Alternative: Trigger manually from Vercel Dashboard');
-    console.log('   Go to: https://vercel.com/aung-myats-projects-142f3377/getappshots');
-    console.log('   Click: Deployments → Latest → Redeploy → Clear Build Cache\n');
+    console.log('   Go to: Vercel → Your Project → Deployments → Latest → Redeploy → Clear Build Cache\n');
     process.exit(1);
   }
 }

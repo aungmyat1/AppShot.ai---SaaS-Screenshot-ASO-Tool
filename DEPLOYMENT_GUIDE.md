@@ -22,7 +22,11 @@ npm run deploy:vercel
 
 # Verify environment configuration
 npm run env:check
+
+# Sync all env to Vercel (Doppler → Development, Preview, Production)
+npm run env:sync:all
 ```
+See **[docs/ENV_SYNC_WITH_VERCEL.md](docs/ENV_SYNC_WITH_VERCEL.md)** for the full env layout and sync options.
 
 ---
 
@@ -614,6 +618,18 @@ npx prisma migrate deploy --schema apps/web/prisma/schema.prisma
 - [ ] CDN working
 - [ ] Database queries optimized
 - [ ] Caching configured (if using Redis)
+
+---
+
+## 🔒 Vercel Protection Rules & Deploy Hooks
+
+Configure **Protection Rules** and **Deploy Hooks** in Vercel for safe production and CI/CD:
+
+- **Protection Rules** (Vercel → Settings → Git): Require approval before production deployment; enable “Automatically cancel old deployments”; skip builds on commits with `[skip ci]`; optional password protection for preview deployments.
+- **Deploy Hooks**: Create hook URLs in Vercel → Settings → Git → Deploy Hooks. Store them as `VERCEL_DEPLOY_HOOK_PREVIEW` and `VERCEL_DEPLOY_HOOK_PRODUCTION` (never commit). Trigger via: `./scripts/deploy-hook.sh preview` or `./scripts/deploy-hook.sh production`.
+- **Best practices**: Use branch protection (prevent direct pushes to `main`); test in preview before production; use descriptive branch names (`feat/`, `fix/`, `chore/`); monitor deployments and set up alerts for failures; use preview URLs for stakeholder reviews; clean up old branches (Vercel removes previews for deleted branches).
+
+See **[docs/VERCEL_PROTECTION_AND_DEPLOY_HOOKS.md](docs/VERCEL_PROTECTION_AND_DEPLOY_HOOKS.md)** for full setup.
 
 ---
 

@@ -25,6 +25,29 @@ const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const cwd = process.cwd();
+
+/** Load .env and .env.local so VERCEL_PROJECT_ID / VERCEL_TOKEN are available when running via npm. */
+function loadEnvFiles() {
+  for (const name of ['.env', '.env.local']) {
+    const filePath = path.join(cwd, name);
+    if (!fs.existsSync(filePath)) continue;
+    const content = fs.readFileSync(filePath, 'utf8');
+    for (const line of content.split(/\r?\n/g)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq <= 0) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let value = trimmed.slice(eq + 1).trim();
+      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1).replace(/\\"/g, '"');
+      if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1).replace(/\\'/g, "'");
+      if (key && !key.startsWith('#')) process.env[key] = value;
+    }
+  }
+}
+loadEnvFiles();
+
 const args = process.argv.slice(2);
 
 function parseArgValue(prefix) {
@@ -48,14 +71,12 @@ const options = {
 
 /**
  * Mapping of Vercel environments to Doppler configuration names.
- * Note: This project uses the following Doppler config names:
- * - development: 'dev'
- * - preview: 'preview' (not 'staging')
- * - production: 'prd' (not 'prod')
+ * Doppler configs: dev (development), staging (preview), prd (production).
+ * Override with --config= e.g. --env=preview --config=preview if you use 'preview' in Doppler.
  */
 const ENV_TO_DOPPLER_CONFIG = {
   development: 'dev',
-  preview: 'preview',
+  preview: 'staging',
   production: 'prd',
 };
 

@@ -78,6 +78,8 @@ export const ENV_KEYS = [
   "CORS_ORIGINS",
   "NODE_ENV",
   "PORT",
+  "VERCEL_DEPLOY_HOOK_PREVIEW",
+  "VERCEL_DEPLOY_HOOK_PRODUCTION",
 ] as const;
 
 export type EnvKey = (typeof ENV_KEYS)[number];

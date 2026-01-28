@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-const PROJECT_ID = 'prj_LPfgsI5roKyo3CFHWInU4hlg2jxs';
+const PROJECT_ID = process.env.VERCEL_PROJECT_ID;
+const TEAM_ID = process.env.VERCEL_TEAM_ID;
 
 if (!VERCEL_TOKEN) {
-  console.error('❌ VERCEL_TOKEN required');
-  console.log('Usage: $env:VERCEL_TOKEN = "your_token"; node scripts/watch-deployment.js');
+  console.error('❌ VERCEL_TOKEN required. Set in env or https://vercel.com/account/tokens');
+  process.exit(1);
+}
+if (!PROJECT_ID) {
+  console.error('❌ VERCEL_PROJECT_ID required. Get from Vercel → Project → Settings → General');
   process.exit(1);
 }
 
@@ -20,10 +24,11 @@ async function watchLatestDeployment() {
     const interval = setInterval(async () => {
       checkCount++;
 
-      const response = await fetch(
-        `https://api.vercel.com/v6/deployments?projectId=${PROJECT_ID}&limit=1`,
-        { headers: { 'Authorization': `Bearer ${VERCEL_TOKEN}` } }
-      );
+      const url = new URL('https://api.vercel.com/v6/deployments');
+      url.searchParams.set('projectId', PROJECT_ID);
+      url.searchParams.set('limit', '1');
+      if (TEAM_ID) url.searchParams.set('teamId', TEAM_ID);
+      const response = await fetch(url.toString(), { headers: { 'Authorization': `Bearer ${VERCEL_TOKEN}` } });
 
       if (!response.ok) {
         console.error(`API error: ${response.status}`);

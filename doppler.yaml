@@ -2,6 +2,12 @@ setup:
   project: "getappshots"
   config: "dev"
 
+# Doppler configs used for Vercel sync:
+#   dev     -> Vercel Environment: Development  (npm run env:sync:dev)
+#   staging -> Vercel Environment: Preview      (npm run env:sync:staging or env:sync:preview)
+#   prd     -> Vercel Environment: Production  (npm run env:sync:prod)
+# Test sync (dry-run, no writes): npm run env:sync:test
+
 # Optional: keep a local env file in sync for local development.
 # If you prefer "doppler run" only (no local files), you can ignore this.
 sync:

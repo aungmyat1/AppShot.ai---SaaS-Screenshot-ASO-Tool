@@ -25,9 +25,12 @@
     "doppler:init": "node scripts/doppler-setup.js",
     "stripe:check": "tsx scripts/check-stripe-setup.ts",
     "env:sync": "node scripts/sync-doppler-to-vercel.js",
+    "env:sync:all": "node scripts/sync-doppler-to-vercel.js --env=development && node scripts/sync-doppler-to-vercel.js --env=preview && node scripts/sync-doppler-to-vercel.js --env=production",
     "env:sync:dev": "node scripts/sync-doppler-to-vercel.js --env=development",
     "env:sync:preview": "node scripts/sync-doppler-to-vercel.js --env=preview",
     "env:sync:prod": "node scripts/sync-doppler-to-vercel.js --env=production",
+    "env:sync:staging": "node scripts/sync-doppler-to-vercel.js --env=preview",
+    "env:sync:test": "node scripts/sync-doppler-to-vercel.js --dry-run && node scripts/sync-doppler-to-vercel.js --env=development --dry-run && node scripts/sync-doppler-to-vercel.js --env=preview --dry-run && node scripts/sync-doppler-to-vercel.js --env=production --dry-run",
     "env:dry-run": "node scripts/sync-doppler-to-vercel.js --dry-run",
     "env:check": "node scripts/verify-env.js",
     "env:check:clerk": "node scripts/verify-clerk-env.js",
@@ -41,6 +44,8 @@
     "update:database": "node scripts/update-vercel-database.js",
     "deploy:vercel": "node scripts/deploy-to-vercel.js",
     "deploy:production": "node scripts/deploy-vercel-production.js",
+    "deploy:hook:preview": "node scripts/deploy-hook.js preview",
+    "deploy:hook:prod": "node scripts/deploy-hook.js production",
     "deploy:monitor": "node scripts/monitor-vercel-deployment.js --watch",
     "deploy:check": "node scripts/monitor-vercel-deployment.js",
     "clerk:check": "node scripts/check-clerk-vercel.js",
@@ -64,7 +69,8 @@
     "branch:env:configure": "node scripts/configure-branch-env.js",
     "branch:env:configure:apply": "node scripts/configure-branch-env.js --apply-protection",
     "vercel:verify": "node scripts/verify-vercel-project.js",
-    "github:test-token": "node scripts/test-github-token.js"
+    "github:test-token": "node scripts/test-github-token.js",
+    "clerk:verify-config": "node scripts/verify-clerk-config.js"
   },
   "devDependencies": {
     "turbo": "2.7.6"

@@ -1,0 +1,76 @@
+name: Sync GitHub Environment Variables to Vercel
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+    branches: [ main ]
+    paths:
+      - '.env.managed'  # Trigger when managed env file changes
+
+jobs:
+  github-to-vercel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      secrets: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Sync GitHub Environment Variables to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Check if .env.managed file exists
+          if [ -f .env.managed ]; then
+            echo "Found .env.managed file, syncing to Vercel..."
+            
+            # Process each line in the .env.managed file
+            while IFS= read -r line; do
+              # Skip empty lines and comments
+              if [[ ! -z "$line" && ! "$line" =~ ^# ]] && [[ "$line" =~ = ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                
+                # Check if the environment variable already exists in Vercel
+                if vercel env ls --environment production | grep -q "$key"; then
+                  echo "Updating existing environment variable: $key"
+                  # Remove the existing variable first
+                  echo "y" | vercel env rm "$key" --environment production
+                else
+                  echo "Adding new environment variable: $key"
+                fi
+                
+                # Add the environment variable to Vercel
+                echo "$value" | vercel env add "$key" plain --environment production
+              fi
+            done < .env.managed
+            
+            echo "Successfully synced .env.managed to Vercel production environment"
+          else
+            echo "No .env.managed file found, skipping sync to Vercel"
+          fi
+
+      - name: Verify sync
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # List environment variables in Vercel to verify the sync
+          echo "Current environment variables in Vercel:"
+          vercel env ls --environment production

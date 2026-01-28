@@ -5,6 +5,7 @@
  * Verify required environment variables are present.
  *
  * Default behavior:
+ * - Loads .env, .env.local, .env.[env], .env.[env].local (so vars from .env.local are seen)
  * - Reads keys from `.env.example` and `apps/web/.env.example` (if they exist)
  * - Checks process.env for those keys
  *
@@ -13,6 +14,7 @@
  *   node scripts/verify-env.js --env=production
  *   node scripts/verify-env.js --from=.env.example
  *   node scripts/verify-env.js --ignore=KEY1,KEY2
+ *   node scripts/verify-env.js --no-load-env   (skip loading .env files; use only shell env)
  */
 
 const fs = require('fs');
@@ -34,12 +36,49 @@ const env =
 
 const fromArg = parseArgValue('--from=');
 const ignoreArg = parseArgValue('--ignore=');
+const noLoadEnv = args.includes('--no-load-env');
 
 const ignore = new Set(
   (ignoreArg ? ignoreArg.split(',') : [])
     .map((s) => s.trim())
     .filter(Boolean)
 );
+
+const cwd = process.cwd();
+
+/**
+ * Parse a .env-style file and set process.env. Does not overwrite existing process.env
+ * unless the file value is non-empty (so .env.local can override .env).
+ */
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const content = fs.readFileSync(filePath, 'utf8');
+  for (const line of content.split(/\r?\n/g)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    let value = trimmed.slice(eq + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1).replace(/\\"/g, '"');
+    if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1).replace(/\\'/g, "'");
+    if (key && !key.startsWith('#')) process.env[key] = value;
+  }
+}
+
+/** Load .env, .env.local, .env.[env], .env.[env].local (Next.js order). */
+function loadEnvFiles() {
+  if (noLoadEnv) return;
+  const files = [
+    path.join(cwd, '.env'),
+    path.join(cwd, '.env.local'),
+    path.join(cwd, `.env.${env}`),
+    path.join(cwd, `.env.${env}.local`),
+  ];
+  for (const f of files) loadEnvFile(f);
+}
+
+loadEnvFiles();
 
 function readKeysFromEnvExample(filePath) {
   if (!fs.existsSync(filePath)) return [];
@@ -72,8 +111,8 @@ function main() {
   if (fromArg) {
     candidates.push(path.isAbsolute(fromArg) ? fromArg : path.join(process.cwd(), fromArg));
   } else {
+    // Single source of truth: root .env.example (matches config/env.config.ts ENV_KEYS)
     candidates.push(path.join(process.cwd(), '.env.example'));
-    candidates.push(path.join(process.cwd(), 'apps', 'web', '.env.example'));
   }
 
   const keys = unique(candidates.flatMap(readKeysFromEnvExample))
