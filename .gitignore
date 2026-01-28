@@ -16,12 +16,20 @@ out
 *.local
 .turbo
 
-# Environment variables
+# Environment variables (NEVER commit secrets)
 .env
 .env.local
-.env.production
+.env.development.local
+.env.staging.local
+.env.production.local
 .env.test
-# Note: .env.example should NOT be ignored - it's a template file
+.env.test.local
+.env*.local
+# Optional env files with local overrides (uncomment if you use them locally)
+# .env.development
+# .env.staging
+# .env.production
+# Keep .env.example committed - it's the template with keys only
 
 # Test output
 coverage
@@ -199,10 +207,6 @@ coverage/
 # Recycle Bin used on Windows
 $RECYCLE.BIN/
 
-# dotenv environment variables file
-.env.test
-.env*.local
-
 # local files
 *.csv
 *.xml
@@ -229,4 +233,3 @@ playwright-report/
 test-results/
 
 .vercel
-.env*.local

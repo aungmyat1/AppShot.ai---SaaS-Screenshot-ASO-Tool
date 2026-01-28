@@ -1,0 +1,98 @@
+# Environment sync: validate env keys and sync Doppler → Vercel
+# Complements sync-doppler-vercel.yml with validation and .env.example alignment
+name: Env Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".env.example"
+      - ".env.development"
+      - ".env.staging"
+      - ".env.production"
+      - ".env.test.example"
+      - "config/env.config.ts"
+      - "lib/env.ts"
+      - ".github/workflows/env-sync.yml"
+  workflow_dispatch:
+    inputs:
+      validate_only:
+        description: "Only validate env (skip Doppler → Vercel sync)"
+        required: false
+        default: false
+        type: boolean
+      vercel_env:
+        description: "Vercel environment to sync (development|preview|production|all)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - development
+          - preview
+          - production
+
+jobs:
+  validate:
+    name: Validate env
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate env keys from .env.example
+        run: node scripts/verify-env.js --env=development || true
+
+  sync:
+    name: Sync Doppler to Vercel
+    needs: validate
+    if: ${{ !github.event.inputs.validate_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Doppler CLI
+        uses: dopplerhq/cli-action@v3
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+
+      - name: Determine sync environments
+        id: envs
+        run: |
+          ENV_INPUT="${{ github.event.inputs.vercel_env }}"
+          if [ "$ENV_INPUT" = "" ] || [ "$ENV_INPUT" = "all" ]; then
+            echo "environments=development preview production" >> $GITHUB_OUTPUT
+          else
+            echo "environments=$ENV_INPUT" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TEAM_SLUG: ${{ secrets.VERCEL_TEAM_SLUG }}
+        run: |
+          for env in ${{ steps.envs.outputs.environments }}; do
+            echo "Syncing to Vercel $env..."
+            node scripts/sync-doppler-to-vercel.js --env="$env" || exit 1
+          done
