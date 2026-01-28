@@ -195,7 +195,8 @@ All configuration is correct and verified:
 - **Fix**:
   1. Use **`npm ci`** as Install Command (see `vercel.json`). It installs only from `package-lock.json`, so no extra npm deps are pulled.
   2. In **Vercel Dashboard** → Project → **Settings** → **General**: ensure **Install Command** is not overridden. If it is, clear it so `vercel.json`’s `installCommand` is used, or set it explicitly to `npm ci`.
-  3. Ensure **Root Directory** is `.` (repo root) so the correct `package.json` / `package-lock.json` are used.
+  3. Ensure **Root Directory** is `.` (repo root) so the correct `
+  ` / `package-lock.json` are used.
 
 ---
 
