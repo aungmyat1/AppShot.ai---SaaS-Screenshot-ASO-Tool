@@ -17,6 +17,7 @@
         "dist/**"
       ],
       "env": [
+        "API_URL",
         "NODE_ENV",
         "PORT",
         "APP_URL",
