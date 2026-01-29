@@ -12,6 +12,7 @@ declare module "archiver" {
       data?: { name: string }
     ): Archiver;
     finalize(): Promise<void>;
+    abort(): void;
     on(event: string, callback: (...args: unknown[]) => void): Archiver;
   }
 
